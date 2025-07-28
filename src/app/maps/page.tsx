@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MapComponent from "@/components/maps/map-placeholder";
 import { Button } from "@/components/ui/button";
-import { Car } from "lucide-react";
 import MapControls from "@/components/maps/map-controls";
 import {
   Sheet,
@@ -155,7 +154,25 @@ export default function MapsPage() {
       />
       <div className="absolute top-4 left-4">
         <Button variant="default" size="icon" className="bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90">
-          <Car className="h-6 w-6" />
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6"
+            >
+                <path d="M6 17H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2" />
+                <path d="M18 17h2a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                <path d="M4 11h16" />
+                <path d="M9 17v-4" />
+                <path d="M15 17v-4" />
+                <path d="M12 17V7" />
+            </svg>
         </Button>
       </div>
       <DeviceStatusSummary devices={devices} />
