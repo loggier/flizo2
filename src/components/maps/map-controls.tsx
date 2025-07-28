@@ -18,10 +18,10 @@ export default function MapControls({ onLayerChange, onLocateUser, onToggleLabel
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground"
+        className="bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90"
         onClick={onLayerChange}
       >
-        <Layers className="h-6 w-6" />
+        <Car className="h-6 w-6" />
       </Button>
        <Button 
         variant="outline" 
@@ -37,10 +37,10 @@ export default function MapControls({ onLayerChange, onLocateUser, onToggleLabel
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-primary text-primary-foreground rounded-full shadow-md"
+        className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground"
         onClick={onLocateUser}
       >
-        <Car className="h-6 w-6" />
+        <Crosshair className="h-6 w-6" />
       </Button>
     </div>
   );
