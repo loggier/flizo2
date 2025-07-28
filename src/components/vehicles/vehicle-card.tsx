@@ -2,7 +2,8 @@
 import Image from "next/image";
 import type { Device } from "@/lib/types";
 import { cn, formatTimeAgo } from "@/lib/utils";
-import { KeySquare, Clock, Power } from "lucide-react";
+import { KeySquare, Clock } from "lucide-react";
+import { FootstepsIcon } from "../icons/footsteps-icon";
 
 interface VehicleCardProps {
   device: Device;
@@ -51,11 +52,11 @@ export function VehicleCard({ device }: VehicleCardProps) {
         
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4" />
-          <span>Últ. Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
+          <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <Power className="w-4 h-4" />
+          <FootstepsIcon className="w-4 h-4" />
           <span>Online: {formatTimeAgo(device.timestamp)}</span>
         </div>
       </div>
