@@ -1,4 +1,14 @@
 
+
+export interface Sensor {
+  id: number;
+  name: string;
+  type: string;
+  value: string;
+  show_in_popup: number;
+  value_formula: null | string;
+}
+
 export interface Device {
     id: number;
     alarm: number;
@@ -37,7 +47,7 @@ export interface Device {
     protocol: string;
     driver: string;
     driver_data: any;
-    sensors: any[];
+    sensors: Sensor[];
     services: any[];
     tail: { lat: string; lng: string }[];
     distance_unit_hour: string;
