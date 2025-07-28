@@ -75,17 +75,20 @@ export function LoginForm() {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (response.status !== 200 || data.status !== 1) {
         throw new Error(data.message || loginTranslations.genericError);
       }
 
-      if (data.accessToken) {
+      const token = data.user_api_hash;
+      if (token) {
         if (values.rememberMe) {
-          localStorage.setItem("accessToken", data.accessToken);
+          localStorage.setItem("user_api_hash", token);
         } else {
-          sessionStorage.setItem("accessToken", data.accessToken);
+          sessionStorage.setItem("user_api_hash", token);
         }
         router.push("/dashboard");
+      } else {
+         throw new Error(data.message || loginTranslations.genericError);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : loginTranslations.unexpectedError;
@@ -186,7 +189,7 @@ export function LoginForm() {
           </div>
         <p>
           {loginTranslations.privacyPolicyText}{" "}
-          <Link href="#" className="underline hover:text-primary">
+          <Link href="https://s1.flizo.app/page/privacy_policy_new" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
             {loginTranslations.privacyPolicyLink}
           </Link>
           .

@@ -17,7 +17,7 @@ export default function DashboardClient() {
   const dashboardTranslations = t.dashboard;
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
+    const token = localStorage.getItem('user_api_hash') || sessionStorage.getItem('user_api_hash');
     if (token) {
       setIsAuthenticated(true);
     } else {
@@ -27,8 +27,8 @@ export default function DashboardClient() {
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('accessToken');
-    sessionStorage.removeItem('accessToken');
+    localStorage.removeItem('user_api_hash');
+    sessionStorage.removeItem('user_api_hash');
     router.push('/');
   };
 
