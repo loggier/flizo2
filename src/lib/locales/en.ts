@@ -28,5 +28,12 @@ export const en = {
     liveTrackingDescription: "Vehicles currently on the move",
     alerts: "Alerts",
     alertsDescription: "Geofence and speed alerts",
+  },
+  bottomNav: {
+    map: "Map",
+    vehicles: "Vehicle",
+    alerts: "Alerts",
+    settings: "Settings",
+    help: "Help",
   }
 };

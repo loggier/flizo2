@@ -108,7 +108,7 @@ export function LoginForm() {
             sessionStorage.setItem("permissions", JSON.stringify(permissions));
           }
         }
-        router.push("/dashboard");
+        router.push("/maps");
       } else {
          throw new Error(data.message || loginTranslations.genericError);
       }
@@ -132,9 +132,6 @@ export function LoginForm() {
         <div className="flex justify-center pt-4">
             <FlizoLogo />
         </div>
-        <CardTitle className="text-2xl font-bold">
-          {loginTranslations.title}
-        </CardTitle>
         <CardDescription>
           {loginTranslations.description}
         </CardDescription>
