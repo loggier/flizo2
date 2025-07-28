@@ -97,18 +97,18 @@ export default function MapsPage() {
   }, [router, isInitialLoad]);
 
   useEffect(() => {
-      if (map && allDevices.length > 0 && !selectedDeviceId && visibleDeviceIds.size > 0) {
-        const bounds = new google.maps.LatLngBounds();
-        allDevices.forEach(device => {
-            if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
-                bounds.extend({ lat: device.lat, lng: device.lng });
-            }
-        });
-        if (!bounds.isEmpty()) {
-            map.fitBounds(bounds);
-        }
+    if (map && allDevices.length > 0 && !selectedDeviceId && visibleDeviceIds.size > 0) {
+      const bounds = new google.maps.LatLngBounds();
+      allDevices.forEach(device => {
+          if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
+              bounds.extend({ lat: device.lat, lng: device.lng });
+          }
+      });
+      if (!bounds.isEmpty()) {
+          map.fitBounds(bounds);
+      }
     }
-  }, [map, allDevices, selectedDeviceId, visibleDeviceIds])
+  }, [map, allDevices, selectedDeviceId, visibleDeviceIds]);
 
   useEffect(() => {
     if (allDevices.length > 0) { // Ensure we don't save an empty set on initial load
@@ -214,6 +214,7 @@ export default function MapsPage() {
         heading={heading}
         devices={visibleDevices}
         showLabels={showLabels}
+        onSelectDevice={handleSelectDevice}
       />
       {isLoading && isInitialLoad && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -243,7 +244,7 @@ export default function MapsPage() {
         visibleDeviceIds={visibleDeviceIds}
         toggleDeviceVisibility={toggleDeviceVisibility}
         onSelectDevice={handleSelectDevice}
-        isLoading={isLoading}
+        isLoading={isLoading && isInitialLoad}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">

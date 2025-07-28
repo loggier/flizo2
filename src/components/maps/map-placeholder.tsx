@@ -24,9 +24,10 @@ interface MapComponentProps {
     heading: number;
     devices: Device[];
     showLabels: boolean;
+    onSelectDevice: (device: Device) => void;
 }
 
-function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels }: MapComponentProps) {
+function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels, onSelectDevice }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
@@ -151,6 +152,7 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
             userLocationIcon={userLocationIcon}
             userCircleIcon={userCircleIcon}
             showLabel={false}
+            onSelect={() => {}}
           />
         )}
         {devices.map((device) => (
@@ -159,6 +161,7 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
               device={device} 
               isUserLocation={false} 
               showLabel={showLabels}
+              onSelect={onSelectDevice}
             />
         ))}
       </GoogleMap>

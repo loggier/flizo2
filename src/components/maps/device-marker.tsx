@@ -12,6 +12,7 @@ interface DeviceMarkerProps {
   userLocationIcon?: google.maps.Symbol;
   userCircleIcon?: google.maps.Symbol;
   showLabel: boolean;
+  onSelect: (device: Device) => void;
 }
 
 const DeviceMarker = ({ 
@@ -20,6 +21,7 @@ const DeviceMarker = ({
   userLocationIcon, 
   userCircleIcon,
   showLabel,
+  onSelect,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
@@ -62,6 +64,7 @@ const DeviceMarker = ({
         title={device.name}
         icon={deviceIcon}
         zIndex={101}
+        onClick={() => onSelect(device)}
       />
       {showLabel && <DeviceLabel device={device} />}
       {device.tail && device.tail.length > 0 && (
