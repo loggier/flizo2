@@ -29,11 +29,11 @@ export function VehicleHeader() {
       case "all":
         return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
       case "moving":
-        return "bg-green-500/80 text-white/90 hover:bg-green-500";
+        return "bg-green-500 text-white hover:bg-primary hover:text-primary-foreground";
       case "stopped":
-        return "bg-yellow-500/80 text-black/90 hover:bg-yellow-500";
+        return "bg-yellow-400 text-black hover:bg-primary hover:text-primary-foreground";
       case "offline":
-        return "bg-red-500/80 text-white/90 hover:bg-red-500";
+        return "bg-red-500 text-white hover:bg-primary hover:text-primary-foreground";
       default:
         return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
     }
