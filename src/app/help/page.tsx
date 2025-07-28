@@ -34,7 +34,7 @@ export default function HelpPage() {
     const facebook = process.env.NEXT_PUBLIC_facebook;
     const instagram = process.env.NEXT_PUBLIC_instagram;
     const tiktok = process.env.NEXT_PUBLIC_tiktok;
-    const website = process.env.NEXT_PUBLIC_website || 'https://flizo.com';
+    const website = process.env.NEXT_PUBLIC_web || 'https://flizo.com';
 
 
     const buttons = [
