@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MapComponent from "@/components/maps/map-placeholder";
 import { Button } from "@/components/ui/button";
-import { Menu, Tag } from "lucide-react";
+import { Menu } from "lucide-react";
 import MapControls from "@/components/maps/map-controls";
 import {
   Sheet,
@@ -16,6 +16,7 @@ import {
 import { useLanguage } from "@/hooks/use-language";
 import { getDevices } from "@/services/flizo.service";
 import type { Device } from "@/lib/types";
+import DeviceStatusSummary from "@/components/maps/device-status-summary";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
@@ -157,6 +158,7 @@ export default function MapsPage() {
           <Menu className="h-6 w-6" />
         </Button>
       </div>
+      <DeviceStatusSummary devices={devices} />
       <MapControls 
         onLayerChange={handleLayerChange}
         onLocateUser={handleLocateUser}
