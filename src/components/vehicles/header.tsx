@@ -22,18 +22,18 @@ export function VehicleHeader() {
     const isActive = statusFilter === value;
 
     if (isActive) {
-      return "bg-background text-primary font-bold shadow-lg";
+      return "bg-background text-primary font-bold shadow-lg hover:bg-primary hover:text-primary-foreground";
     }
 
     switch (value) {
       case "all":
         return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
       case "moving":
-        return "bg-green-500 text-white hover:bg-primary hover:text-primary-foreground";
+        return "bg-green-500 text-white hover:bg-primary";
       case "stopped":
-        return "bg-yellow-400 text-black hover:bg-primary hover:text-primary-foreground";
+        return "bg-yellow-400 text-black hover:bg-primary";
       case "offline":
-        return "bg-red-500 text-white hover:bg-primary hover:text-primary-foreground";
+        return "bg-red-500 text-white hover:bg-primary";
       default:
         return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
     }
