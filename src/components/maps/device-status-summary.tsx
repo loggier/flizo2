@@ -11,7 +11,7 @@ interface DeviceStatusSummaryProps {
 const StatusCircle = ({ color, count }: { color: string; count: number }) => (
   <div
     className={cn(
-        "flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg shadow-lg",
+        "flex items-center justify-center w-8 h-8 rounded-full font-bold text-base shadow-lg",
         color === 'yellow' ? 'text-black' : 'text-white'
     )}
     style={{ backgroundColor: color }}
