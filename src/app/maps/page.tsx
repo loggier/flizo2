@@ -34,6 +34,7 @@ export default function MapsPage() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [showLabels, setShowLabels] = useState(true);
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
+  const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
 
   useEffect(() => {
     const savedMapType = localStorage.getItem("mapType") as MapType;
@@ -60,24 +61,28 @@ export default function MapsPage() {
         setAllDevices(flattenedDevices);
 
         // Initialize visibility state
-        const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
-        if (savedVisibleDeviceIds) {
-          setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
-        } else {
-          // Default to all visible
-          setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+        if (visibleDeviceIds.size === 0) { // Only on first load
+            const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
+            if (savedVisibleDeviceIds) {
+                setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
+            } else {
+                // Default to all visible
+                setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+            }
         }
-
+        
         localStorage.setItem('devices', JSON.stringify(flattenedDevices));
         
-        if (flattenedDevices.length > 0 && map) {
+        if (flattenedDevices.length > 0 && map && !selectedDeviceId) {
             const bounds = new google.maps.LatLngBounds();
             flattenedDevices.forEach(device => {
-                if (device.lat && device.lng) {
+                if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
                     bounds.extend({ lat: device.lat, lng: device.lng });
                 }
             });
-            map.fitBounds(bounds);
+            if (!bounds.isEmpty()) {
+                map.fitBounds(bounds);
+            }
         }
 
       } catch (error) {
@@ -94,7 +99,7 @@ export default function MapsPage() {
     const intervalId = setInterval(fetchDevices, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [router, map]);
+  }, [router, map, visibleDeviceIds, selectedDeviceId]);
 
   useEffect(() => {
     // Do not save the initial empty set
@@ -136,6 +141,15 @@ export default function MapsPage() {
     });
   }, []);
 
+  const handleSelectDevice = (device: Device) => {
+    if (device.lat && device.lng && map) {
+        setSelectedDeviceId(device.id);
+        setIsDeviceListOpen(false);
+        map.panTo({ lat: device.lat, lng: device.lng });
+        map.setZoom(18);
+    }
+  }
+
   const handleLocateUser = () => {
     if (navigator.geolocation && map) {
       navigator.geolocation.getCurrentPosition(
@@ -143,6 +157,7 @@ export default function MapsPage() {
           const { latitude, longitude } = position.coords;
           const userCoords = { lat: latitude, lng: longitude };
           setUserPosition(userCoords);
+          setSelectedDeviceId(null); // Deselect device when locating user
           map.panTo(userCoords);
           map.setZoom(18);
         },
@@ -213,6 +228,7 @@ export default function MapsPage() {
         deviceGroups={deviceGroups}
         visibleDeviceIds={visibleDeviceIds}
         toggleDeviceVisibility={toggleDeviceVisibility}
+        onSelectDevice={handleSelectDevice}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">

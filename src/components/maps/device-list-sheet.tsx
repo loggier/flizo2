@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
-import type { DeviceGroup } from "@/lib/types";
+import type { Device, DeviceGroup } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
 import { ScrollArea } from "../ui/scroll-area";
 
@@ -28,6 +28,7 @@ interface DeviceListSheetProps {
   deviceGroups: DeviceGroup[];
   visibleDeviceIds: Set<number>;
   toggleDeviceVisibility: (deviceIds: number | number[], visible: boolean) => void;
+  onSelectDevice: (device: Device) => void;
 }
 
 export default function DeviceListSheet({
@@ -35,7 +36,8 @@ export default function DeviceListSheet({
   onOpenChange,
   deviceGroups,
   visibleDeviceIds,
-  toggleDeviceVisibility
+  toggleDeviceVisibility,
+  onSelectDevice,
 }: DeviceListSheetProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -92,7 +94,7 @@ export default function DeviceListSheet({
               return (
               <AccordionItem value={group.id.toString()} key={group.id} className="border-b">
                 <div className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
-                    <div className="flex items-center">
+                    <div className="flex items-center flex-1">
                         <div onClick={(e) => e.stopPropagation()} className="pr-2">
                              <Checkbox 
                                 id={`group-${group.id}`}
@@ -118,6 +120,7 @@ export default function DeviceListSheet({
                         device={device}
                         isVisible={visibleDeviceIds.has(device.id)}
                         onVisibilityChange={toggleDeviceVisibility}
+                        onSelect={onSelectDevice}
                       />
                     ))}
                   </div>

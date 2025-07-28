@@ -10,6 +10,7 @@ interface DeviceListItemProps {
   device: Device;
   isVisible: boolean;
   onVisibilityChange: (id: number, visible: boolean) => void;
+  onSelect: (device: Device) => void;
 }
 
 const getStatusInfo = (device: Device): { text: string, color: string, icon: React.ReactNode } => {
@@ -31,7 +32,7 @@ const getStatusInfo = (device: Device): { text: string, color: string, icon: Rea
     }
   };
 
-export default function DeviceListItem({ device, isVisible, onVisibilityChange }: DeviceListItemProps) {
+export default function DeviceListItem({ device, isVisible, onVisibilityChange, onSelect }: DeviceListItemProps) {
     const status = getStatusInfo(device);
 
     return (
@@ -44,13 +45,15 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange }
             </div>
 
             <div className="flex items-start gap-2">
-                 <Checkbox 
-                  id={`device-${device.id}`}
-                  checked={isVisible}
-                  onCheckedChange={(checked) => onVisibilityChange(device.id, !!checked)}
-                  className="mt-1"
-                 />
-                 <div className="flex-1">
+                 <div onClick={(e) => e.stopPropagation()}>
+                    <Checkbox 
+                        id={`device-${device.id}`}
+                        checked={isVisible}
+                        onCheckedChange={(checked) => onVisibilityChange(device.id, !!checked)}
+                        className="mt-1"
+                    />
+                 </div>
+                 <div className="flex-1 cursor-pointer" onClick={() => onSelect(device)}>
                     <div className="flex items-center gap-2">
                       <KeySquare className="h-5 w-5 text-primary"/>
                       <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
