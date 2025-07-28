@@ -87,7 +87,11 @@ export function VehicleCard({ device }: VehicleCardProps) {
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>{new Date(device.timestamp * 1000).toLocaleString()}</span>
+              <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FootstepsIcon className="w-4 h-4" />
+              <span>Online: {formatTimeAgo(device.timestamp)}</span>
             </div>
           </div>
 
@@ -96,23 +100,27 @@ export function VehicleCard({ device }: VehicleCardProps) {
             <p className="text-xs">{device.distance_unit_hour}</p>
           </div>
         </div>
-      </div>
         
-      {hasSensors && (
-        <div className="bg-white/80 p-3 border-t border-black/10">
-           <p className="text-xs font-semibold mb-2">Sensores</p>
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            {device.sensors.map((sensor: Sensor, index: number) => (
-              <div key={index} className="flex items-center gap-2 text-xs text-gray-700">
-                <span 
-                  className="font-bold"
-                  dangerouslySetInnerHTML={{ __html: sensor.value }}
-                />
-              </div>
-            ))}
+        {hasSensors && (
+          <div className="mt-3 bg-white/80 p-2 rounded-lg">
+             <p className="text-xs font-semibold mb-2 text-gray-800">Sensores</p>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              {device.sensors.map((sensor: Sensor, index: number) => (
+                <div key={index} className="text-xs text-gray-700">
+                  <span 
+                    className="font-bold"
+                    dangerouslySetInnerHTML={{ __html: sensor.name + ':' }}
+                  />
+                  {' '}
+                  <span 
+                    dangerouslySetInnerHTML={{ __html: sensor.value }}
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
