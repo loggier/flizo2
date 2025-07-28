@@ -55,13 +55,10 @@ const getStatusInfo = (device: Device): { text: string; color: string; icon: Rea
     }
 };
 
-const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | React.ReactNode }) => (
+const InfoRow = ({ icon: Icon, value }: { icon: React.ElementType, value: string | React.ReactNode }) => (
     <div className="flex items-center gap-3 text-sm">
         <Icon className="h-5 w-5 text-gray-500 flex-shrink-0" />
-        <div className="flex-1">
-            <p className="font-semibold text-gray-800">{label}</p>
-            <div className="text-gray-600">{value}</div>
-        </div>
+        <div className="text-gray-600 flex-1">{value}</div>
     </div>
 );
 
@@ -105,7 +102,7 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent 
         side="bottom" 
-        className="rounded-t-2xl p-0 bg-gray-100 max-h-[90vh] h-fit flex flex-col"
+        className="rounded-t-2xl p-0 bg-gray-100 h-[50vh] flex flex-col"
         withHandle
       >
         <SheetHeader className="sr-only">
@@ -136,12 +133,13 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
 
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
             <div className="bg-white rounded-lg p-4 shadow-sm">
+                <h3 className="font-bold text-base mb-4 text-gray-800">INFORMACIÓN</h3>
                 <div className="space-y-4">
-                    <InfoRow icon={MapPin} label="Dirección" value={address} />
-                    <InfoRow icon={Clock} label="Última Conexión" value={new Date(device.timestamp * 1000).toLocaleString()} />
-                    <InfoRow icon={Signal} label="Online" value={formatTimeAgo(device.timestamp)} />
-                    <InfoRow icon={Timer} label="Estacionado" value={device.stop_duration} />
-                    <InfoRow icon={Milestone} label="Distancia Hoy" value={`${device.total_distance.toFixed(2)} ${device.unit_of_distance}`} />
+                    <InfoRow icon={MapPin} value={address} />
+                    <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
+                    <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
+                    <InfoRow icon={Timer} value={device.stop_duration} />
+                    <InfoRow icon={Milestone} value={`${device.total_distance.toFixed(2)} ${device.unit_of_distance}`} />
                 </div>
             </div>
 
@@ -152,7 +150,6 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
 
             {device.sensors && device.sensors.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-sm">
-                    <h3 className="font-bold text-base mb-3 text-gray-700 sr-only">SENSORES</h3>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                         {device.sensors.map((sensor: Sensor) => (
                            <div key={sensor.id} className="text-sm">
@@ -169,3 +166,4 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     </Sheet>
   );
 }
+
