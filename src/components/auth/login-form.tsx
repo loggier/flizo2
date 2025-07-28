@@ -102,6 +102,8 @@ export function LoginForm() {
     }
   }
 
+  const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl}page/privacy_policy_new`;
+
   return (
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center space-y-4">
@@ -189,7 +191,7 @@ export function LoginForm() {
           </div>
         <p>
           {loginTranslations.privacyPolicyText}{" "}
-          <Link href="https://s1.flizo.app/page/privacy_policy_new" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
+          <Link href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">
             {loginTranslations.privacyPolicyLink}
           </Link>
           .
