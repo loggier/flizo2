@@ -35,35 +35,36 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
   const { bgColor, textColor } = getStatusInfo(device);
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
-  const [address, setAddress] = useState(device.address || 'Ubicación no disponible');
+  const [address, setAddress] = useState('Ubicación no disponible');
 
   useEffect(() => {
     let isMounted = true;
     
     // Set initial address from device data if available
-    setAddress(device.address || 'Ubicación no disponible');
+    setAddress(device.address || 'Cargando dirección...');
 
     const fetchAddress = async () => {
       if (device.lat && device.lng) {
         try {
           const fetchedAddress = await getAddress(device.lat, device.lng);
           if (isMounted) {
-            setAddress(fetchedAddress);
+            // Use fetched address, fallback to cached, then to default
+            setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
           }
         } catch (error) {
-          if (isMounted && !device.address) { // Only set error if no cached address
-            setAddress('No se pudo obtener la dirección');
+          if (isMounted) { 
+            setAddress(device.address || 'No se pudo obtener la dirección');
           }
           console.error("Error fetching address:", error);
+        }
+      } else {
+        if (isMounted) {
+          setAddress('Ubicación no disponible');
         }
       }
     };
     
-    // Only fetch if we don't have an address, or to refresh occasionally
-    // This is a simple optimization. A more robust solution might use a timestamp.
-    if (!device.address) {
-        fetchAddress();
-    }
+    fetchAddress();
 
     return () => {
       isMounted = false;
@@ -74,39 +75,37 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
 
   return (
     <div onClick={onClick} className="cursor-pointer">
-      <div className="rounded-xl shadow-md overflow-hidden relative z-10">
-        <div className={cn("p-3", bgColor, textColor)}>
-          <h3 className="font-bold text-sm mb-2">{device.name}</h3>
-          <div className="flex items-start gap-3">
-            <div className="flex-shrink-0">
-              <Image
-                src={deviceIconUrl}
-                alt={device.name}
-                width={48}
-                height={48}
-                className="w-12 h-12 object-contain"
-              />
-            </div>
+      <div className={cn("rounded-xl shadow-md p-3 relative z-10", bgColor, textColor)}>
+        <h3 className="font-bold text-sm mb-2">{device.name}</h3>
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0">
+            <Image
+              src={deviceIconUrl}
+              alt={device.name}
+              width={48}
+              height={48}
+              className="w-12 h-12 object-contain"
+            />
+          </div>
 
-            <div className="flex-1 space-y-1.5 text-xs">
-              <div className="flex items-start gap-2">
-                <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span className="leading-tight">{address}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4" />
-                <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FootstepsIcon className="w-4 h-4" />
-                <span>Online: {formatTimeAgo(device.timestamp)}</span>
-              </div>
+          <div className="flex-1 space-y-1.5 text-xs">
+            <div className="flex items-start gap-2">
+              <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <span className="leading-tight">{address}</span>
             </div>
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4" />
+              <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <FootstepsIcon className="w-4 h-4" />
+              <span>Online: {formatTimeAgo(device.timestamp)}</span>
+            </div>
+          </div>
 
-            <div className="flex-shrink-0 text-center">
-              <p className="font-bold text-2xl">{device.speed}</p>
-              <p className="text-xs">{device.distance_unit_hour}</p>
-            </div>
+          <div className="flex-shrink-0 text-center">
+            <p className="font-bold text-2xl">{device.speed}</p>
+            <p className="text-xs">{device.distance_unit_hour}</p>
           </div>
         </div>
       </div>
@@ -132,5 +131,3 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
     </div>
   );
 }
-
-    

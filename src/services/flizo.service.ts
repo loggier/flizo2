@@ -23,22 +23,33 @@ export async function getDevices(user_api_hash: string): Promise<DeviceGroup[]> 
   return data;
 }
 
-export async function getAddress(lat: number, lon: number): Promise<string> {
+export async function getAddress(lat: number, lon: number): Promise<string | null> {
     const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
     if (!user_api_hash) {
         throw new Error('Unauthorized');
     }
     
-    const response = await fetch(`${serverApi}geo_address?user_api_hash=${user_api_hash}&lat=${lat}&lon=${lon}`);
+    try {
+        const response = await fetch(`${serverApi}geo_address?user_api_hash=${user_api_hash}&lat=${lat}&lon=${lon}`);
 
-    if (response.status === 401) {
-        throw new Error('Unauthorized');
+        if (response.status === 401) {
+            throw new Error('Unauthorized');
+        }
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch address');
+        }
+
+        const data = await response.text();
+        
+        if (data.trim() === '-') {
+            return null;
+        }
+        
+        return data;
+
+    } catch (error) {
+        console.error("getAddress error:", error);
+        return null;
     }
-
-    if (!response.ok) {
-        throw new Error('Failed to fetch address');
-    }
-
-    const data = await response.text();
-    return data;
 }

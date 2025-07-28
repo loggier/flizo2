@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/sheet";
 import type { Device, Sensor } from "@/lib/types";
 import { Button } from "../ui/button";
-import { Separator } from "../ui/separator";
 import Image from "next/image";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import {
@@ -68,29 +67,30 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 
 export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: VehicleDetailsSheetProps) {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
-  const [address, setAddress] = useState(device?.address || 'Ubicación no disponible');
+  const [address, setAddress] = useState('Ubicación no disponible');
   
   useEffect(() => {
     let isMounted = true;
     
-    // Set initial address from device data if available
     if (device) {
-        setAddress(device.address || 'Ubicación no disponible');
-    }
+        // Immediately show cached address or a default message
+        setAddress(device.address || 'Cargando dirección...');
 
-    if (device?.lat && device?.lng) {
-        // Show loading state only if we don't have a cached address
-        if (!device.address) {
-            setAddress('Cargando dirección...');
+        if (device.lat && device.lng) {
+            getAddress(device.lat, device.lng)
+                .then(fetchedAddress => {
+                    if (isMounted) {
+                        setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
+                    }
+                })
+                .catch(() => {
+                    if (isMounted) {
+                        setAddress(device.address || 'No se pudo obtener la dirección');
+                    }
+                });
+        } else {
+             setAddress('Ubicación no disponible');
         }
-        
-        getAddress(device.lat, device.lng)
-            .then(fetchedAddress => {
-                if (isMounted) setAddress(fetchedAddress);
-            })
-            .catch(() => {
-                if (isMounted) setAddress(device.address || 'No se pudo obtener la dirección');
-            });
     }
 
     return () => { isMounted = false; };
@@ -171,6 +171,3 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     </Sheet>
   );
 }
-
-
-
