@@ -2,8 +2,9 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, MarkerF, Polyline } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
+import type { Device } from '@/lib/types';
 
 const containerStyle = {
   width: '100%',
@@ -20,10 +21,12 @@ interface MapComponentProps {
     onMapLoad: (map: google.maps.Map | null) => void;
     userPosition: google.maps.LatLngLiteral | null;
     heading: number;
+    devices: Device[];
 }
 
-function MapComponent({ mapType, onMapLoad, userPosition, heading }: MapComponentProps) {
+function MapComponent({ mapType, onMapLoad, userPosition, heading, devices }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -107,7 +110,7 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading }: MapComponen
       path: window.google.maps.SymbolPath.CIRCLE,
       scale: 14,
       fillColor: '#4285F4',
-      fillOpacity: 1,
+      fillOpacity: 0.3,
       strokeColor: '#FFFFFF',
       strokeWeight: 2,
   } : undefined;
@@ -145,6 +148,36 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading }: MapComponen
             />
           </>
         )}
+        {devices.map((device) => {
+            const deviceIcon = (typeof window !== 'undefined' && window.google && device.icon) ? {
+                url: `${serverUrl}${device.icon.path}`,
+                scaledSize: new window.google.maps.Size(device.icon.width, device.icon.height),
+                anchor: new window.google.maps.Point(device.icon.width / 2, device.icon.height / 2),
+                rotation: device.course,
+            } : undefined;
+
+            return(
+                <React.Fragment key={device.id}>
+                    {device.lat && device.lng && (
+                        <MarkerF
+                            position={{ lat: device.lat, lng: device.lng }}
+                            title={device.name}
+                            icon={deviceIcon}
+                        />
+                    )}
+                    {device.tail && device.tail.length > 0 && (
+                        <Polyline
+                            path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
+                            options={{
+                                strokeColor: device.device_data.tail_color,
+                                strokeWeight: 2,
+                                strokeOpacity: 0.8,
+                            }}
+                        />
+                    )}
+                </React.Fragment>
+            );
+        })}
       </GoogleMap>
     </LoadScript>
   );

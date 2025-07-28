@@ -1,0 +1,27 @@
+
+import type { Device, DeviceGroup } from "@/lib/types";
+
+const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
+
+export async function getDevices(user_api_hash: string): Promise<Device[]> {
+  const response = await fetch(`${serverApi}get_devices?user_api_hash=${user_api_hash}`);
+
+  if (response.status === 401) {
+    throw new Error('Unauthorized');
+  }
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch devices');
+  }
+
+  const data: DeviceGroup[] = await response.json();
+
+  if (!data) {
+    return [];
+  }
+
+  // Flatten the items from all groups into a single array
+  const allDevices = data.flatMap(group => group.items);
+  
+  return allDevices;
+}

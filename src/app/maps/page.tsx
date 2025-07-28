@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import MapComponent from "@/components/maps/map-placeholder";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
@@ -13,36 +14,83 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
+import { getDevices } from "@/services/flizo.service";
+import type { Device } from "@/lib/types";
+
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
 export default function MapsPage() {
+  const router = useRouter();
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [userPosition, setUserPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [heading, setHeading] = useState(0);
   const { t } = useLanguage();
+  const [devices, setDevices] = useState<Device[]>([]);
 
   useEffect(() => {
     const savedMapType = localStorage.getItem("mapType") as MapType;
     if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
       setMapType(savedMapType);
     }
-  }, []);
+
+    const fetchDevices = async () => {
+      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+      if (!token) {
+        router.push("/");
+        return;
+      }
+
+      try {
+        const fetchedDevices = await getDevices(token);
+        setDevices(fetchedDevices);
+        localStorage.setItem('devices', JSON.stringify(fetchedDevices));
+        
+        if (fetchedDevices.length > 0 && map) {
+            const bounds = new google.maps.LatLngBounds();
+            fetchedDevices.forEach(device => {
+                if (device.lat && device.lng) {
+                    bounds.extend({ lat: device.lat, lng: device.lng });
+                }
+            });
+            map.fitBounds(bounds);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch devices:", error);
+        // If unauthorized, redirect to login
+        if ((error as Error).message === 'Unauthorized') {
+          localStorage.clear();
+          sessionStorage.clear();
+          router.push("/");
+        }
+      }
+    };
+
+    fetchDevices();
+    // Set an interval to fetch devices periodically
+    const intervalId = setInterval(fetchDevices, 30000); // every 30 seconds
+
+    return () => clearInterval(intervalId); // Clear interval on component unmount
+  }, [router, map]);
 
   useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
       if (event.alpha !== null) {
-        // alpha is the compass direction
         setHeading(event.alpha);
       }
     };
 
-    window.addEventListener("deviceorientation", handleDeviceOrientation, true);
-
+    if (typeof window !== 'undefined') {
+        window.addEventListener("deviceorientation", handleDeviceOrientation, true);
+    }
+    
     return () => {
-      window.removeEventListener("deviceorientation", handleDeviceOrientation, true);
+        if (typeof window !== 'undefined') {
+            window.removeEventListener("deviceorientation", handleDeviceOrientation, true);
+        }
     };
   }, []);
 
@@ -77,14 +125,20 @@ export default function MapsPage() {
   };
 
   const layerOptions: { id: MapType; label: string }[] = [
-    { id: "OSM", label: t.bottomNav.map }, // Assuming 'Map' means 'Normal' or 'Street'
+    { id: "OSM", label: t.bottomNav.map },
     { id: "SATELLITE", label: "Satélite" },
     { id: "TRAFFIC", label: "Tráfico" },
   ];
 
   return (
     <div className="relative h-full w-full">
-      <MapComponent mapType={mapType} onMapLoad={setMap} userPosition={userPosition} heading={heading} />
+      <MapComponent 
+        mapType={mapType} 
+        onMapLoad={setMap} 
+        userPosition={userPosition} 
+        heading={heading}
+        devices={devices} 
+      />
       <div className="absolute top-4 left-4">
         <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground">
           <Menu className="h-6 w-6" />
