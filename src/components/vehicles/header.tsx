@@ -43,11 +43,12 @@ export function VehicleHeader() {
             className={cn(
               "rounded-full text-sm h-8 flex-1 transition-all duration-300",
               statusFilter === filter.value
-                ? "bg-background text-primary font-bold shadow-lg"
+                ? "font-bold shadow-lg"
                 : "bg-primary/50 text-primary-foreground/80 hover:bg-primary/70",
-                filter.value === 'moving' && statusFilter === 'moving' && 'bg-green-500 text-white',
-                filter.value === 'stopped' && statusFilter === 'stopped' && 'bg-yellow-500 text-black',
-                filter.value === 'offline' && statusFilter === 'offline' && 'bg-red-500 text-white',
+              statusFilter === 'all' && filter.value === 'all' && 'bg-background text-primary',
+              statusFilter === 'moving' && filter.value === 'moving' && 'bg-green-500 text-white hover:bg-green-600',
+              statusFilter === 'stopped' && filter.value === 'stopped' && 'bg-yellow-500 text-black hover:bg-yellow-600',
+              statusFilter === 'offline' && filter.value === 'offline' && 'bg-red-500 text-white hover:bg-red-600',
             )}
           >
             {filter.label}
@@ -57,4 +58,3 @@ export function VehicleHeader() {
     </header>
   );
 }
-
