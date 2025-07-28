@@ -21,18 +21,18 @@ interface MapComponentProps {
     userPosition: google.maps.LatLngLiteral | null;
 }
 
-const userLocationIcon = {
-    path: `M -12,0 a 12,12 0 1,0 24,0 a 12,12 0 1,0 -24,0`,
-    fillColor: '#4285F4',
-    fillOpacity: 1,
-    strokeColor: '#FFFFFF',
-    strokeWeight: 2,
-    scale: 1,
-    anchor: new google.maps.Point(0, 0),
-};
-
 function MapComponent({ mapType, onMapLoad, userPosition }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
+
+  const userLocationIcon = {
+      path: `M -12,0 a 12,12 0 1,0 24,0 a 12,12 0 1,0 -24,0`,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+      strokeColor: '#FFFFFF',
+      strokeWeight: 2,
+      scale: 1,
+      anchor: (typeof window !== 'undefined' && window.google) ? new window.google.maps.Point(0, 0) : undefined,
+  };
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
