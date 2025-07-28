@@ -131,10 +131,10 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            <div className="bg-white rounded-lg p-2 shadow-sm">
+        <div className="flex-1 overflow-y-auto p-2 space-y-2">
+            <div className="bg-white rounded-lg p-3 shadow-sm">
                 <h3 className="font-bold text-base mb-3 text-gray-800">INFORMACIÓN</h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
                     <InfoRow icon={MapPin} value={address} />
                     <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
                     <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
@@ -143,13 +143,13 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-2">
                 <Button size="lg" variant="outline" className="bg-white"><History className="mr-2"/> Historial</Button>
                 <Button size="lg" variant="outline" className="bg-white"><FileText className="mr-2"/> Reportes</Button>
             </div>
 
             {device.sensors && device.sensors.length > 0 && (
-                <div className="bg-white rounded-lg p-2 shadow-sm">
+                <div className="bg-white rounded-lg p-3 shadow-sm">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         {device.sensors.map((sensor: Sensor) => (
                            <div key={sensor.id} className="text-xs">
