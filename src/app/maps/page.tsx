@@ -71,18 +71,6 @@ export default function MapsPage() {
         
         localStorage.setItem('devices', JSON.stringify(flattenedDevices));
         
-        if (flattenedDevices.length > 0 && map && !selectedDeviceId) {
-            const bounds = new google.maps.LatLngBounds();
-            flattenedDevices.forEach(device => {
-                if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
-                    bounds.extend({ lat: device.lat, lng: device.lng });
-                }
-            });
-            if (!bounds.isEmpty()) {
-                map.fitBounds(bounds);
-            }
-        }
-
       } catch (error) {
         console.error("Failed to fetch devices:", error);
         if ((error as Error).message === 'Unauthorized') {
@@ -99,7 +87,21 @@ export default function MapsPage() {
     const intervalId = setInterval(fetchDevices, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [router, map, selectedDeviceId]);
+  }, [router]);
+
+  useEffect(() => {
+      if (map && allDevices.length > 0 && !selectedDeviceId && visibleDeviceIds.size > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        allDevices.forEach(device => {
+            if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
+                bounds.extend({ lat: device.lat, lng: device.lng });
+            }
+        });
+        if (!bounds.isEmpty()) {
+            map.fitBounds(bounds);
+        }
+    }
+  }, [map, allDevices, selectedDeviceId, visibleDeviceIds])
 
   useEffect(() => {
     if (allDevices.length > 0) { // Ensure we don't save an empty set on initial load
