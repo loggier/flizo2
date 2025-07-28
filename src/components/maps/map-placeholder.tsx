@@ -3,6 +3,7 @@
 
 import React from 'react';
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import type { MapType } from '@/app/maps/page';
 
 const containerStyle = {
   width: '100%',
@@ -14,8 +15,12 @@ const center = {
   lng: -38.523
 };
 
-function MapComponent() {
-  const [map, setMap] = React.useState<google.maps.Map | null>(null);
+interface MapComponentProps {
+    mapType: MapType;
+    onMapLoad: (map: google.maps.Map | null) => void;
+}
+
+function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
 
   const onLoad = React.useCallback(function callback(mapInstance: google.maps.Map) {
     // Normal Map
@@ -77,14 +82,13 @@ function MapComponent() {
     mapInstance.mapTypes.set("OSM", osmMapType);
     mapInstance.mapTypes.set("SATELLITE", satelliteMapType);
     mapInstance.mapTypes.set("TRAFFIC", trafficMapType);
-    mapInstance.setMapTypeId("OSM");
-
-    setMap(mapInstance);
-  }, []);
+    
+    onMapLoad(mapInstance);
+  }, [onMapLoad]);
 
   const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
-    setMap(null);
-  }, []);
+    onMapLoad(null);
+  }, [onMapLoad]);
   
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -98,6 +102,7 @@ function MapComponent() {
         zoom={10}
         onLoad={onLoad}
         onUnmount={onUnmount}
+        mapTypeId={mapType}
         options={{
             disableDefaultUI: true,
             scrollwheel: true,
