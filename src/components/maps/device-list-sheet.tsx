@@ -61,9 +61,6 @@ export default function DeviceListSheet({
         side="left"
         className="p-0 !w-[90vw] sm:!w-[400px] flex flex-col bg-primary text-primary-foreground [&>button]:hidden"
       >
-        <SheetHeader className="p-4 bg-primary">
-          <SheetTitle className="text-white">Vehículos</SheetTitle>
-        </SheetHeader>
         <div className="bg-primary p-2">
             <Tabs defaultValue="dispositivos" className="w-full">
             <TabsList className="grid w-full grid-cols-3 bg-primary-foreground/20">
