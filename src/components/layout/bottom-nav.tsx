@@ -35,11 +35,11 @@ export default function BottomNav() {
                 className={cn(
                   "flex flex-col items-center justify-center gap-1 text-xs transition-all duration-300 ease-in-out",
                   isActive
-                    ? "bg-primary text-primary-foreground font-semibold rounded-full shadow-lg p-3"
+                    ? "bg-primary text-primary-foreground font-semibold rounded-full shadow-lg p-3 scale-110"
                     : "text-muted-foreground hover:text-foreground h-full w-full"
                 )}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className={cn("w-5 h-5", isActive && "w-6 h-6")} />
                 <span className={cn("truncate", { "hidden": isActive })}>{item.label}</span>
               </div>
             </Link>
