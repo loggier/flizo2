@@ -21,25 +21,23 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-teal-600 text-white p-2 shadow-[0_-1px_4px_rgba(0,0,0,0.1)] rounded-t-2xl">
-      <div className="flex justify-around items-center max-w-md mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-[0_-1px_6px_rgba(0,0,0,0.05)]">
+      <div className="flex justify-around items-center max-w-md mx-auto h-16">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center justify-center gap-1 text-xs"
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 text-xs w-full h-full transition-colors",
+                isActive
+                  ? "text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
-              <div
-                className={cn(
-                  "p-3 rounded-lg flex flex-col items-center gap-1",
-                  isActive ? "bg-red-500" : "bg-transparent"
-                )}
-              >
-                <item.icon className="w-6 h-6" />
-                <span>{item.label}</span>
-              </div>
+              <item.icon className="w-6 h-6" />
+              <span>{item.label}</span>
             </Link>
           );
         })}
