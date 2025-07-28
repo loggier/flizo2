@@ -68,8 +68,9 @@ export function VehicleCard({ device }: VehicleCardProps) {
   return (
     <div className={cn("rounded-xl shadow-md overflow-hidden", bgColor, textColor)}>
       <div className="p-3">
+        <h3 className="font-bold text-sm mb-2">{device.name}</h3>
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 pt-1">
+          <div className="flex-shrink-0">
             <Image
               src={deviceIconUrl}
               alt={device.name}
@@ -80,21 +81,13 @@ export function VehicleCard({ device }: VehicleCardProps) {
           </div>
 
           <div className="flex-1 space-y-1.5 text-xs">
-            <h3 className="font-bold text-sm">{device.name}</h3>
-            
             <div className="flex items-start gap-2">
               <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span className="leading-tight">{address}</span>
             </div>
-            
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>Conexión: {new Date(device.timestamp * 1000).toLocaleTimeString()}</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <FootstepsIcon className="w-4 h-4" />
-              <span>Online: {formatTimeAgo(device.timestamp)}</span>
+              <span>{new Date(device.timestamp * 1000).toLocaleString()}</span>
             </div>
           </div>
 
@@ -103,23 +96,23 @@ export function VehicleCard({ device }: VehicleCardProps) {
             <p className="text-xs">{device.distance_unit_hour}</p>
           </div>
         </div>
-        
-        {hasSensors && (
-          <div className="bg-white/80 mt-3 rounded-lg p-2">
-            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-              {device.sensors.map((sensor: Sensor, index: number) => (
-                <div key={index} className="flex justify-between items-center text-xs text-gray-700">
-                  <span className="font-medium truncate">{sensor.name}</span>
-                  <span 
-                    className="font-bold"
-                    dangerouslySetInnerHTML={{ __html: sensor.value }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
+        
+      {hasSensors && (
+        <div className="bg-white/80 p-3 border-t border-black/10">
+           <p className="text-xs font-semibold mb-2">Sensores</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            {device.sensors.map((sensor: Sensor, index: number) => (
+              <div key={index} className="flex items-center gap-2 text-xs text-gray-700">
+                <span 
+                  className="font-bold"
+                  dangerouslySetInnerHTML={{ __html: sensor.value }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
