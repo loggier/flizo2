@@ -88,7 +88,7 @@ export default function HelpPage() {
           </a>
         )}
 
-        <div className="grid grid-cols-3 gap-x-4 gap-y-8 mt-12">
+        <div className="grid grid-cols-3 gap-x-4 gap-y-8 mt-8">
             {buttons.map((btn, index) => (
                 btn.href ? <ActionButton key={index} href={btn.href} icon={btn.icon} label={btn.label} /> : null
             ))}
