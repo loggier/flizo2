@@ -143,7 +143,7 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
         options={{
             disableDefaultUI: true,
             scrollwheel: true,
-            streetViewControl: true,
+            streetViewControl: false,
         }}
       >
         {userPosition && userLocationIcon && userCircleIcon && (
