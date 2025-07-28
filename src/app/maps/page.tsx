@@ -103,21 +103,25 @@ export default function MapsPage() {
   }, [router, isInitialLoad]);
 
   useEffect(() => {
-    if (map && selectedDeviceId) {
+    if (!map) return;
+
+    // Zoom to selected device if one is chosen
+    if (selectedDeviceId) {
       const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
       if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
         map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
-        map.setZoom(18); 
+        map.setZoom(18);
       }
-    } else if (map && allDevices.length > 0 && visibleDeviceIds.size > 0 && !selectedDeviceId && isInitialLoad) {
+    // On initial load, if no device is selected, fit all visible devices on map
+    } else if (isInitialLoad && allDevices.length > 0 && visibleDeviceIds.size > 0) {
       const bounds = new google.maps.LatLngBounds();
       allDevices.forEach(device => {
-          if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
-              bounds.extend({ lat: device.lat, lng: device.lng });
-          }
+        if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
+          bounds.extend({ lat: device.lat, lng: device.lng });
+        }
       });
       if (!bounds.isEmpty()) {
-          map.fitBounds(bounds);
+        map.fitBounds(bounds);
       }
     }
   }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad]);
@@ -292,5 +296,3 @@ export default function MapsPage() {
     </div>
   );
 }
-
-    
