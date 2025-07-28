@@ -66,44 +66,47 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
-    const serverApi = process.env.NEXT_PUBLIC_serverApi;
+    const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
+    
+    const params = new URLSearchParams({
+        email: values.email,
+        password: values.password,
+    });
 
     try {
-      const response = await fetch(`${serverApi}login`, {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify({
-          email: values.email,
-          password: values.password,
-        }),
+      const response = await fetch(`${serverApi}login?${params.toString()}`, {
+        method: "GET",
       });
 
       if (!response.ok) {
         throw new Error(loginTranslations.genericError);
       }
       
-      const text = await response.text();
       let data;
       try {
-        data = JSON.parse(text);
+        data = await response.json();
       } catch (e) {
         throw new Error("Received invalid JSON from server.");
       }
-
 
       if (data.status !== 1) {
         throw new Error(data.message || loginTranslations.genericError);
       }
 
       const token = data.user_api_hash;
+      const permissions = data.permissions;
+
       if (token) {
         if (values.rememberMe) {
           localStorage.setItem("user_api_hash", token);
+          if (permissions) {
+            localStorage.setItem("permissions", JSON.stringify(permissions));
+          }
         } else {
           sessionStorage.setItem("user_api_hash", token);
+          if (permissions) {
+            sessionStorage.setItem("permissions", JSON.stringify(permissions));
+          }
         }
         router.push("/dashboard");
       } else {
@@ -121,7 +124,7 @@ export function LoginForm() {
     }
   }
 
-  const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl || ''}page/privacy_policy_new`;
+  const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/'}page/privacy_policy_new`;
 
   return (
     <Card className="w-full max-w-md shadow-2xl">
