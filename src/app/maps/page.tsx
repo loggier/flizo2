@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MapComponent from "@/components/maps/map-placeholder";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Car } from "lucide-react";
 import MapControls from "@/components/maps/map-controls";
 import {
   Sheet,
@@ -154,16 +154,14 @@ export default function MapsPage() {
         showLabels={showLabels}
       />
       <div className="absolute top-4 left-4">
-        <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground">
-          <Menu className="h-6 w-6" />
+        <Button variant="default" size="icon" className="bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90">
+          <Car className="h-6 w-6" />
         </Button>
       </div>
       <DeviceStatusSummary devices={devices} />
       <MapControls 
         onLayerChange={handleLayerChange}
         onLocateUser={handleLocateUser}
-        onToggleLabels={handleToggleLabels}
-        showLabels={showLabels}
       />
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">
