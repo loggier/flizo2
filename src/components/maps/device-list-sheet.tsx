@@ -48,7 +48,7 @@ export default function DeviceListSheet({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="p-0 !w-[90vw] sm:!w-[400px] flex flex-col bg-primary text-primary-foreground"
+        className="p-0 !w-[90vw] sm:!w-[400px] flex flex-col bg-primary text-primary-foreground [&>button]:hidden"
       >
         <SheetHeader className="p-4 bg-primary">
           <SheetTitle className="text-white">Vehículos</SheetTitle>
