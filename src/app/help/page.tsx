@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { FlizoLogo } from '@/components/icons/flizo-logo';
-import { Phone, Globe } from 'lucide-react';
+import { Phone, Globe, Mail } from 'lucide-react';
 import { WhatsAppIcon } from '@/components/icons/social-icons';
 import { FacebookIcon } from '@/components/icons/social-icons';
 import { InstagramIcon } from '@/components/icons/social-icons';
@@ -11,20 +11,11 @@ import { TikTokIcon } from '@/components/icons/tiktok-icon';
 import { useLanguage } from '@/hooks/use-language';
 
 
-const supportLinks = {
-  whatsappSoporte: 'https://wa.me/528118627025',
-  numContacto: '528118627025',
-  facebook: 'http://facebook.com/flizo.app',
-  instagram: 'http://instagram.com/flizo.app',
-  tiktok: 'https://www.tiktok.com/@flizo.app?_t=ZS-8xpuHGrStIj&_r=1',
-  website: 'https://flizo.com'
-};
-
-const ActionButton = ({ href, icon: Icon, label }: { href: string, icon: React.ElementType, label: string }) => {
+const ActionButton = ({ href, icon: Icon, label, ...props }: { href: string, icon: React.ElementType, label: string, [key: string]: any }) => {
   if (!href) return null;
 
   return (
-    <Link href={href} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 text-center">
+    <Link href={href} {...props} className="flex flex-col items-center gap-2 text-center">
       <div className="flex items-center justify-center w-20 h-20 bg-primary/10 text-primary rounded-full hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-md">
         <Icon className="w-10 h-10" />
       </div>
@@ -37,36 +28,60 @@ const ActionButton = ({ href, icon: Icon, label }: { href: string, icon: React.E
 export default function HelpPage() {
     const { t } = useLanguage();
 
+    const whatsappSoporte = process.env.NEXT_PUBLIC_whatsappSoporte;
+    const numContacto = process.env.NEXT_PUBLIC_numContacto;
+    const mailContacto = process.env.NEXT_PUBLIC_mailContacto;
+    const facebook = process.env.NEXT_PUBLIC_facebook;
+    const instagram = process.env.NEXT_PUBLIC_instagram;
+    const tiktok = process.env.NEXT_PUBLIC_tiktok;
+    const website = process.env.NEXT_PUBLIC_website || 'https://flizo.com';
+
+
     const buttons = [
         {
-            href: supportLinks.whatsappSoporte,
+            href: whatsappSoporte,
             icon: WhatsAppIcon,
-            label: "WhatsApp"
+            label: "WhatsApp",
+            target: "_blank",
+            rel: "noopener noreferrer"
         },
         {
-            href: `tel:${supportLinks.numContacto}`,
+            href: `tel:${numContacto}`,
             icon: Phone,
             label: "Llamar"
         },
         {
-            href: supportLinks.facebook,
+            href: `mailto:${mailContacto}`,
+            icon: Mail,
+            label: "Email"
+        },
+        {
+            href: facebook,
             icon: FacebookIcon,
-            label: "Facebook"
+            label: "Facebook",
+            target: "_blank",
+            rel: "noopener noreferrer"
         },
         {
-            href: supportLinks.instagram,
+            href: instagram,
             icon: InstagramIcon,
-            label: "Instagram"
+            label: "Instagram",
+            target: "_blank",
+            rel: "noopener noreferrer"
         },
         {
-            href: supportLinks.tiktok,
+            href: tiktok,
             icon: TikTokIcon,
-            label: "TikTok"
+            label: "TikTok",
+            target: "_blank",
+            rel: "noopener noreferrer"
         },
         {
-            href: supportLinks.website,
+            href: website,
             icon: Globe,
-            label: "Sitio Web"
+            label: "Sitio Web",
+            target: "_blank",
+            rel: "noopener noreferrer"
         }
     ];
 
@@ -82,15 +97,23 @@ export default function HelpPage() {
             Contacta con Soporte
         </p>
 
-        {supportLinks.numContacto && (
-          <a href={`tel:${supportLinks.numContacto}`} className="text-2xl font-bold text-primary hover:underline">
-            {supportLinks.numContacto}
+        {numContacto && (
+          <a href={`tel:${numContacto}`} className="text-2xl font-bold text-primary hover:underline">
+            {numContacto}
           </a>
+        )}
+
+        {mailContacto && (
+            <div className="mt-1">
+                <a href={`mailto:${mailContacto}`} className="text-lg font-medium text-primary hover:underline">
+                    {mailContacto}
+                </a>
+            </div>
         )}
 
         <div className="grid grid-cols-3 gap-x-4 gap-y-8 mt-8">
             {buttons.map((btn, index) => (
-                btn.href ? <ActionButton key={index} href={btn.href} icon={btn.icon} label={btn.label} /> : null
+                btn.href ? <ActionButton key={index} {...btn} /> : null
             ))}
         </div>
       </div>
