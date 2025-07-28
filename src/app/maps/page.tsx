@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import MapComponent from "@/components/maps/map-placeholder";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ export default function MapsPage() {
   const [deviceGroups, setDeviceGroups] = useState<DeviceGroup[]>([]);
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [showLabels, setShowLabels] = useState(true);
+  const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const savedMapType = localStorage.getItem("mapType") as MapType;
@@ -57,6 +58,15 @@ export default function MapsPage() {
         setDeviceGroups(fetchedGroups);
         const flattenedDevices = fetchedGroups.flatMap(group => group.items);
         setAllDevices(flattenedDevices);
+
+        // Initialize visibility state
+        const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
+        if (savedVisibleDeviceIds) {
+          setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
+        } else {
+          // Default to all visible
+          setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+        }
 
         localStorage.setItem('devices', JSON.stringify(flattenedDevices));
         
@@ -87,6 +97,10 @@ export default function MapsPage() {
   }, [router, map]);
 
   useEffect(() => {
+    localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
+  }, [visibleDeviceIds]);
+
+  useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
       if (event.alpha !== null) {
         setHeading(event.alpha);
@@ -102,6 +116,21 @@ export default function MapsPage() {
             window.removeEventListener("deviceorientation", handleDeviceOrientation, true);
         }
     };
+  }, []);
+  
+  const toggleDeviceVisibility = useCallback((deviceIds: number | number[], visible: boolean) => {
+    setVisibleDeviceIds(prevVisibleIds => {
+      const newVisibleIds = new Set(prevVisibleIds);
+      const ids = Array.isArray(deviceIds) ? deviceIds : [deviceIds];
+      
+      if (visible) {
+        ids.forEach(id => newVisibleIds.add(id));
+      } else {
+        ids.forEach(id => newVisibleIds.delete(id));
+      }
+      
+      return newVisibleIds;
+    });
   }, []);
 
   const handleLocateUser = () => {
@@ -148,6 +177,8 @@ export default function MapsPage() {
     { id: "TRAFFIC", label: "Tráfico" },
   ];
 
+  const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
+
   return (
     <div className="relative h-full w-full">
       <MapComponent 
@@ -155,7 +186,7 @@ export default function MapsPage() {
         onMapLoad={setMap} 
         userPosition={userPosition} 
         heading={heading}
-        devices={allDevices}
+        devices={visibleDevices}
         showLabels={showLabels}
       />
       <div className="absolute top-4 left-4">
@@ -165,7 +196,7 @@ export default function MapsPage() {
             className="bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90"
             onClick={() => setIsDeviceListOpen(true)}
         >
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path fillRule="evenodd" clipRule="evenodd" d="M2 14.803v6.447c0 .414.336.75.75.75h1.614a.75.75 0 0 0 .74-.627L5.5 19h13l.395 2.373a.75.75 0 0 0 .74.627h1.615a.75.75 0 0 0 .75-.75v-6.447a5.954 5.954 0 0 0-1-3.303l-.78-1.17a1.994 1.994 0 0 1-.178-.33h.994a.75.75 0 0 0 .671-.415l.25-.5A.75.75 0 0 0 21.287 8H19.6l-.31-1.546a2.5 2.5 0 0 0-1.885-1.944C15.943 4.17 14.141 4 12 4c-2.142 0-3.943.17-5.405.51a2.5 2.5 0 0 0-1.886 1.944L4.399 8H2.714a.75.75 0 0 0-.67 1.085l.25.5a.75.75 0 0 0 .67.415h.995a1.999 1.999 0 0 1-.178.33L3 11.5c-.652.978-1 2.127-1 3.303zm15.961-4.799a4 4 0 0 0 .34.997H5.699c.157-.315.271-.65.34-.997l.632-3.157a.5.5 0 0 1 .377-.39C8.346 6.157 10 6 12 6c2 0 3.654.156 4.952.458a.5.5 0 0 1 .378.389l.631 3.157zM5.5 16a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM20 14.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" fill="currentColor"></path></g></svg>
+             <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" className="h-7 w-7"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"><path fillRule="evenodd" clipRule="evenodd" d="M2 14.803v6.447c0 .414.336.75.75.75h1.614a.75.75 0 0 0 .74-.627L5.5 19h13l.395 2.373a.75.75 0 0 0 .74.627h1.615a.75.75 0 0 0 .75-.75v-6.447a5.954 5.954 0 0 0-1-3.303l-.78-1.17a1.994 1.994 0 0 1-.178-.33h.994a.75.75 0 0 0 .671-.415l.25-.5A.75.75 0 0 0 21.287 8H19.6l-.31-1.546a2.5 2.5 0 0 0-1.885-1.944C15.943 4.17 14.141 4 12 4c-2.142 0-3.943.17-5.405.51a2.5 2.5 0 0 0-1.886 1.944L4.399 8H2.714a.75.75 0 0 0-.67 1.085l.25.5a.75.75 0 0 0 .67.415h.995a1.999 1.999 0 0 1-.178.33L3 11.5c-.652.978-1 2.127-1 3.303zm15.961-4.799a4 4 0 0 0 .34.997H5.699c.157-.315.271-.65.34-.997l.632-3.157a.5.5 0 0 1 .377-.39C8.346 6.157 10 6 12 6c2 0 3.654.156 4.952.458a.5.5 0 0 1 .378.389l.631 3.157zM5.5 16a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zM20 14.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" fill="currentColor"></path></g></svg>
         </Button>
       </div>
       <DeviceStatusSummary devices={allDevices} />
@@ -177,6 +208,8 @@ export default function MapsPage() {
         isOpen={isDeviceListOpen} 
         onOpenChange={setIsDeviceListOpen}
         deviceGroups={deviceGroups}
+        visibleDeviceIds={visibleDeviceIds}
+        toggleDeviceVisibility={toggleDeviceVisibility}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">

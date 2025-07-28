@@ -26,12 +26,16 @@ interface DeviceListSheetProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   deviceGroups: DeviceGroup[];
+  visibleDeviceIds: Set<number>;
+  toggleDeviceVisibility: (deviceIds: number | number[], visible: boolean) => void;
 }
 
 export default function DeviceListSheet({
   isOpen,
   onOpenChange,
   deviceGroups,
+  visibleDeviceIds,
+  toggleDeviceVisibility
 }: DeviceListSheetProps) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -43,6 +47,11 @@ export default function DeviceListSheet({
       ),
     }))
     .filter((group) => group.items.length > 0);
+
+  const handleGroupCheckChange = (group: DeviceGroup, checked: boolean) => {
+    const deviceIds = group.items.map(d => d.id);
+    toggleDeviceVisibility(deviceIds, checked);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -76,12 +85,20 @@ export default function DeviceListSheet({
         </div>
         <ScrollArea className="flex-1 bg-white text-black">
           <Accordion type="multiple" defaultValue={filteredGroups.map(g => g.id.toString())} className="w-full">
-            {filteredGroups.map((group) => (
+            {filteredGroups.map((group) => {
+              const allItemsInGroupVisible = group.items.every(item => visibleDeviceIds.has(item.id));
+              const someItemsInGroupVisible = group.items.some(item => visibleDeviceIds.has(item.id));
+              
+              return (
               <AccordionItem value={group.id.toString()} key={group.id} className="border-b">
                 <div className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
                     <div className="flex items-center">
                         <div onClick={(e) => e.stopPropagation()} className="pr-2">
-                            <Checkbox id={`group-${group.id}`} />
+                             <Checkbox 
+                                id={`group-${group.id}`}
+                                checked={allItemsInGroupVisible ? true : (someItemsInGroupVisible ? 'indeterminate' : false)}
+                                onCheckedChange={(checked) => handleGroupCheckChange(group, !!checked)}
+                              />
                         </div>
                         <AccordionTrigger className="p-0 flex-1">
                             <label htmlFor={`group-${group.id}`} className="font-semibold cursor-pointer">{group.title}</label>
@@ -96,12 +113,17 @@ export default function DeviceListSheet({
                 <AccordionContent>
                   <div className="flex flex-col">
                     {group.items.map((device) => (
-                      <DeviceListItem key={device.id} device={device} />
+                      <DeviceListItem 
+                        key={device.id} 
+                        device={device}
+                        isVisible={visibleDeviceIds.has(device.id)}
+                        onVisibilityChange={toggleDeviceVisibility}
+                      />
                     ))}
                   </div>
                 </AccordionContent>
               </AccordionItem>
-            ))}
+            )})}
           </Accordion>
         </ScrollArea>
       </SheetContent>

@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils";
 
 interface DeviceListItemProps {
   device: Device;
+  isVisible: boolean;
+  onVisibilityChange: (id: number, visible: boolean) => void;
 }
 
 const getStatusInfo = (device: Device): { text: string, color: string, icon: React.ReactNode } => {
@@ -29,7 +31,7 @@ const getStatusInfo = (device: Device): { text: string, color: string, icon: Rea
     }
   };
 
-export default function DeviceListItem({ device }: DeviceListItemProps) {
+export default function DeviceListItem({ device, isVisible, onVisibilityChange }: DeviceListItemProps) {
     const status = getStatusInfo(device);
 
     return (
@@ -42,9 +44,13 @@ export default function DeviceListItem({ device }: DeviceListItemProps) {
             </div>
 
             <div className="flex items-center gap-3">
-                <Checkbox id={`device-${device.id}`} />
+                <Checkbox 
+                  id={`device-${device.id}`}
+                  checked={isVisible}
+                  onCheckedChange={(checked) => onVisibilityChange(device.id, !!checked)}
+                 />
                 <KeySquare className="h-5 w-5 text-primary"/>
-                <span className="font-bold">{device.name}</span>
+                <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
             </div>
 
             <div className="space-y-1 pl-10 text-sm text-gray-600">
