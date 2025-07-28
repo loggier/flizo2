@@ -29,15 +29,16 @@ export default function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex-1"
+              className="flex-1 h-full flex items-center justify-center"
             >
               <div
                 className={cn(
-                  "flex h-full flex-col items-center justify-center gap-1 rounded-full text-xs transition-all duration-300 ease-in-out",
+                  "flex h-full w-full flex-col items-center justify-center gap-1 text-xs transition-all duration-300 ease-in-out",
                   isActive
-                    ? "bg-primary text-primary-foreground scale-105 font-semibold"
+                    ? "bg-primary text-primary-foreground scale-110 font-semibold rounded-xl shadow-lg"
                     : "text-muted-foreground hover:text-foreground"
                 )}
+                style={{ height: 'calc(100% - 4px)', width: 'calc(100% - 4px)'}}
               >
                 <item.icon className="w-5 h-5" />
                 <span className="truncate">{item.label}</span>
