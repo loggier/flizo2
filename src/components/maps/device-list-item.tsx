@@ -56,7 +56,7 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange }
                       <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
                     </div>
 
-                    <div className="space-y-1 text-sm text-gray-600 mt-1">
+                    <div className="space-y-1 text-xs text-gray-600 mt-1">
                       <div className={cn("flex items-center gap-2", status.color)}>
                           {status.icon}
                           <span>{status.text}</span>
