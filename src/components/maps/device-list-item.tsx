@@ -43,28 +43,33 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange }
                 </div>
             </div>
 
-            <div className="flex items-center gap-3">
-                <Checkbox 
+            <div className="flex items-start gap-3">
+                 <Checkbox 
                   id={`device-${device.id}`}
                   checked={isVisible}
                   onCheckedChange={(checked) => onVisibilityChange(device.id, !!checked)}
+                  className="mt-1"
                  />
-                <KeySquare className="h-5 w-5 text-primary"/>
-                <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
-            </div>
+                 <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <KeySquare className="h-5 w-5 text-primary"/>
+                      <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
+                    </div>
 
-            <div className="space-y-1 pl-10 text-sm text-gray-600">
-                <div className={cn("flex items-center gap-2", status.color)}>
-                    {status.icon}
-                    <span>{status.text}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
-                </div>
-                 <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4" />
-                    <span>Online: {device.time}</span>
+                    <div className="space-y-1 text-sm text-gray-600 mt-1">
+                      <div className={cn("flex items-center gap-2", status.color)}>
+                          {status.icon}
+                          <span>{status.text}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          <span>Online: {device.time}</span>
+                      </div>
+                    </div>
                 </div>
             </div>
         </div>
