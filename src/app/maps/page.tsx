@@ -8,7 +8,7 @@ export default function MapsPage() {
     <div className="relative h-full w-full">
       <MapPlaceholder />
       <div className="absolute top-4 left-4">
-        <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md">
+        <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md hover:bg-primary/90 hover:text-primary-foreground">
           <Menu className="h-6 w-6" />
         </Button>
       </div>
