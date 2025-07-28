@@ -1,8 +1,8 @@
 
 import Image from "next/image";
 import type { Device } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { KeySquare, Clock, Power, Phone } from "lucide-react";
+import { cn, formatTimeAgo } from "@/lib/utils";
+import { KeySquare, Clock, Power } from "lucide-react";
 
 interface VehicleCardProps {
   device: Device;
@@ -35,14 +35,14 @@ export function VehicleCard({ device }: VehicleCardProps) {
         <Image
           src={deviceIconUrl}
           alt={device.name}
-          width={64}
-          height={64}
-          className="w-16 h-16 object-contain"
+          width={56}
+          height={56}
+          className="w-14 h-14 object-contain"
         />
       </div>
 
       <div className="flex-1 space-y-1.5 text-xs">
-        <h3 className="font-bold text-base">{device.name}</h3>
+        <h3 className="font-bold text-sm">{device.name}</h3>
         
         <div className="flex items-center gap-2">
           <KeySquare className="w-4 h-4" />
@@ -56,15 +56,8 @@ export function VehicleCard({ device }: VehicleCardProps) {
 
         <div className="flex items-center gap-2">
           <Power className="w-4 h-4" />
-          <span>Online: {device.time}</span>
+          <span>Online: {formatTimeAgo(device.timestamp)}</span>
         </div>
-
-        {device.device_data?.sim_number && (
-          <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4" />
-            <span>Número: {device.device_data.sim_number}</span>
-          </div>
-        )}
       </div>
 
       <div className="flex-shrink-0 text-center">
@@ -74,4 +67,3 @@ export function VehicleCard({ device }: VehicleCardProps) {
     </div>
   );
 }
-
