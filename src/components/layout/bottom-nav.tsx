@@ -30,17 +30,19 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-300 relative",
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-300",
                 isActive
-                  ? "text-primary font-bold"
+                  ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <item.icon className="w-6 h-6" />
+              <div className={cn(
+                  "flex items-center justify-center w-10 h-10 rounded-full transition-colors",
+                  isActive ? "bg-primary/10" : ""
+              )}>
+                <item.icon className="w-6 h-6" />
+              </div>
               <span className="text-xs truncate">{item.label}</span>
-               {isActive && (
-                <div className="w-12 h-1 bg-primary rounded-t-full absolute bottom-0"></div>
-              )}
             </Link>
           );
         })}
