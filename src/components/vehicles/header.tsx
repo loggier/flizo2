@@ -18,6 +18,27 @@ export function VehicleHeader() {
     { label: "Offline", value: "offline" },
   ];
 
+  const getButtonClass = (value: VehicleStatus) => {
+    const isActive = statusFilter === value;
+
+    if (isActive) {
+      return "bg-background text-primary font-bold shadow-lg";
+    }
+
+    switch (value) {
+      case "all":
+        return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
+      case "moving":
+        return "bg-green-500/80 text-white/90 hover:bg-green-500";
+      case "stopped":
+        return "bg-yellow-500/80 text-black/90 hover:bg-yellow-500";
+      case "offline":
+        return "bg-red-500/80 text-white/90 hover:bg-red-500";
+      default:
+        return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
+    }
+  };
+
   return (
     <header className="fixed top-0 left-0 right-0 z-40 bg-primary text-primary-foreground shadow-md p-4 space-y-4">
       <div className="flex items-center justify-between gap-4">
@@ -42,13 +63,7 @@ export function VehicleHeader() {
             onClick={() => setStatusFilter(filter.value)}
             className={cn(
               "rounded-full text-sm h-8 flex-1 transition-all duration-300",
-              statusFilter === filter.value
-                ? "font-bold shadow-lg"
-                : "bg-primary/50 text-primary-foreground/80 hover:bg-primary/70",
-              statusFilter === 'all' && filter.value === 'all' && 'bg-background text-primary',
-              statusFilter === 'moving' && filter.value === 'moving' && 'bg-green-500 text-white hover:bg-green-600',
-              statusFilter === 'stopped' && filter.value === 'stopped' && 'bg-yellow-500 text-black hover:bg-yellow-600',
-              statusFilter === 'offline' && filter.value === 'offline' && 'bg-red-500 text-white hover:bg-red-600',
+              getButtonClass(filter.value)
             )}
           >
             {filter.label}
