@@ -2,7 +2,7 @@
 "use client";
 
 import React from 'react';
-import { GoogleMap, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, LoadScript } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
@@ -14,21 +14,10 @@ const center = {
   lng: -38.523
 };
 
-const mapOptions: google.maps.MapOptions = {
-  zoomControl: false,
-  streetViewControl: true,
-  mapTypeControl: false,
-  fullscreenControl: false,
-  mapTypeId: "OSM", // Set the map type ID on initialization
-};
-
 function MapComponent() {
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: "" // No API key needed for this method
-  });
+  const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
-  const onLoad = React.useCallback(function callback(map: google.maps.Map) {
+  const onLoad = React.useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
       getTileUrl: function(coord, zoom) {
         if (!coord || zoom === undefined) {
@@ -47,25 +36,37 @@ function MapComponent() {
       maxZoom: 18
     });
     
-    map.mapTypes.set("OSM", osmMapType);
-    // The mapTypeId is already set in options, so we don't need to set it again here.
+    mapInstance.mapTypes.set("OSM", osmMapType);
+    mapInstance.setMapTypeId("OSM");
+    setMap(mapInstance);
   }, []);
 
-  if (loadError) {
-    return <div>Map cannot be loaded right now, sorry.</div>;
-  }
+  const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
+    setMap(null);
+  }, []);
+  
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
-  return isLoaded ? (
+  return (
+    <LoadScript
+      googleMapsApiKey={apiKey}
+    >
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
         zoom={10}
         onLoad={onLoad}
-        options={mapOptions}
+        onUnmount={onUnmount}
+        options={{
+            disableDefaultUI: true,
+            scrollwheel: true,
+            streetViewControl: true,
+        }}
       >
         { /* Child components, like markers, info windows, etc. */ }
       </GoogleMap>
-  ) : <div>Loading Map...</div>
+    </LoadScript>
+  );
 }
 
 export default React.memo(MapComponent);
