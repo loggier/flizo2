@@ -104,16 +104,15 @@ export function VehicleCard({ device }: VehicleCardProps) {
       </div>
       
       {hasSensors && (
-        <div className="bg-white/60 p-3 mt-2 border-t border-black/5">
-          <h4 className="text-xs font-bold text-gray-600 mb-2">Sensores</h4>
-          <div className="space-y-1.5">
+        <div className="bg-white/80 p-3 mt-2 border-t border-black/5">
+          <div className="space-y-2">
             {device.sensors.map((sensor: Sensor, index: number) => (
-              <div key={index} className="flex items-center gap-2 text-xs text-gray-700">
+              <div key={index} className="flex justify-between items-center text-xs text-gray-700">
+                <span className="font-medium">{sensor.name}</span>
                 <span 
-                  className="flex items-center gap-1.5"
+                  className="font-bold"
                   dangerouslySetInnerHTML={{ __html: sensor.value }}
                 />
-                <span>{sensor.name}</span>
               </div>
             ))}
           </div>
