@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import MapComponent from "@/components/maps/map-placeholder";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Tag } from "lucide-react";
 import MapControls from "@/components/maps/map-controls";
 import {
   Sheet,
@@ -29,12 +29,18 @@ export default function MapsPage() {
   const [heading, setHeading] = useState(0);
   const { t } = useLanguage();
   const [devices, setDevices] = useState<Device[]>([]);
+  const [showLabels, setShowLabels] = useState(true);
 
   useEffect(() => {
     const savedMapType = localStorage.getItem("mapType") as MapType;
     if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
       setMapType(savedMapType);
     }
+    const savedShowLabels = localStorage.getItem("showLabels");
+    if (savedShowLabels) {
+      setShowLabels(JSON.parse(savedShowLabels));
+    }
+
 
     const fetchDevices = async () => {
       const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
@@ -60,7 +66,6 @@ export default function MapsPage() {
 
       } catch (error) {
         console.error("Failed to fetch devices:", error);
-        // If unauthorized, redirect to login
         if ((error as Error).message === 'Unauthorized') {
           localStorage.clear();
           sessionStorage.clear();
@@ -70,10 +75,9 @@ export default function MapsPage() {
     };
 
     fetchDevices();
-    // Set an interval to fetch devices periodically
-    const intervalId = setInterval(fetchDevices, 30000); // every 30 seconds
+    const intervalId = setInterval(fetchDevices, 30000); 
 
-    return () => clearInterval(intervalId); // Clear interval on component unmount
+    return () => clearInterval(intervalId);
   }, [router, map]);
 
   useEffect(() => {
@@ -124,6 +128,14 @@ export default function MapsPage() {
     setIsSheetOpen(false);
   };
 
+  const handleToggleLabels = () => {
+    setShowLabels(prev => {
+        const newState = !prev;
+        localStorage.setItem("showLabels", JSON.stringify(newState));
+        return newState;
+    });
+  }
+
   const layerOptions: { id: MapType; label: string }[] = [
     { id: "OSM", label: t.bottomNav.map },
     { id: "SATELLITE", label: "Satélite" },
@@ -137,7 +149,8 @@ export default function MapsPage() {
         onMapLoad={setMap} 
         userPosition={userPosition} 
         heading={heading}
-        devices={devices} 
+        devices={devices}
+        showLabels={showLabels}
       />
       <div className="absolute top-4 left-4">
         <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground">
@@ -147,6 +160,8 @@ export default function MapsPage() {
       <MapControls 
         onLayerChange={handleLayerChange}
         onLocateUser={handleLocateUser}
+        onToggleLabels={handleToggleLabels}
+        showLabels={showLabels}
       />
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">

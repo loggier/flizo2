@@ -1,0 +1,82 @@
+
+"use client";
+
+import React from 'react';
+import { MarkerF, Polyline } from '@react-google-maps/api';
+import type { Device } from '@/lib/types';
+import DeviceLabel from './device-label';
+
+interface DeviceMarkerProps {
+  device: Device;
+  isUserLocation: boolean;
+  userLocationIcon?: google.maps.Symbol;
+  userCircleIcon?: google.maps.Symbol;
+  showLabel: boolean;
+}
+
+const DeviceMarker = ({ 
+  device, 
+  isUserLocation, 
+  userLocationIcon, 
+  userCircleIcon,
+  showLabel,
+}: DeviceMarkerProps) => {
+  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+
+  if (!device.lat || !device.lng) {
+    return null;
+  }
+  
+  const position = { lat: device.lat, lng: device.lng };
+
+  const deviceIcon = (typeof window !== 'undefined' && window.google && device.icon) ? {
+      url: `${serverUrl}${device.icon.path}`,
+      scaledSize: new window.google.maps.Size(device.icon.width, device.icon.height),
+      anchor: new window.google.maps.Point(device.icon.width / 2, device.icon.height / 2),
+      rotation: device.course,
+  } : undefined;
+
+  if (isUserLocation) {
+    return (
+      <>
+        <MarkerF
+          position={position}
+          icon={userCircleIcon}
+          title={device.name}
+          zIndex={99}
+        />
+        <MarkerF
+          position={position}
+          icon={userLocationIcon}
+          title={`${device.name} (Rumbo: ${device.course.toFixed(0)}°)`}
+          zIndex={100}
+        />
+      </>
+    );
+  }
+
+  return (
+    <React.Fragment>
+      <MarkerF
+        position={position}
+        title={device.name}
+        icon={deviceIcon}
+        zIndex={101}
+      />
+      {showLabel && <DeviceLabel device={device} />}
+      {device.tail && device.tail.length > 0 && (
+        <Polyline
+          path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
+          options={{
+            strokeColor: device.device_data.tail_color,
+            strokeWeight: 2,
+            strokeOpacity: 0.8,
+            zIndex: 100,
+          }}
+        />
+      )}
+    </React.Fragment>
+  );
+};
+
+export default React.memo(DeviceMarker);

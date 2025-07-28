@@ -2,9 +2,10 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, LoadScript, MarkerF, Polyline } from '@react-google-maps/api';
+import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device } from '@/lib/types';
+import DeviceMarker from './device-marker';
 
 const containerStyle = {
   width: '100%',
@@ -22,11 +23,11 @@ interface MapComponentProps {
     userPosition: google.maps.LatLngLiteral | null;
     heading: number;
     devices: Device[];
+    showLabels: boolean;
 }
 
-function MapComponent({ mapType, onMapLoad, userPosition, heading, devices }: MapComponentProps) {
+function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -132,52 +133,37 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices }: Ma
             streetViewControl: true,
         }}
       >
-        {userPosition && (
+        {userPosition && userLocationIcon && userCircleIcon && (
           <>
-            <MarkerF
-              position={userPosition}
-              icon={userCircleIcon}
-              title="Tu ubicación"
-              zIndex={99}
-            />
-            <MarkerF
-              position={userPosition}
-              icon={userLocationIcon}
-              title={`Tu ubicación (Rumbo: ${heading.toFixed(0)}°)`}
-              zIndex={100}
+            <DeviceMarker
+              device={{
+                id: -1,
+                name: 'Tu ubicación',
+                lat: userPosition.lat,
+                lng: userPosition.lng,
+                course: heading,
+                speed: 0,
+                online: 'ack',
+                icon: { path: '', width: 30, height: 30 },
+                tail: [],
+                icon_colors: { moving: '', stopped: '', offline: '', engine: '', blocked: ''},
+                device_data: { tail_color: '#4285F4' }
+              } as any}
+              isUserLocation={true}
+              userLocationIcon={userLocationIcon}
+              userCircleIcon={userCircleIcon}
+              showLabel={false}
             />
           </>
         )}
-        {devices.map((device) => {
-            const deviceIcon = (typeof window !== 'undefined' && window.google && device.icon) ? {
-                url: `${serverUrl}${device.icon.path}`,
-                scaledSize: new window.google.maps.Size(device.icon.width, device.icon.height),
-                anchor: new window.google.maps.Point(device.icon.width / 2, device.icon.height / 2),
-                rotation: device.course,
-            } : undefined;
-
-            return(
-                <React.Fragment key={device.id}>
-                    {device.lat && device.lng && (
-                        <MarkerF
-                            position={{ lat: device.lat, lng: device.lng }}
-                            title={device.name}
-                            icon={deviceIcon}
-                        />
-                    )}
-                    {device.tail && device.tail.length > 0 && (
-                        <Polyline
-                            path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
-                            options={{
-                                strokeColor: device.device_data.tail_color,
-                                strokeWeight: 2,
-                                strokeOpacity: 0.8,
-                            }}
-                        />
-                    )}
-                </React.Fragment>
-            );
-        })}
+        {devices.map((device) => (
+            <DeviceMarker 
+              key={device.id} 
+              device={device} 
+              isUserLocation={false} 
+              showLabel={showLabels}
+            />
+        ))}
       </GoogleMap>
     </LoadScript>
   );
