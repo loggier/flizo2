@@ -35,6 +35,7 @@ export default function MapsPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const savedMapType = localStorage.getItem("mapType") as MapType;
@@ -48,6 +49,7 @@ export default function MapsPage() {
 
 
     const fetchDevices = async () => {
+      setIsLoading(true);
       const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
       if (!token) {
         router.push("/");
@@ -60,15 +62,11 @@ export default function MapsPage() {
         const flattenedDevices = fetchedGroups.flatMap(group => group.items);
         setAllDevices(flattenedDevices);
 
-        // Initialize visibility state
-        if (visibleDeviceIds.size === 0) { // Only on first load
-            const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
-            if (savedVisibleDeviceIds) {
-                setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
-            } else {
-                // Default to all visible
-                setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
-            }
+        if (localStorage.getItem('visibleDeviceIds')) {
+            const savedVisibleDeviceIds = JSON.parse(localStorage.getItem('visibleDeviceIds')!);
+            setVisibleDeviceIds(new Set(savedVisibleDeviceIds));
+        } else {
+            setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
         }
         
         localStorage.setItem('devices', JSON.stringify(flattenedDevices));
@@ -92,6 +90,8 @@ export default function MapsPage() {
           sessionStorage.clear();
           router.push("/");
         }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -99,14 +99,13 @@ export default function MapsPage() {
     const intervalId = setInterval(fetchDevices, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [router, map, visibleDeviceIds, selectedDeviceId]);
+  }, [router, map, selectedDeviceId]);
 
   useEffect(() => {
-    // Do not save the initial empty set
-    if (visibleDeviceIds.size > 0) {
-      localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
+    if (allDevices.length > 0) { // Ensure we don't save an empty set on initial load
+        localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
     }
-  }, [visibleDeviceIds]);
+  }, [visibleDeviceIds, allDevices]);
 
   useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
@@ -229,6 +228,7 @@ export default function MapsPage() {
         visibleDeviceIds={visibleDeviceIds}
         toggleDeviceVisibility={toggleDeviceVisibility}
         onSelectDevice={handleSelectDevice}
+        isLoading={isLoading}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">
