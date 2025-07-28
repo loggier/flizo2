@@ -66,7 +66,7 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
-    const serverApi = process.env.NEXT_PUBLIC_serverApi || '';
+    const serverApi = process.env.NEXT_PUBLIC_serverApi;
 
     try {
       const response = await fetch(`${serverApi}login`, {
@@ -129,6 +129,9 @@ export function LoginForm() {
         <div className="flex justify-center pt-4">
             <FlizoLogo />
         </div>
+        <CardTitle className="text-2xl font-bold">
+          {loginTranslations.title}
+        </CardTitle>
         <CardDescription>
           {loginTranslations.description}
         </CardDescription>

@@ -15,7 +15,7 @@ export const en = {
     privacyPolicyText: "By signing in, you agree to our",
     privacyPolicyLink: "Privacy Policy",
     loginFailedTitle: "Login Failed",
-    genericError: "Something went wrong!",
+    genericError: "Something went wrong! Please check the API URL.",
     unexpectedError: "An unexpected server error occurred.",
   },
   dashboard: {

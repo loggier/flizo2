@@ -15,7 +15,7 @@ export const es = {
     privacyPolicyText: "Al iniciar sesión, aceptas nuestra",
     privacyPolicyLink: "Política de privacidad",
     loginFailedTitle: "Fallo de inicio de sesión",
-    genericError: "¡Algo salió mal!",
+    genericError: "¡Algo salió mal! Por favor, revisa la URL de la API.",
     unexpectedError: "Ha ocurrido un error inesperado en el servidor.",
   },
   dashboard: {
