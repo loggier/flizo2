@@ -14,13 +14,13 @@ const getStatusColor = (device: Device): string => {
   switch (online) {
     case 'moving':
       return icon_colors.moving || 'green';
-    case 'online': // Often implies moving or recently active
-      return icon_colors.moving || 'green';
+    case 'online':
+       return icon_colors.stopped || 'yellow';
     case 'engine':
       return icon_colors.engine || 'yellow';
     case 'stopped':
        return icon_colors.stopped || 'yellow';
-    case 'ack': // Acknowledged, but not moving, typically shown as stopped
+    case 'ack':
        return icon_colors.stopped || 'yellow';
     case 'offline':
       return icon_colors.offline || 'red';
@@ -45,14 +45,13 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
     alignItems: 'center',
     whiteSpace: 'nowrap',
     border: '1px solid #ccc',
-    overflow: 'hidden', // Ensures the child respects the border radius
+    overflow: 'hidden',
   };
 
   const colorIndicatorStyle: React.CSSProperties = {
     width: '8px',
-    height: '100%',
+    alignSelf: 'stretch',
     backgroundColor: color,
-    alignSelf: 'stretch', // Makes the div stretch to the container's height
   };
 
   const textStyle: React.CSSProperties = {
@@ -68,7 +67,7 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
     height: 0,
     borderLeft: '8px solid transparent',
     borderRight: '8px solid transparent',
-    borderTop: '8px solid #FFFFFF', // Matches the label background
+    borderTop: '8px solid #FFFFFF',
     filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.2))',
     transform: 'translateX(-50%)',
     bottom: '-8px',
