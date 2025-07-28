@@ -18,6 +18,7 @@ import type { Device, DeviceGroup } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
+import VehicleDetailsSheet from "@/components/maps/vehicle-details-sheet";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
@@ -102,26 +103,25 @@ export default function MapsPage() {
   }, [router, isInitialLoad]);
 
   useEffect(() => {
-    if (map && allDevices.length > 0 && visibleDeviceIds.size > 0) {
-      if (selectedDeviceId) {
-        const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
-        if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
-          map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
-          map.setZoom(18);
-        }
-      } else {
-        const bounds = new google.maps.LatLngBounds();
-        allDevices.forEach(device => {
-            if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
-                bounds.extend({ lat: device.lat, lng: device.lng });
-            }
-        });
-        if (!bounds.isEmpty()) {
-            map.fitBounds(bounds);
-        }
+    if (map && selectedDeviceId) {
+      const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
+      if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
+        map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
+        // Optionally set zoom, but maybe you want the user to control it
+        // map.setZoom(18); 
+      }
+    } else if (map && allDevices.length > 0 && visibleDeviceIds.size > 0 && !selectedDeviceId && isInitialLoad) {
+      const bounds = new google.maps.LatLngBounds();
+      allDevices.forEach(device => {
+          if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
+              bounds.extend({ lat: device.lat, lng: device.lng });
+          }
+      });
+      if (!bounds.isEmpty()) {
+          map.fitBounds(bounds);
       }
     }
-  }, [map, allDevices, selectedDeviceId, visibleDeviceIds]);
+  }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad]);
 
   useEffect(() => {
     if (allDevices.length > 0) { // Ensure we don't save an empty set on initial load
@@ -163,13 +163,15 @@ export default function MapsPage() {
   }, []);
 
   const handleSelectDevice = (device: Device) => {
-    if (device.lat && device.lng && map) {
-        setSelectedDeviceId(device.id);
-        setIsDeviceListOpen(false);
-        map.panTo({ lat: device.lat, lng: device.lng });
-        map.setZoom(18);
+    if (device.lat && device.lng) {
+      setSelectedDeviceId(device.id);
+      setIsDeviceListOpen(false); // Close list if open
     }
-  }
+  };
+
+  const handleDeselectDevice = () => {
+    setSelectedDeviceId(null);
+  };
 
   const handleLocateUser = () => {
     if (navigator.geolocation && map) {
@@ -217,6 +219,7 @@ export default function MapsPage() {
   ];
 
   const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
+  const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
 
   return (
     <div className="relative h-full w-full">
@@ -258,6 +261,15 @@ export default function MapsPage() {
         toggleDeviceVisibility={toggleDeviceVisibility}
         onSelectDevice={handleSelectDevice}
         isLoading={isLoading && isInitialLoad}
+      />
+       <VehicleDetailsSheet
+        device={selectedDevice}
+        isOpen={!!selectedDevice}
+        onOpenChange={(open) => {
+          if (!open) {
+            handleDeselectDevice();
+          }
+        }}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">
