@@ -47,7 +47,7 @@ export default function DeviceListItem({ device }: DeviceListItemProps) {
                     </div>
                 </div>
             </div>
-            <div className="mt-2 space-y-2 pl-10 text-sm text-gray-600">
+            <div className="space-y-1 pl-10 text-sm text-gray-600">
                 <div className={cn("flex items-center gap-2", status.color)}>
                     {status.icon}
                     <span>{status.text}</span>
