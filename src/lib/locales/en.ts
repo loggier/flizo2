@@ -35,5 +35,11 @@ export const en = {
     alerts: "Alerts",
     settings: "Settings",
     help: "Help",
+  },
+  maps: {
+    layers: "Layers",
+    normal: "Normal",
+    satellite: "Satellite",
+    traffic: "Traffic"
   }
 };
