@@ -17,6 +17,7 @@ import { getDevices } from "@/services/flizo.service";
 import type { Device, DeviceGroup } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
+import { LoaderIcon } from "@/components/icons/loader-icon";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
@@ -208,6 +209,12 @@ export default function MapsPage() {
         devices={visibleDevices}
         showLabels={showLabels}
       />
+      {isLoading && (
+        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
+          <LoaderIcon className="h-10 w-10 text-primary" />
+          <p className="mt-4 text-lg font-semibold text-primary-foreground">Cargando vehículos...</p>
+        </div>
+      )}
       <div className="absolute top-4 left-4">
         <Button 
             variant="default" 
