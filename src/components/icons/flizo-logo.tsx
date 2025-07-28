@@ -10,9 +10,9 @@ export function FlizoLogo({ className, ...props }: React.ImgHTMLAttributes<HTMLI
     <Image
       src={logoUrl}
       alt="Flizo Copilot Logo"
-      width={216}
-      height={48}
-      className={cn("w-auto h-12", className)}
+      width={288}
+      height={64}
+      className={cn("w-auto h-16", className)}
       priority
       {...props}
     />

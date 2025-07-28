@@ -107,12 +107,9 @@ export function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-2xl">
       <CardHeader className="text-center space-y-4">
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-4">
             <FlizoLogo />
         </div>
-        <CardTitle className="text-2xl font-bold tracking-tight">
-          {loginTranslations.title}
-        </CardTitle>
         <CardDescription>
           {loginTranslations.description}
         </CardDescription>
