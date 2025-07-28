@@ -37,6 +37,7 @@ export default function MapsPage() {
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
     const savedMapType = localStorage.getItem("mapType") as MapType;
@@ -63,11 +64,13 @@ export default function MapsPage() {
         const flattenedDevices = fetchedGroups.flatMap(group => group.items);
         setAllDevices(flattenedDevices);
 
-        if (localStorage.getItem('visibleDeviceIds')) {
-            const savedVisibleDeviceIds = JSON.parse(localStorage.getItem('visibleDeviceIds')!);
-            setVisibleDeviceIds(new Set(savedVisibleDeviceIds));
-        } else {
-            setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+        if (isInitialLoad) {
+            if (localStorage.getItem('visibleDeviceIds')) {
+                const savedVisibleDeviceIds = JSON.parse(localStorage.getItem('visibleDeviceIds')!);
+                setVisibleDeviceIds(new Set(savedVisibleDeviceIds));
+            } else {
+                setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+            }
         }
         
         localStorage.setItem('devices', JSON.stringify(flattenedDevices));
@@ -81,6 +84,9 @@ export default function MapsPage() {
         }
       } finally {
         setIsLoading(false);
+        if (isInitialLoad) {
+          setIsInitialLoad(false);
+        }
       }
     };
 
@@ -88,7 +94,7 @@ export default function MapsPage() {
     const intervalId = setInterval(fetchDevices, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [router]);
+  }, [router, isInitialLoad]);
 
   useEffect(() => {
       if (map && allDevices.length > 0 && !selectedDeviceId && visibleDeviceIds.size > 0) {
@@ -209,7 +215,7 @@ export default function MapsPage() {
         devices={visibleDevices}
         showLabels={showLabels}
       />
-      {isLoading && (
+      {isLoading && isInitialLoad && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
           <LoaderIcon className="h-10 w-10 text-primary" />
           <p className="mt-4 text-lg font-semibold text-primary-foreground">Cargando vehículos...</p>
