@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 
@@ -86,13 +86,12 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
     onMapLoad(mapInstance);
   }, [onMapLoad]);
 
-  const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
+  const onUnmount = React.useCallback(function callback() {
     onMapLoad(null);
   }, [onMapLoad]);
   
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
-  // This check is crucial to avoid passing an empty string as the API key
   if (!apiKey) {
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
@@ -114,7 +113,6 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
             streetViewControl: true,
         }}
       >
-        { /* Child components, like markers, info windows, etc. */ }
       </GoogleMap>
     </LoadScript>
   );
