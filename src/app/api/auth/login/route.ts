@@ -9,12 +9,18 @@ export async function POST(request: Request) {
     if (email === 'test@example.com' && password === 'password') {
       // Simulate a successful login
       const token = 'mock-jwt-token-for-flizo-copilot-app-demo';
-      return NextResponse.json({ accessToken: token });
+      return NextResponse.json({ status: 1, user_api_hash: token, message: "Login successful" });
     } else {
       // Simulate failed login
-      return NextResponse.json({ message: 'Invalid email or password' }, { status: 401 });
+      return new Response(
+        JSON.stringify({ status: 0, message: 'Invalid email or password' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
     }
   } catch (error) {
-    return NextResponse.json({ message: 'An unexpected error occurred on the server.' }, { status: 500 });
+    return new Response(
+      JSON.stringify({ status: 0, message: 'An unexpected error occurred on the server.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 }

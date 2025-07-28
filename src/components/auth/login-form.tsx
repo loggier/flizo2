@@ -80,7 +80,11 @@ export function LoginForm() {
       }
 
       if (data.accessToken) {
-        localStorage.setItem("accessToken", data.accessToken);
+        if (values.rememberMe) {
+          localStorage.setItem("accessToken", data.accessToken);
+        } else {
+          sessionStorage.setItem("accessToken", data.accessToken);
+        }
         router.push("/dashboard");
       }
     } catch (error) {

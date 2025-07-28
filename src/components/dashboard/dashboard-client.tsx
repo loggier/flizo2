@@ -17,7 +17,7 @@ export default function DashboardClient() {
   const dashboardTranslations = t.dashboard;
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('accessToken') || sessionStorage.getItem('accessToken');
     if (token) {
       setIsAuthenticated(true);
     } else {
@@ -28,6 +28,7 @@ export default function DashboardClient() {
 
   const handleLogout = () => {
     localStorage.removeItem('accessToken');
+    sessionStorage.removeItem('accessToken');
     router.push('/');
   };
 
