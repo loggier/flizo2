@@ -14,17 +14,18 @@ const center = {
   lng: -38.523
 };
 
-const mapOptions = {
+const mapOptions: google.maps.MapOptions = {
   zoomControl: false,
-  streetViewControl: false,
+  streetViewControl: true,
   mapTypeControl: false,
   fullscreenControl: false,
+  mapTypeId: "OSM", // Set the map type ID on initialization
 };
 
 function MapComponent() {
-  const { isLoaded } = useJsApiLoader({
+  const { isLoaded, loadError } = useJsApiLoader({
     id: 'google-map-script',
-    googleMapsApiKey: "" // We don't need an API key for this method
+    googleMapsApiKey: "" // No API key needed for this method
   });
 
   const onLoad = React.useCallback(function callback(map: google.maps.Map) {
@@ -47,9 +48,12 @@ function MapComponent() {
     });
     
     map.mapTypes.set("OSM", osmMapType);
-    map.setMapTypeId("OSM");
-
+    // The mapTypeId is already set in options, so we don't need to set it again here.
   }, []);
+
+  if (loadError) {
+    return <div>Map cannot be loaded right now, sorry.</div>;
+  }
 
   return isLoaded ? (
       <GoogleMap
@@ -61,7 +65,7 @@ function MapComponent() {
       >
         { /* Child components, like markers, info windows, etc. */ }
       </GoogleMap>
-  ) : <></>
+  ) : <div>Loading Map...</div>
 }
 
 export default React.memo(MapComponent);
