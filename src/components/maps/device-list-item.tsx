@@ -43,7 +43,7 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange }
                 </div>
             </div>
 
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2">
                  <Checkbox 
                   id={`device-${device.id}`}
                   checked={isVisible}
@@ -51,7 +51,7 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange }
                   className="mt-1"
                  />
                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <KeySquare className="h-5 w-5 text-primary"/>
                       <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
                     </div>
