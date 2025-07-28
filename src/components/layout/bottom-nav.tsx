@@ -22,7 +22,7 @@ export default function BottomNav() {
 
   return (
     <nav className="fixed bottom-4 inset-x-0 flex justify-center z-50 px-4">
-      <div className="flex h-16 w-full max-w-sm items-center justify-around rounded-full border border-border/20 bg-background/80 p-2 shadow-2xl shadow-primary/10 backdrop-blur-lg">
+      <div className="flex h-20 w-full max-w-sm items-center justify-around rounded-full border border-border/20 bg-background/80 p-2 shadow-2xl shadow-primary/10 backdrop-blur-lg">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
