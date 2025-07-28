@@ -29,24 +29,34 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { FlizoLogo } from "../icons/flizo-logo";
-import { es } from "@/lib/locales/es";
+import { useLanguage } from "@/hooks/use-language";
 
-const t = es.loginForm;
-
-const formSchema = z.object({
+const formSchema = (t: any) => z.object({
   email: z.string().email({ message: t.emailInvalid }),
   password: z.string().min(1, { message: t.passwordRequired }),
   rememberMe: z.boolean().default(false).optional(),
 });
 
+
 export function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
+  const loginTranslations = t.loginForm;
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const currentFormSchema = formSchema(loginTranslations);
+
+  const form = useForm<z.infer<typeof currentFormSchema>>({
+    resolver: zodResolver(currentFormSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -54,7 +64,7 @@ export function LoginForm() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
     try {
       const response = await fetch("/api/auth/login", {
@@ -66,7 +76,7 @@ export function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || t.genericError);
+        throw new Error(data.message || loginTranslations.genericError);
       }
 
       if (data.accessToken) {
@@ -74,10 +84,10 @@ export function LoginForm() {
         router.push("/dashboard");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : t.unexpectedError;
+      const errorMessage = error instanceof Error ? error.message : loginTranslations.unexpectedError;
       toast({
         variant: "destructive",
-        title: t.loginFailedTitle,
+        title: loginTranslations.loginFailedTitle,
         description: errorMessage,
       });
     } finally {
@@ -92,10 +102,10 @@ export function LoginForm() {
             <FlizoLogo />
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">
-          {t.title}
+          {loginTranslations.title}
         </CardTitle>
         <CardDescription>
-          {t.description}
+          {loginTranslations.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -106,9 +116,9 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t.emailLabel}</FormLabel>
+                  <FormLabel>{loginTranslations.emailLabel}</FormLabel>
                   <FormControl>
-                    <Input placeholder={t.emailPlaceholder} {...field} />
+                    <Input placeholder={loginTranslations.emailPlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,7 +129,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>{t.passwordLabel}</FormLabel>
+                  <FormLabel>{loginTranslations.passwordLabel}</FormLabel>
                   <FormControl>
                     <PasswordInput placeholder="••••••••" {...field} />
                   </FormControl>
@@ -140,7 +150,7 @@ export function LoginForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>{t.rememberMeLabel}</FormLabel>
+                      <FormLabel>{loginTranslations.rememberMeLabel}</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -149,20 +159,31 @@ export function LoginForm() {
                 href="#"
                 className="text-sm font-medium text-primary hover:underline hover:text-accent-foreground"
               >
-                {t.forgotPasswordLink}
+                {loginTranslations.forgotPasswordLink}
               </Link>
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? t.signingInButton : t.signInButton}
+              {isSubmitting ? loginTranslations.signingInButton : loginTranslations.signInButton}
             </Button>
           </form>
         </Form>
       </CardContent>
-      <CardFooter className="flex flex-col items-center justify-center text-center text-xs text-muted-foreground">
+      <CardFooter className="flex flex-col items-center justify-center text-center text-xs text-muted-foreground space-y-4">
+         <div className="w-full">
+            <Select onValueChange={setLanguage} defaultValue={language}>
+              <SelectTrigger>
+                <SelectValue placeholder="Language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         <p>
-          {t.privacyPolicyText}{" "}
+          {loginTranslations.privacyPolicyText}{" "}
           <Link href="#" className="underline hover:text-primary">
-            {t.privacyPolicyLink}
+            {loginTranslations.privacyPolicyLink}
           </Link>
           .
         </p>

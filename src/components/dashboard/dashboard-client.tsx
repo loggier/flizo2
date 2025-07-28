@@ -7,14 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { LogOut, MapPin, Truck, Bell } from 'lucide-react';
-import { es } from '@/lib/locales/es';
-
-const t = es.dashboard;
+import { useLanguage } from '@/hooks/use-language';
 
 export default function DashboardClient() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { t } = useLanguage();
+  const dashboardTranslations = t.dashboard;
 
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -49,12 +49,12 @@ export default function DashboardClient() {
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
-                <CardTitle className="text-3xl font-bold">{t.welcome}</CardTitle>
-                <CardDescription>{t.description}</CardDescription>
+                <CardTitle className="text-3xl font-bold">{dashboardTranslations.welcome}</CardTitle>
+                <CardDescription>{dashboardTranslations.description}</CardDescription>
             </div>
             <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                {t.logout}
+                {dashboardTranslations.logout}
             </Button>
         </CardHeader>
         <CardContent>
@@ -62,40 +62,40 @@ export default function DashboardClient() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {t.activeVehicles}
+                  {dashboardTranslations.activeVehicles}
                 </CardTitle>
                 <Truck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">12</div>
                 <p className="text-xs text-muted-foreground">
-                  {t.activeVehiclesDescription}
+                  {dashboardTranslations.activeVehiclesDescription}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {t.liveTracking}
+                  {dashboardTranslations.liveTracking}
                 </CardTitle>
                 <MapPin className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">8</div>
                 <p className="text-xs text-muted-foreground">
-                  {t.liveTrackingDescription}
+                  {dashboardTranslations.liveTrackingDescription}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t.alerts}</CardTitle>
+                <CardTitle className="text-sm font-medium">{dashboardTranslations.alerts}</CardTitle>
                 <Bell className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">3</div>
                 <p className="text-xs text-muted-foreground">
-                  {t.alertsDescription}
+                  {dashboardTranslations.alertsDescription}
                 </p>
               </CardContent>
             </Card>
