@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device } from '@/lib/types';
 import DeviceMarker from './device-marker';
@@ -29,6 +29,11 @@ interface MapComponentProps {
 
 function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels, onSelectDevice }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+
+  const { isLoaded } = useLoadScript({
+    googleMapsApiKey: apiKey,
+  });
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -91,8 +96,11 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
     }
   }, [map, mapType]);
   
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
+  if (!isLoaded) {
+    return <div>Loading Map...</div>;
+  }
+  
   if (!apiKey) {
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
@@ -118,9 +126,6 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
   } : undefined;
   
   return (
-    <LoadScript
-      googleMapsApiKey={apiKey}
-    >
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
@@ -165,7 +170,6 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
             />
         ))}
       </GoogleMap>
-    </LoadScript>
   );
 }
 
