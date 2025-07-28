@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, LoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 
@@ -21,19 +21,16 @@ interface MapComponentProps {
 }
 
 function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
-  const onLoad = React.useCallback(function callback(mapInstance: google.maps.Map) {
+  const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     // Normal Map
     const osmMapType = new google.maps.ImageMapType({
       getTileUrl: function(coord, zoom) {
-        if (!coord || zoom === undefined) {
-            return null;
-        }
+        if (!coord || zoom === undefined) return null;
         const tilesPerGlobe = 1 << zoom;
         let x = coord.x % tilesPerGlobe;
-        if (x < 0) {
-            x = tilesPerGlobe + x;
-        }
+        if (x < 0) x = tilesPerGlobe + x;
         return `https://mt0.google.com/vt/lyrs=m&x=${x}&y=${coord.y}&z=${zoom}&s=Ga`;
       },
       tileSize: new google.maps.Size(256, 256),
@@ -44,14 +41,10 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
     // Satellite Map
     const satelliteMapType = new google.maps.ImageMapType({
         getTileUrl: function(coord, zoom) {
-            if (!coord || zoom === undefined) {
-                return null;
-            }
+            if (!coord || zoom === undefined) return null;
             const tilesPerGlobe = 1 << zoom;
             let x = coord.x % tilesPerGlobe;
-            if (x < 0) {
-                x = tilesPerGlobe + x;
-            }
+            if (x < 0) x = tilesPerGlobe + x;
             const subdomain = ['mt0', 'mt1', 'mt2', 'mt3'][coord.x % 4];
             return `https://${subdomain}.google.com/vt/lyrs=y&x=${x}&y=${coord.y}&z=${zoom}&s=Ga`;
         },
@@ -63,14 +56,10 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
     // Traffic Map
     const trafficMapType = new google.maps.ImageMapType({
         getTileUrl: function(coord, zoom) {
-            if (!coord || zoom === undefined) {
-                return null;
-            }
+            if (!coord || zoom === undefined) return null;
             const tilesPerGlobe = 1 << zoom;
             let x = coord.x % tilesPerGlobe;
-            if (x < 0) {
-                x = tilesPerGlobe + x;
-            }
+            if (x < 0) x = tilesPerGlobe + x;
             const subdomain = ['mt0', 'mt1', 'mt2', 'mt3'][coord.x % 4];
             return `https://${subdomain}.google.com/vt/lyrs=m@221097413,traffic&x=${x}&y=${coord.y}&z=${zoom}&s=Ga`;
         },
@@ -83,12 +72,20 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
     mapInstance.mapTypes.set("SATELLITE", satelliteMapType);
     mapInstance.mapTypes.set("TRAFFIC", trafficMapType);
     
+    setMap(mapInstance);
     onMapLoad(mapInstance);
   }, [onMapLoad]);
 
-  const onUnmount = React.useCallback(function callback() {
+  const onUnmount = useCallback(function callback() {
+    setMap(null);
     onMapLoad(null);
   }, [onMapLoad]);
+
+  useEffect(() => {
+    if (map) {
+      map.setMapTypeId(mapType);
+    }
+  }, [map, mapType]);
   
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -106,7 +103,6 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
         zoom={10}
         onLoad={onLoad}
         onUnmount={onUnmount}
-        mapTypeId={mapType}
         options={{
             disableDefaultUI: true,
             scrollwheel: true,
