@@ -107,8 +107,7 @@ export default function MapsPage() {
       const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
       if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
         map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
-        // Optionally set zoom, but maybe you want the user to control it
-        // map.setZoom(18); 
+        map.setZoom(18); 
       }
     } else if (map && allDevices.length > 0 && visibleDeviceIds.size > 0 && !selectedDeviceId && isInitialLoad) {
       const bounds = new google.maps.LatLngBounds();
