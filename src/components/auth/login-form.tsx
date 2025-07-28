@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -29,10 +30,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FlizoLogo } from "../icons/flizo-logo";
+import { es } from "@/lib/locales/es";
+
+const t = es.loginForm;
 
 const formSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z.string().min(1, { message: "Password is required." }),
+  email: z.string().email({ message: t.emailInvalid }),
+  password: z.string().min(1, { message: t.passwordRequired }),
   rememberMe: z.boolean().default(false).optional(),
 });
 
@@ -62,7 +66,7 @@ export function LoginForm() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Something went wrong!");
+        throw new Error(data.message || t.genericError);
       }
 
       if (data.accessToken) {
@@ -70,10 +74,10 @@ export function LoginForm() {
         router.push("/dashboard");
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      const errorMessage = error instanceof Error ? error.message : t.unexpectedError;
       toast({
         variant: "destructive",
-        title: "Login Failed",
+        title: t.loginFailedTitle,
         description: errorMessage,
       });
     } finally {
@@ -88,10 +92,10 @@ export function LoginForm() {
             <FlizoLogo />
         </div>
         <CardTitle className="text-2xl font-bold tracking-tight">
-          Sign in to your account
+          {t.title}
         </CardTitle>
         <CardDescription>
-          Enter your credentials to access your dashboard.
+          {t.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -102,9 +106,9 @@ export function LoginForm() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t.emailLabel}</FormLabel>
                   <FormControl>
-                    <Input placeholder="name@example.com" {...field} />
+                    <Input placeholder={t.emailPlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,7 +119,7 @@ export function LoginForm() {
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Password</FormLabel>
+                  <FormLabel>{t.passwordLabel}</FormLabel>
                   <FormControl>
                     <PasswordInput placeholder="••••••••" {...field} />
                   </FormControl>
@@ -136,7 +140,7 @@ export function LoginForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      <FormLabel>Remember me</FormLabel>
+                      <FormLabel>{t.rememberMeLabel}</FormLabel>
                     </div>
                   </FormItem>
                 )}
@@ -145,20 +149,20 @@ export function LoginForm() {
                 href="#"
                 className="text-sm font-medium text-primary hover:underline hover:text-accent-foreground"
               >
-                Forgot password?
+                {t.forgotPasswordLink}
               </Link>
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Signing In..." : "Sign In"}
+              {isSubmitting ? t.signingInButton : t.signInButton}
             </Button>
           </form>
         </Form>
       </CardContent>
       <CardFooter className="flex flex-col items-center justify-center text-center text-xs text-muted-foreground">
         <p>
-          By signing in, you agree to our{" "}
+          {t.privacyPolicyText}{" "}
           <Link href="#" className="underline hover:text-primary">
-            Privacy Policy
+            {t.privacyPolicyLink}
           </Link>
           .
         </p>

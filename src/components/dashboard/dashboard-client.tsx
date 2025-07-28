@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -6,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '../ui/skeleton';
 import { LogOut, MapPin, Truck, Bell } from 'lucide-react';
+import { es } from '@/lib/locales/es';
+
+const t = es.dashboard;
 
 export default function DashboardClient() {
   const router = useRouter();
@@ -45,12 +49,12 @@ export default function DashboardClient() {
       <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between">
             <div>
-                <CardTitle className="text-3xl font-bold">Welcome to your Dashboard</CardTitle>
-                <CardDescription>Manage your fleet and track your vehicles in real-time.</CardDescription>
+                <CardTitle className="text-3xl font-bold">{t.welcome}</CardTitle>
+                <CardDescription>{t.description}</CardDescription>
             </div>
             <Button variant="outline" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                Logout
+                {t.logout}
             </Button>
         </CardHeader>
         <CardContent>
@@ -58,40 +62,40 @@ export default function DashboardClient() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Active Vehicles
+                  {t.activeVehicles}
                 </CardTitle>
                 <Truck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">12</div>
                 <p className="text-xs text-muted-foreground">
-                  +2 from last month
+                  {t.activeVehiclesDescription}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
-                  Live Tracking
+                  {t.liveTracking}
                 </CardTitle>
                 <MapPin className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">8</div>
                 <p className="text-xs text-muted-foreground">
-                  Vehicles currently on the move
+                  {t.liveTrackingDescription}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Alerts</CardTitle>
+                <CardTitle className="text-sm font-medium">{t.alerts}</CardTitle>
                 <Bell className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">3</div>
                 <p className="text-xs text-muted-foreground">
-                  Geofence and speed alerts
+                  {t.alertsDescription}
                 </p>
               </CardContent>
             </Card>
