@@ -35,10 +35,14 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
   const { bgColor, textColor } = getStatusInfo(device);
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
-  const [address, setAddress] = useState(device.address || 'Cargando dirección...');
+  const [address, setAddress] = useState(device.address || 'Ubicación no disponible');
 
   useEffect(() => {
     let isMounted = true;
+    
+    // Set initial address from device data if available
+    setAddress(device.address || 'Ubicación no disponible');
+
     const fetchAddress = async () => {
       if (device.lat && device.lng) {
         try {
@@ -47,29 +51,31 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
             setAddress(fetchedAddress);
           }
         } catch (error) {
-          if (isMounted) {
+          if (isMounted && !device.address) { // Only set error if no cached address
             setAddress('No se pudo obtener la dirección');
           }
           console.error("Error fetching address:", error);
         }
-      } else {
-        setAddress('Ubicación no disponible');
       }
     };
-
-    fetchAddress();
+    
+    // Only fetch if we don't have an address, or to refresh occasionally
+    // This is a simple optimization. A more robust solution might use a timestamp.
+    if (!device.address) {
+        fetchAddress();
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [device.lat, device.lng]);
+  }, [device.lat, device.lng, device.address]); // Rerun if location or cached address changes
 
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
     <div onClick={onClick} className="cursor-pointer">
-      <div className={cn("rounded-t-xl shadow-md overflow-hidden relative z-10", bgColor, textColor)}>
-        <div className="p-3">
+      <div className="rounded-xl shadow-md overflow-hidden relative z-10">
+        <div className={cn("p-3", bgColor, textColor)}>
           <h3 className="font-bold text-sm mb-2">{device.name}</h3>
           <div className="flex items-start gap-3">
             <div className="flex-shrink-0">
@@ -106,7 +112,7 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
       </div>
       
       {hasSensors && (
-        <div className="bg-white p-2 rounded-b-xl shadow-md relative -mt-1 pt-3 w-[95%] mx-auto">
+        <div className="bg-white p-2 rounded-b-xl shadow-md relative -mt-1 pt-4 w-[95%] mx-auto z-0">
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             {device.sensors.map((sensor: Sensor, index: number) => (
               <div key={index} className="text-xs text-gray-700">

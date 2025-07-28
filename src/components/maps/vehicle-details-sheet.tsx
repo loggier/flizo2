@@ -68,25 +68,33 @@ const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType, label:
 
 export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: VehicleDetailsSheetProps) {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
-  const [address, setAddress] = useState(device?.address || 'Cargando dirección...');
+  const [address, setAddress] = useState(device?.address || 'Ubicación no disponible');
   
   useEffect(() => {
     let isMounted = true;
+    
+    // Set initial address from device data if available
+    if (device) {
+        setAddress(device.address || 'Ubicación no disponible');
+    }
+
     if (device?.lat && device?.lng) {
-        setAddress('Cargando dirección...');
+        // Show loading state only if we don't have a cached address
+        if (!device.address) {
+            setAddress('Cargando dirección...');
+        }
+        
         getAddress(device.lat, device.lng)
             .then(fetchedAddress => {
                 if (isMounted) setAddress(fetchedAddress);
             })
             .catch(() => {
-                if (isMounted) setAddress('No se pudo obtener la dirección');
+                if (isMounted) setAddress(device.address || 'No se pudo obtener la dirección');
             });
-    } else if (device) {
-        setAddress('Ubicación no disponible');
     }
 
     return () => { isMounted = false; };
-  }, [device?.lat, device?.lng, device]);
+  }, [device?.lat, device?.lng, device?.address, device]);
 
 
   if (!device) return null;
@@ -163,4 +171,6 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     </Sheet>
   );
 }
+
+
 
