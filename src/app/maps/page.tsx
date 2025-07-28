@@ -21,6 +21,7 @@ export default function MapsPage() {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [userPosition, setUserPosition] = useState<google.maps.LatLngLiteral | null>(null);
+  const [heading, setHeading] = useState(0);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -28,6 +29,21 @@ export default function MapsPage() {
     if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
       setMapType(savedMapType);
     }
+  }, []);
+
+  useEffect(() => {
+    const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
+      if (event.alpha !== null) {
+        // alpha is the compass direction
+        setHeading(event.alpha);
+      }
+    };
+
+    window.addEventListener("deviceorientation", handleDeviceOrientation, true);
+
+    return () => {
+      window.removeEventListener("deviceorientation", handleDeviceOrientation, true);
+    };
   }, []);
 
   const handleLocateUser = () => {
@@ -38,7 +54,7 @@ export default function MapsPage() {
           const userCoords = { lat: latitude, lng: longitude };
           setUserPosition(userCoords);
           map.panTo(userCoords);
-          map.setZoom(15);
+          map.setZoom(18);
         },
         (error) => {
           console.error("Error getting user location:", error);
@@ -68,7 +84,7 @@ export default function MapsPage() {
 
   return (
     <div className="relative h-full w-full">
-      <MapComponent mapType={mapType} onMapLoad={setMap} userPosition={userPosition} />
+      <MapComponent mapType={mapType} onMapLoad={setMap} userPosition={userPosition} heading={heading} />
       <div className="absolute top-4 left-4">
         <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground">
           <Menu className="h-6 w-6" />

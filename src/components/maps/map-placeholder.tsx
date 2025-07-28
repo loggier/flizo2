@@ -19,20 +19,11 @@ interface MapComponentProps {
     mapType: MapType;
     onMapLoad: (map: google.maps.Map | null) => void;
     userPosition: google.maps.LatLngLiteral | null;
+    heading: number;
 }
 
-function MapComponent({ mapType, onMapLoad, userPosition }: MapComponentProps) {
+function MapComponent({ mapType, onMapLoad, userPosition, heading }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-
-  const userLocationIcon = {
-      path: `M -12,0 a 12,12 0 1,0 24,0 a 12,12 0 1,0 -24,0`,
-      fillColor: '#4285F4',
-      fillOpacity: 1,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-      scale: 1,
-      anchor: (typeof window !== 'undefined' && window.google) ? new window.google.maps.Point(0, 0) : undefined,
-  };
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -100,6 +91,27 @@ function MapComponent({ mapType, onMapLoad, userPosition }: MapComponentProps) {
   if (!apiKey) {
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
+  
+  const userLocationIcon = (typeof window !== 'undefined' && window.google) ? {
+      path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      scale: 7,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+      strokeColor: '#FFFFFF',
+      strokeWeight: 2,
+      rotation: heading,
+      anchor: new window.google.maps.Point(0, 2.6)
+  } : undefined;
+
+  const userCircleIcon = (typeof window !== 'undefined' && window.google) ? {
+      path: window.google.maps.SymbolPath.CIRCLE,
+      scale: 14,
+      fillColor: '#4285F4',
+      fillOpacity: 1,
+      strokeColor: '#FFFFFF',
+      strokeWeight: 2,
+  } : undefined;
+
 
   return (
     <LoadScript
@@ -118,12 +130,20 @@ function MapComponent({ mapType, onMapLoad, userPosition }: MapComponentProps) {
         }}
       >
         {userPosition && (
-          <MarkerF
-            position={userPosition}
-            icon={userLocationIcon}
-            title="Tu ubicación"
-            zIndex={100}
-          />
+          <>
+            <MarkerF
+              position={userPosition}
+              icon={userCircleIcon}
+              title="Tu ubicación"
+              zIndex={99}
+            />
+            <MarkerF
+              position={userPosition}
+              icon={userLocationIcon}
+              title={`Tu ubicación (Rumbo: ${heading.toFixed(0)}°)`}
+              zIndex={100}
+            />
+          </>
         )}
       </GoogleMap>
     </LoadScript>
