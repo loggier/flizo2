@@ -11,7 +11,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
 
@@ -21,6 +20,7 @@ export default function MapsPage() {
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [userPosition, setUserPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const { t } = useLanguage();
 
   useEffect(() => {
@@ -35,7 +35,9 @@ export default function MapsPage() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          map.panTo({ lat: latitude, lng: longitude });
+          const userCoords = { lat: latitude, lng: longitude };
+          setUserPosition(userCoords);
+          map.panTo(userCoords);
           map.setZoom(15);
         },
         (error) => {
@@ -66,7 +68,7 @@ export default function MapsPage() {
 
   return (
     <div className="relative h-full w-full">
-      <MapComponent mapType={mapType} onMapLoad={setMap} />
+      <MapComponent mapType={mapType} onMapLoad={setMap} userPosition={userPosition} />
       <div className="absolute top-4 left-4">
         <Button variant="outline" size="icon" className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground">
           <Menu className="h-6 w-6" />

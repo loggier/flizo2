@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, LoadScript } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, MarkerF } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 
 const containerStyle = {
@@ -18,13 +18,23 @@ const center = {
 interface MapComponentProps {
     mapType: MapType;
     onMapLoad: (map: google.maps.Map | null) => void;
+    userPosition: google.maps.LatLngLiteral | null;
 }
 
-function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
+const userLocationIcon = {
+    path: `M -12,0 a 12,12 0 1,0 24,0 a 12,12 0 1,0 -24,0`,
+    fillColor: '#4285F4',
+    fillOpacity: 1,
+    strokeColor: '#FFFFFF',
+    strokeWeight: 2,
+    scale: 1,
+    anchor: new google.maps.Point(0, 0),
+};
+
+function MapComponent({ mapType, onMapLoad, userPosition }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
-    // Normal Map
     const osmMapType = new google.maps.ImageMapType({
       getTileUrl: function(coord, zoom) {
         if (!coord || zoom === undefined) return null;
@@ -38,7 +48,6 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
       maxZoom: 18
     });
 
-    // Satellite Map
     const satelliteMapType = new google.maps.ImageMapType({
         getTileUrl: function(coord, zoom) {
             if (!coord || zoom === undefined) return null;
@@ -53,7 +62,6 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
         maxZoom: 20
     });
 
-    // Traffic Map
     const trafficMapType = new google.maps.ImageMapType({
         getTileUrl: function(coord, zoom) {
             if (!coord || zoom === undefined) return null;
@@ -109,6 +117,14 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
             streetViewControl: true,
         }}
       >
+        {userPosition && (
+          <MarkerF
+            position={userPosition}
+            icon={userLocationIcon}
+            title="Tu ubicación"
+            zIndex={100}
+          />
+        )}
       </GoogleMap>
     </LoadScript>
   );
