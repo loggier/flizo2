@@ -104,27 +104,28 @@ export default function MapsPage() {
 
   useEffect(() => {
     if (!map) return;
-
-    // Zoom to selected device if one is chosen
-    if (selectedDeviceId) {
-      const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
-      if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
-        map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
-        map.setZoom(18);
-      }
-    // On initial load, if no device is selected, fit all visible devices on map
-    } else if (isInitialLoad && allDevices.length > 0 && visibleDeviceIds.size > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      allDevices.forEach(device => {
-        if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
-          bounds.extend({ lat: device.lat, lng: device.lng });
+  
+    const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
+  
+    if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
+      map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
+      map.setZoom(18);
+    } else {
+      const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
+      if (visibleDevices.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        visibleDevices.forEach(device => {
+          if (device.lat && device.lng) {
+            bounds.extend({ lat: device.lat, lng: device.lng });
+          }
+        });
+  
+        if (!bounds.isEmpty()) {
+          map.fitBounds(bounds);
         }
-      });
-      if (!bounds.isEmpty()) {
-        map.fitBounds(bounds);
       }
     }
-  }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad]);
+  }, [map, allDevices, selectedDeviceId, visibleDeviceIds]);
 
   useEffect(() => {
     if (allDevices.length > 0) { // Ensure we don't save an empty set on initial load
@@ -295,4 +296,5 @@ export default function MapsPage() {
       </Sheet>
     </div>
   );
-}
+
+    
