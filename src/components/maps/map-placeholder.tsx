@@ -6,6 +6,7 @@ import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device } from '@/lib/types';
 import DeviceMarker from './device-marker';
+import { LoaderIcon } from '../icons/loader-icon';
 
 const containerStyle = {
   width: '100%',
@@ -98,7 +99,14 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
   
 
   if (!isLoaded) {
-    return <div>Loading Map...</div>;
+    return (
+        <div className="flex h-full w-full items-center justify-center bg-gray-200">
+            <div className="flex flex-col items-center gap-4">
+                <LoaderIcon className="h-10 w-10 text-primary" />
+                <p className="font-semibold text-primary">Cargando Mapa...</p>
+            </div>
+        </div>
+    );
   }
   
   if (!apiKey) {
@@ -113,7 +121,7 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
       strokeColor: '#FFFFFF',
       strokeWeight: 2,
       rotation: heading,
-      anchor: new window.google.maps.Point(0, 2.6)
+      anchor: new google.maps.Point(0, 2.6)
   } : undefined;
 
   const userCircleIcon = (typeof window !== 'undefined' && window.google) ? {
