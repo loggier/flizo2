@@ -1,7 +1,9 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
+import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
 
 export const metadata: Metadata = {
   title: 'Flizo Copilot',
@@ -22,7 +24,9 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased">
         <LanguageProvider>
-          {children}
+          <VehicleFilterProvider>
+            {children}
+          </VehicleFilterProvider>
         </LanguageProvider>
         <Toaster />
       </body>

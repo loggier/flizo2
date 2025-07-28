@@ -21,27 +21,26 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-4 inset-x-0 flex justify-center z-50 px-4">
-      <div className="flex h-16 w-full max-w-sm items-center justify-around rounded-full border border-border/20 bg-background/80 p-2 shadow-2xl shadow-primary/10 backdrop-blur-lg">
+    <nav className="fixed bottom-0 inset-x-0 bg-background border-t border-border/20 z-50">
+      <div className="flex h-16 w-full max-w-md mx-auto items-center justify-around">
         {navItems.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className="flex-1 h-full flex items-center justify-center"
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 w-full h-full transition-colors duration-300",
+                isActive
+                  ? "text-primary font-bold"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
             >
-              <div
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 text-xs transition-all duration-300 ease-in-out",
-                  isActive
-                    ? "bg-primary text-primary-foreground font-semibold rounded-full shadow-lg p-3 scale-110"
-                    : "text-muted-foreground hover:text-foreground h-full w-full"
-                )}
-              >
-                <item.icon className={cn("w-5 h-5", isActive && "w-6 h-6")} />
-                <span className={cn("truncate", { "hidden": isActive })}>{item.label}</span>
-              </div>
+              <item.icon className="w-6 h-6" />
+              <span className="text-xs truncate">{item.label}</span>
+               {isActive && (
+                <div className="w-12 h-1 bg-primary rounded-t-full absolute bottom-0"></div>
+              )}
             </Link>
           );
         })}
