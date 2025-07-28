@@ -163,3 +163,4 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     </Sheet>
   );
 }
+
