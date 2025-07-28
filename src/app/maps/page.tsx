@@ -97,7 +97,10 @@ export default function MapsPage() {
   }, [router, map]);
 
   useEffect(() => {
-    localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
+    // Do not save the initial empty set
+    if (visibleDeviceIds.size > 0) {
+      localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
+    }
   }, [visibleDeviceIds]);
 
   useEffect(() => {
