@@ -71,7 +71,7 @@ export default function HelpPage() {
     ];
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-full px-6 pt-8 text-center bg-background">
+    <div className="flex flex-col items-center justify-center min-h-full px-6 pt-4 text-center bg-background">
       <div className="w-full max-w-md">
         
         <div className="mb-8">
