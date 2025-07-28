@@ -12,6 +12,7 @@ import { MapPinIcon } from "../icons/map-pin-icon";
 
 interface VehicleCardProps {
   device: Device;
+  onClick: () => void;
 }
 
 const getStatusInfo = (device: Device): { bgColor: string, textColor: string } => {
@@ -30,7 +31,7 @@ const getStatusInfo = (device: Device): { bgColor: string, textColor: string } =
   }
 };
 
-export function VehicleCard({ device }: VehicleCardProps) {
+export function VehicleCard({ device, onClick }: VehicleCardProps) {
   const { bgColor, textColor } = getStatusInfo(device);
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
@@ -66,8 +67,8 @@ export function VehicleCard({ device }: VehicleCardProps) {
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
-    <div>
-      <div className={cn("rounded-xl shadow-md overflow-hidden relative z-10", bgColor, textColor)}>
+    <div onClick={onClick} className="cursor-pointer">
+      <div className={cn("rounded-t-xl shadow-md overflow-hidden relative z-10", bgColor, textColor)}>
         <div className="p-3">
           <h3 className="font-bold text-sm mb-2">{device.name}</h3>
           <div className="flex items-start gap-3">
@@ -125,3 +126,5 @@ export function VehicleCard({ device }: VehicleCardProps) {
     </div>
   );
 }
+
+    

@@ -79,6 +79,11 @@ export default function VehiclesPage() {
       })
       .filter(group => group.items.length > 0);
   }, [deviceGroups, searchTerm, statusFilter]);
+  
+  const handleVehicleClick = (device: Device) => {
+    sessionStorage.setItem('selectedDeviceId', device.id.toString());
+    router.push('/maps');
+  };
 
   if (isLoading && deviceGroups.length === 0) {
     return <VehicleListSkeleton />;
@@ -100,7 +105,7 @@ export default function VehiclesPage() {
               </AccordionTrigger>
               <AccordionContent className="pt-4 space-y-4">
                 {group.items.map((device) => (
-                  <VehicleCard key={device.id} device={device} />
+                  <VehicleCard key={device.id} device={device} onClick={() => handleVehicleClick(device)} />
                 ))}
               </AccordionContent>
             </AccordionItem>
@@ -115,3 +120,4 @@ export default function VehiclesPage() {
   );
 }
 
+    

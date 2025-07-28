@@ -49,6 +49,11 @@ export default function MapsPage() {
       setShowLabels(JSON.parse(savedShowLabels));
     }
 
+    const clickedDeviceId = sessionStorage.getItem("selectedDeviceId");
+    if (clickedDeviceId) {
+        setSelectedDeviceId(parseInt(clickedDeviceId, 10));
+        sessionStorage.removeItem("selectedDeviceId");
+    }
 
     const fetchDevices = async () => {
       setIsLoading(true);
@@ -97,15 +102,23 @@ export default function MapsPage() {
   }, [router, isInitialLoad]);
 
   useEffect(() => {
-    if (map && allDevices.length > 0 && !selectedDeviceId && visibleDeviceIds.size > 0) {
-      const bounds = new google.maps.LatLngBounds();
-      allDevices.forEach(device => {
-          if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
-              bounds.extend({ lat: device.lat, lng: device.lng });
-          }
-      });
-      if (!bounds.isEmpty()) {
-          map.fitBounds(bounds);
+    if (map && allDevices.length > 0 && visibleDeviceIds.size > 0) {
+      if (selectedDeviceId) {
+        const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
+        if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
+          map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
+          map.setZoom(18);
+        }
+      } else {
+        const bounds = new google.maps.LatLngBounds();
+        allDevices.forEach(device => {
+            if (device.lat && device.lng && visibleDeviceIds.has(device.id)) {
+                bounds.extend({ lat: device.lat, lng: device.lng });
+            }
+        });
+        if (!bounds.isEmpty()) {
+            map.fitBounds(bounds);
+        }
       }
     }
   }, [map, allDevices, selectedDeviceId, visibleDeviceIds]);
@@ -268,3 +281,5 @@ export default function MapsPage() {
     </div>
   );
 }
+
+    
