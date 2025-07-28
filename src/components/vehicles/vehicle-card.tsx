@@ -105,8 +105,7 @@ export function VehicleCard({ device }: VehicleCardProps) {
       </div>
       
       {hasSensors && (
-        <div className="bg-white p-3 rounded-b-xl shadow-md relative -mt-2 pt-5">
-           <p className="text-xs font-semibold mb-2 text-gray-800 text-center">Sensores</p>
+        <div className="bg-white p-2 rounded-b-xl shadow-md relative -mt-1 pt-3 w-[95%] mx-auto">
           <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             {device.sensors.map((sensor: Sensor, index: number) => (
               <div key={index} className="text-xs text-gray-700">
