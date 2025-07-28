@@ -78,9 +78,20 @@ export function LoginForm() {
         }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(loginTranslations.genericError);
+      }
+      
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error("Received invalid JSON from server.");
+      }
 
-      if (response.status !== 200 || data.status !== 1) {
+
+      if (data.status !== 1) {
         throw new Error(data.message || loginTranslations.genericError);
       }
 
