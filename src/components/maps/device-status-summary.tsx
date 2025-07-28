@@ -3,6 +3,7 @@
 
 import React, { useMemo } from 'react';
 import type { Device } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
 interface DeviceStatusSummaryProps {
   devices: Device[];
@@ -10,7 +11,10 @@ interface DeviceStatusSummaryProps {
 
 const StatusCircle = ({ color, count }: { color: string; count: number }) => (
   <div
-    className="flex items-center justify-center w-10 h-10 rounded-full text-white font-bold text-lg"
+    className={cn(
+        "flex items-center justify-center w-10 h-10 rounded-full font-bold text-lg",
+        color === 'yellow' ? 'text-black' : 'text-white'
+    )}
     style={{ backgroundColor: color }}
   >
     {count}
