@@ -66,8 +66,10 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
+    const serverApi = process.env.NEXT_PUBLIC_serverApi || '';
+
     try {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetch(`${serverApi}login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -105,7 +107,7 @@ export function LoginForm() {
     }
   }
 
-  const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl}page/privacy_policy_new`;
+  const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl || ''}page/privacy_policy_new`;
 
   return (
     <Card className="w-full max-w-md shadow-2xl">
