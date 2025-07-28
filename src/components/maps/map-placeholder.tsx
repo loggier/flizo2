@@ -96,27 +96,6 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
   
-  const userLocationIcon = (typeof window !== 'undefined' && window.google) ? {
-      path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-      scale: 7,
-      fillColor: '#4285F4',
-      fillOpacity: 1,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-      rotation: heading,
-      anchor: new window.google.maps.Point(0, 2.6)
-  } : undefined;
-
-  const userCircleIcon = (typeof window !== 'undefined' && window.google) ? {
-      path: window.google.maps.SymbolPath.CIRCLE,
-      scale: 14,
-      fillColor: '#4285F4',
-      fillOpacity: 0.3,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-  } : undefined;
-
-
   return (
     <LoadScript
       googleMapsApiKey={apiKey}
@@ -133,37 +112,61 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
             streetViewControl: true,
         }}
       >
-        {userPosition && userLocationIcon && userCircleIcon && (
-          <>
-            <DeviceMarker
-              device={{
-                id: -1,
-                name: 'Tu ubicación',
-                lat: userPosition.lat,
-                lng: userPosition.lng,
-                course: heading,
-                speed: 0,
-                online: 'ack',
-                icon: { path: '', width: 30, height: 30 },
-                tail: [],
-                icon_colors: { moving: '', stopped: '', offline: '', engine: '', blocked: ''},
-                device_data: { tail_color: '#4285F4' }
-              } as any}
-              isUserLocation={true}
-              userLocationIcon={userLocationIcon}
-              userCircleIcon={userCircleIcon}
-              showLabel={false}
-            />
-          </>
-        )}
-        {devices.map((device) => (
-            <DeviceMarker 
-              key={device.id} 
-              device={device} 
-              isUserLocation={false} 
-              showLabel={showLabels}
-            />
-        ))}
+        {() => {
+          const userLocationIcon = (typeof window !== 'undefined' && window.google) ? {
+              path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+              scale: 7,
+              fillColor: '#4285F4',
+              fillOpacity: 1,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 2,
+              rotation: heading,
+              anchor: new window.google.maps.Point(0, 2.6)
+          } : undefined;
+        
+          const userCircleIcon = (typeof window !== 'undefined' && window.google) ? {
+              path: window.google.maps.SymbolPath.CIRCLE,
+              scale: 14,
+              fillColor: '#4285F4',
+              fillOpacity: 0.3,
+              strokeColor: '#FFFFFF',
+              strokeWeight: 2,
+          } : undefined;
+
+          return (
+            <>
+              {userPosition && userLocationIcon && userCircleIcon && (
+                <DeviceMarker
+                  device={{
+                    id: -1,
+                    name: 'Tu ubicación',
+                    lat: userPosition.lat,
+                    lng: userPosition.lng,
+                    course: heading,
+                    speed: 0,
+                    online: 'ack',
+                    icon: { path: '', width: 30, height: 30 },
+                    tail: [],
+                    icon_colors: { moving: '', stopped: '', offline: '', engine: '', blocked: ''},
+                    device_data: { tail_color: '#4285F4' }
+                  } as any}
+                  isUserLocation={true}
+                  userLocationIcon={userLocationIcon}
+                  userCircleIcon={userCircleIcon}
+                  showLabel={false}
+                />
+              )}
+              {devices.map((device) => (
+                  <DeviceMarker 
+                    key={device.id} 
+                    device={device} 
+                    isUserLocation={false} 
+                    showLabel={showLabels}
+                  />
+              ))}
+            </>
+          )
+        }}
       </GoogleMap>
     </LoadScript>
   );
