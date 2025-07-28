@@ -7,7 +7,6 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -18,7 +17,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Search, X } from "lucide-react";
+import { Search } from "lucide-react";
 import type { DeviceGroup } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
 import { ScrollArea } from "../ui/scroll-area";
@@ -53,9 +52,6 @@ export default function DeviceListSheet({
       >
         <SheetHeader className="p-4 bg-primary">
           <SheetTitle className="text-white">Vehículos</SheetTitle>
-          <SheetClose className="text-white absolute right-4 top-4">
-            <X className="h-6 w-6" />
-          </SheetClose>
         </SheetHeader>
         <div className="bg-primary p-2">
             <Tabs defaultValue="dispositivos" className="w-full">

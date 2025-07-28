@@ -3,7 +3,7 @@
 
 import type { Device } from "@/lib/types";
 import { Checkbox } from "../ui/checkbox";
-import { Car, Clock, WifiOff, Zap, ZapOff, CheckCircle2, AlertTriangle, KeySquare } from "lucide-react";
+import { Car, Clock, WifiOff, Zap, AlertTriangle, KeySquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DeviceListItemProps {
@@ -47,7 +47,7 @@ export default function DeviceListItem({ device }: DeviceListItemProps) {
                     </div>
                 </div>
             </div>
-            <div className="mt-3 space-y-2 pl-10 text-sm text-gray-600">
+            <div className="mt-2 space-y-2 pl-10 text-sm text-gray-600">
                 <div className={cn("flex items-center gap-2", status.color)}>
                     {status.icon}
                     <span>{status.text}</span>
