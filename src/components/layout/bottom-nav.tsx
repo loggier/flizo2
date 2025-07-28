@@ -35,7 +35,7 @@ export default function BottomNav() {
                 className={cn(
                   "flex w-full flex-col items-center justify-center gap-1 text-xs transition-all duration-300 ease-in-out",
                   isActive
-                    ? "bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg h-[calc(100%-8px)]"
+                    ? "bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg my-1 py-1"
                     : "text-muted-foreground hover:text-foreground h-full"
                 )}
               >
