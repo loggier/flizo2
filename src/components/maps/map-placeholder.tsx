@@ -92,6 +92,11 @@ function MapComponent({ mapType, onMapLoad }: MapComponentProps) {
   
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
+  // This check is crucial to avoid passing an empty string as the API key
+  if (!apiKey) {
+    return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
+  }
+
   return (
     <LoadScript
       googleMapsApiKey={apiKey}
