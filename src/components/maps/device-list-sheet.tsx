@@ -82,19 +82,21 @@ export default function DeviceListSheet({
           <Accordion type="multiple" defaultValue={filteredGroups.map(g => g.id.toString())} className="w-full">
             {filteredGroups.map((group) => (
               <AccordionItem value={group.id.toString()} key={group.id} className="border-b">
-                <AccordionTrigger className="px-4 py-2 hover:no-underline hover:bg-gray-50">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <Checkbox id={`group-${group.id}`} />
-                      <label htmlFor={`group-${group.id}`} className="font-semibold">{group.title}</label>
+                <div className="flex items-center px-4 py-2 hover:bg-gray-50">
+                    <div onClick={(e) => e.stopPropagation()} className="pr-2">
+                        <Checkbox id={`group-${group.id}`} />
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                            {group.items.length}
-                        </span>
-                    </div>
-                  </div>
-                </AccordionTrigger>
+                    <AccordionTrigger className="p-0 flex-1">
+                        <div className="flex items-center justify-between w-full">
+                            <label htmlFor={`group-${group.id}`} className="font-semibold cursor-pointer">{group.title}</label>
+                            <div className="flex items-center gap-2">
+                                <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                                    {group.items.length}
+                                </span>
+                            </div>
+                        </div>
+                    </AccordionTrigger>
+                </div>
                 <AccordionContent>
                   <div className="flex flex-col">
                     {group.items.map((device) => (
