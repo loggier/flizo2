@@ -4,7 +4,6 @@
 import React from 'react';
 import { OverlayView } from '@react-google-maps/api';
 import type { Device } from '@/lib/types';
-import { cn } from '@/lib/utils';
 
 interface DeviceLabelProps {
   device: Device;
@@ -16,11 +15,11 @@ const getStatusColor = (device: Device): string => {
     case 'moving':
       return icon_colors.moving || 'green';
     case 'online':
-      return icon_colors.moving || 'green'; // online but not moving -> stopped
+      return icon_colors.moving || 'green'; 
     case 'engine':
       return icon_colors.engine || 'yellow';
     case 'stopped':
-      return icon_colors.stopped || 'yellow';
+       return icon_colors.stopped || 'yellow';
     case 'ack':
        return icon_colors.stopped || 'yellow';
     case 'offline':
@@ -36,31 +35,44 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
   const position = { lat: device.lat, lng: device.lng };
   const color = getStatusColor(device);
   
-  // Define styles using CSS-in-JS to apply dynamic colors
-  const labelStyle: React.CSSProperties = {
+  const labelContainerStyle: React.CSSProperties = {
     position: 'absolute',
     transform: 'translateX(-50%)',
-    bottom: '100%', // Position above the anchor point
-    padding: '4px 8px',
+    background: '#FFFFFF',
     borderRadius: '8px',
-    color: 'white',
-    backgroundColor: color,
-    fontWeight: '500',
-    fontSize: '12px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+    display: 'flex',
+    alignItems: 'center',
     whiteSpace: 'nowrap',
-    boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
-    zIndex: 150, // Higher than markers
+    border: '1px solid #ccc',
   };
 
+  const colorIndicatorStyle: React.CSSProperties = {
+    width: '8px',
+    height: '100%',
+    backgroundColor: color,
+    borderTopLeftRadius: '7px',
+    borderBottomLeftRadius: '7px',
+    alignSelf: 'stretch',
+  };
+
+  const textStyle: React.CSSProperties = {
+    padding: '4px 8px',
+    color: '#333',
+    fontWeight: '500',
+    fontSize: '12px',
+  };
+  
   const anchorStyle: React.CSSProperties = {
     position: 'absolute',
     width: 0,
     height: 0,
-    borderLeft: '6px solid transparent',
-    borderRight: '6px solid transparent',
-    borderTop: `6px solid ${color}`,
+    borderLeft: '8px solid transparent',
+    borderRight: '8px solid transparent',
+    borderTop: '8px solid #FFFFFF', // Matches the label background
+    filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.2))',
     transform: 'translateX(-50%)',
-    bottom: '-6px', // Connects to the main label body
+    bottom: '-8px',
     left: '50%',
   }
 
@@ -70,11 +82,16 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
       mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
       getPixelPositionOffset={(width, height) => ({
         x: -(width / 2),
-        y: -(height + 10 + (device.icon?.height ? device.icon.height / 2 : 20)), // position above icon
+        y: -(height + 10 + (device.icon?.height ? device.icon.height / 2 : 20)),
       })}
     >
-      <div style={labelStyle}>
-        {device.name} ({device.speed} {device.distance_unit_hour})
+      <div style={{ position: 'relative' }}>
+        <div style={labelContainerStyle}>
+          <div style={colorIndicatorStyle} />
+          <div style={textStyle}>
+            {device.name} ({device.speed} {device.distance_unit_hour})
+          </div>
+        </div>
         <div style={anchorStyle} />
       </div>
     </OverlayView>
