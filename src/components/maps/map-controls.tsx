@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Layers, Crosshair, Tag } from "lucide-react";
+import { Layers, Crosshair, Tag, Car } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MapControlsProps {
@@ -37,10 +37,10 @@ export default function MapControls({ onLayerChange, onLocateUser, onToggleLabel
       <Button 
         variant="outline" 
         size="icon" 
-        className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground"
+        className="bg-primary text-primary-foreground rounded-full shadow-md"
         onClick={onLocateUser}
       >
-        <Crosshair className="h-6 w-6" />
+        <Car className="h-6 w-6" />
       </Button>
     </div>
   );
