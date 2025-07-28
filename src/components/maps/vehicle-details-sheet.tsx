@@ -4,6 +4,8 @@
 import {
   Sheet,
   SheetContent,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
 import type { Device, Sensor } from "@/lib/types";
 import { Button } from "../ui/button";
@@ -99,6 +101,9 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
         className="rounded-t-2xl p-0 bg-gray-100 max-h-[90vh] flex flex-col"
         withHandle
       >
+        <SheetHeader className="sr-only">
+          <SheetTitle>{device.name}</SheetTitle>
+        </SheetHeader>
         <div className={cn("flex items-center p-4 text-white rounded-t-2xl", status.color)}>
             <Image
                 src={deviceIconUrl}
@@ -158,6 +163,3 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     </Sheet>
   );
 }
-
-
-    
