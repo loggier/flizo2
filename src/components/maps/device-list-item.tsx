@@ -33,20 +33,20 @@ export default function DeviceListItem({ device }: DeviceListItemProps) {
     const status = getStatusInfo(device);
 
     return (
-        <div className="p-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Checkbox id={`device-${device.id}`} />
-                    <KeySquare className="h-5 w-5 text-primary"/>
-                    <span className="font-bold">{device.name}</span>
-                </div>
-                <div className="flex items-center justify-center w-16 h-16 rounded-full border-2 border-gray-200">
-                    <div className="text-center">
-                        <p className="font-bold text-lg">{device.speed}</p>
-                        <p className="text-xs text-gray-500">{device.distance_unit_hour}</p>
-                    </div>
+        <div className="relative p-4 pr-20 border-b border-gray-200">
+            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-16 h-16 rounded-full border-2 border-gray-200">
+                <div className="text-center">
+                    <p className="font-bold text-lg">{device.speed}</p>
+                    <p className="text-xs text-gray-500">{device.distance_unit_hour}</p>
                 </div>
             </div>
+
+            <div className="flex items-center gap-3">
+                <Checkbox id={`device-${device.id}`} />
+                <KeySquare className="h-5 w-5 text-primary"/>
+                <span className="font-bold">{device.name}</span>
+            </div>
+
             <div className="space-y-1 pl-10 text-sm text-gray-600">
                 <div className={cn("flex items-center gap-2", status.color)}>
                     {status.icon}
