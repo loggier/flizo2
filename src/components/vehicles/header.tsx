@@ -27,15 +27,15 @@ export function VehicleHeader() {
 
     switch (value) {
       case "all":
-        return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
+        return "bg-primary/80 text-primary-foreground/90";
       case "moving":
-        return "bg-green-500 text-white hover:bg-primary";
+        return "bg-green-500 text-white";
       case "stopped":
-        return "bg-yellow-400 text-black hover:bg-primary";
+        return "bg-yellow-400 text-black";
       case "offline":
-        return "bg-red-500 text-white hover:bg-primary";
+        return "bg-red-500 text-white";
       default:
-        return "bg-primary/80 text-primary-foreground/90 hover:bg-primary";
+        return "bg-primary/80 text-primary-foreground/90";
     }
   };
 
