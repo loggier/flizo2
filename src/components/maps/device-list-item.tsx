@@ -36,7 +36,7 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange, 
     const status = getStatusInfo(device);
 
     return (
-        <div className="relative p-4 pr-20 border-b border-gray-200">
+        <div className="relative p-4 pr-20 border-b border-gray-200 cursor-pointer" onClick={() => onSelect(device)}>
             <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-16 h-16 rounded-full border-2 border-gray-200">
                 <div className="text-center">
                     <p className="font-bold text-lg">{device.speed}</p>
@@ -53,7 +53,7 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange, 
                         className="mt-1"
                     />
                  </div>
-                 <div className="flex-1 cursor-pointer" onClick={() => onSelect(device)}>
+                 <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <KeySquare className="h-5 w-5 text-primary"/>
                       <label htmlFor={`device-${device.id}`} className="font-bold cursor-pointer">{device.name}</label>
