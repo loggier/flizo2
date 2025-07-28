@@ -33,14 +33,14 @@ export default function BottomNav() {
             >
               <div
                 className={cn(
-                  "flex w-full flex-col items-center justify-center gap-1 text-xs transition-all duration-300 ease-in-out",
+                  "flex flex-col items-center justify-center gap-1 text-xs transition-all duration-300 ease-in-out",
                   isActive
-                    ? "bg-primary text-primary-foreground font-semibold rounded-xl shadow-lg my-1 py-1"
-                    : "text-muted-foreground hover:text-foreground h-full"
+                    ? "bg-primary text-primary-foreground font-semibold rounded-full shadow-lg p-3"
+                    : "text-muted-foreground hover:text-foreground h-full w-full"
                 )}
               >
                 <item.icon className="w-5 h-5" />
-                <span className="truncate">{item.label}</span>
+                <span className={cn("truncate", { "hidden": isActive })}>{item.label}</span>
               </div>
             </Link>
           );
