@@ -6,7 +6,6 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import {
-  Car,
   Clock,
   Compass,
   FileText,
@@ -17,9 +16,7 @@ import {
   Signal,
   Star,
   Timer,
-  WifiOff,
   X,
-  Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAddress } from "@/services/flizo.service";
@@ -43,11 +40,8 @@ const getStatusInfo = (device: Device): { text: string; colorClass: string; icon
       case 'moving':
         return { text: 'En movimiento', colorClass: 'bg-green-500', icon: <Car className="h-4 w-4" /> };
       case 'online':
-        return { text: 'Detenido', colorClass: 'bg-yellow-500', icon: <Car className="h-4 w-4" /> };
       case 'engine':
-        return { text: 'Motor Encendido', colorClass: 'bg-yellow-500', icon: <Zap className="h-4 w-4" /> };
       case 'stopped':
-        return { text: 'Detenido', colorClass: 'bg-yellow-500', icon: <Car className="h-4 w-4" /> };
       case 'ack':
         return { text: 'Detenido', colorClass: 'bg-yellow-500', icon: <Car className="h-4 w-4" /> };
       case 'offline':
@@ -181,7 +175,6 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
             <CarouselContent>
               <CarouselItem>
                 <div className="p-3 space-y-2 h-48 overflow-y-auto">
-                    <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
                     <div className="space-y-2 p-3 bg-white rounded-lg">
                       <InfoRow icon={MapPin} label="Ubicación" value={address} isAddress={true} />
                       <InfoRow icon={Clock} label="Última Conexión" value={new Date(device.timestamp * 1000).toLocaleString()} />
@@ -193,8 +186,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
               {hasSensors && (
                 <CarouselItem>
                   <div className="p-3 space-y-2 h-48 overflow-y-auto">
-                      <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-3 gap-2">
                         {device.sensors.map((sensor: Sensor) => (
                            <div key={sensor.id} className="bg-white rounded-lg p-2 flex flex-col items-center justify-center text-center space-y-1 h-24">
                             <SensorIcon sensor={sensor} className="h-6 w-6 text-primary" />
@@ -209,7 +201,6 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                {hasImage && (
                 <CarouselItem>
                    <div className="p-3 space-y-2 h-48 overflow-y-auto">
-                      <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">IMAGEN</h3>
                       <div className="bg-white rounded-lg p-2 flex items-center justify-center">
                          <Image
                             src={deviceImageUrl!}
