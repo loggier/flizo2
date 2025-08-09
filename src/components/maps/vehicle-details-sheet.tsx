@@ -128,7 +128,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const carouselItemsCount = 1 + (hasSensors ? 1 : 0) + (hasImage ? 1 : 0);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none mb-3">
+    <div className="absolute bottom-16 left-0 right-0 z-20 pointer-events-none mb-3">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto p-2">
 
         <div className="p-3 relative bg-white rounded-t-lg">
@@ -236,7 +236,3 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
-
-    
-
-    
