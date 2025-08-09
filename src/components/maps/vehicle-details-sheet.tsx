@@ -144,7 +144,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <h2 className="font-bold text-lg text-gray-800 truncate">{device.name}</h2>
                     <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
                 </div>
-                <div className="flex flex-col items-end text-xs text-gray-500 space-y-1.5 flex-shrink-0 w-24">
+                <div className="flex flex-col items-end text-xs text-gray-500 space-y-1.5 flex-shrink-0 w-24 mt-1.5">
                     <div className="flex items-center gap-2">
                         <span>{device.course}°</span>
                         <Compass className="h-4 w-4" />
@@ -209,7 +209,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                             alt={`Imagen de ${device.name}`}
                             width={1024}
                             height={768}
-                            className="w-full h-auto max-h-48 rounded-md object-contain"
+                            className="w-full h-auto max-h-40 rounded-md object-contain"
                         />
                       </div>
                   </div>
@@ -237,5 +237,3 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
-
-    
