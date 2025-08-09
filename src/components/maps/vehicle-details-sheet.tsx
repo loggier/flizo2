@@ -19,8 +19,7 @@ import {
   Timer,
   WifiOff,
   X,
-  Zap,
-  Image as ImageIcon
+  Zap
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAddress } from "@/services/flizo.service";
@@ -30,13 +29,6 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel"
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-  } from "@/components/ui/dialog"
 import { SensorIcon } from "./sensor-icon";
 import { FootstepsIcon } from "../icons/footsteps-icon";
 
@@ -129,10 +121,11 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
   const hasImage = !!deviceImageUrl;
 
-  const totalDistance = (device.device_data?.total_distance !== undefined)
-    ? `${device.device_data.total_distance.toFixed(2)} ${device.unit_of_distance}`
+  const totalDistance = (typeof device.total_distance === 'number')
+    ? `${device.total_distance.toFixed(2)} ${device.unit_of_distance}`
     : 'N/A';
 
+  const carouselItemsCount = 1 + (hasSensors ? 1 : 0) + (hasImage ? 1 : 0);
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none mb-3">
@@ -156,29 +149,6 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
                 </div>
             </div>
-
-            {hasImage && (
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="absolute top-2 left-2 h-8">
-                            <ImageIcon className="mr-2 h-4 w-4" />
-                            Ver Imagen
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="p-0 border-0 max-w-md">
-                        <DialogHeader className="sr-only">
-                            <DialogTitle>Imagen del vehículo: {device.name}</DialogTitle>
-                        </DialogHeader>
-                        <Image
-                            src={deviceImageUrl!}
-                            alt={`Imagen de ${device.name}`}
-                            width={1024}
-                            height={768}
-                            className="w-full h-auto rounded-lg object-contain"
-                        />
-                    </DialogContent>
-                </Dialog>
-            )}
 
             <div className="mt-3 flex items-center justify-between border-t pt-2">
                  <div className={cn("flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full text-white", status.colorClass)}>
@@ -228,11 +198,27 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                   </div>
                 </CarouselItem>
               )}
+               {hasImage && (
+                <CarouselItem>
+                   <div className="p-3 space-y-2">
+                      <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">IMAGEN</h3>
+                      <div className="bg-white rounded-lg p-2 flex items-center justify-center">
+                         <Image
+                            src={deviceImageUrl!}
+                            alt={`Imagen de ${device.name}`}
+                            width={1024}
+                            height={768}
+                            className="w-full h-auto max-h-48 rounded-md object-contain"
+                        />
+                      </div>
+                  </div>
+                </CarouselItem>
+              )}
             </CarouselContent>
           </Carousel>
-          {hasSensors && (
+          {carouselItemsCount > 1 && (
             <div className="flex justify-center gap-2 py-2">
-              {[...Array(2)].map((_, i) => (
+              {[...Array(carouselItemsCount)].map((_, i) => (
                 <button
                   key={i}
                   onClick={() => api?.scrollTo(i)}
@@ -250,5 +236,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
+
+    
 
     

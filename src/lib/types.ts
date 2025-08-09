@@ -60,7 +60,7 @@ export interface Device {
     engine_status: null | any;
     detect_engine: string;
     engine_hours: string;
-    total_distance: number;
+    total_distance?: number;
     inaccuracy: null | any;
     sim_expiration_date: string;
     device_data: {
@@ -148,3 +148,6 @@ export interface Device {
     title: string;
     items: Device[];
   }
+
+
+    
