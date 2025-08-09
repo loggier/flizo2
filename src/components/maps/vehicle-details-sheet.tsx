@@ -115,7 +115,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
         <div className="p-3 relative bg-white">
-             <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 z-10">
+            <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 z-10">
                 <X className="h-5 w-5" />
             </Button>
             
