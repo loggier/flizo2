@@ -27,6 +27,7 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel"
+import { SensorIcon } from "./sensor-icon";
 
 interface VehicleDetailsSheetProps {
   device: Device | null;
@@ -111,7 +112,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 px-2 pb-2 pointer-events-none">
+    <div className="absolute bottom-0 left-0 right-0 z-20 px-2 pb-2 pointer-events-none mb-2">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
         <div className="p-3 relative bg-white">
@@ -165,21 +166,20 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 <CarouselItem>
                   <div className="p-3 space-y-2">
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
-                      <div className="bg-white rounded-lg p-3">
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                          {device.sensors.map((sensor: Sensor) => (
-                            <div key={sensor.id}>
-                              <div
-                                className="text-xs font-bold text-gray-500"
-                                dangerouslySetInnerHTML={{ __html: sensor.name }}
-                              />
-                              <div
-                                className="text-sm font-semibold text-gray-800"
-                                dangerouslySetInnerHTML={{ __html: sensor.value }}
-                              />
-                            </div>
-                          ))}
-                        </div>
+                      <div className="bg-white rounded-lg p-3 space-y-2">
+                        {device.sensors.map((sensor: Sensor) => (
+                          <div key={sensor.id} className="flex items-center gap-3 text-sm">
+                            <SensorIcon sensor={sensor} className="h-6 w-6 text-primary" />
+                            <div
+                              className="flex-1 text-gray-600"
+                              dangerouslySetInnerHTML={{ __html: sensor.name }}
+                            />
+                            <div
+                              className="font-bold text-gray-800"
+                              dangerouslySetInnerHTML={{ __html: sensor.value }}
+                            />
+                          </div>
+                        ))}
                       </div>
                   </div>
                 </CarouselItem>
