@@ -2,14 +2,15 @@
 "use client";
 
 import {
+    Activity,
     Battery as BatteryIcon,
     Thermometer,
-    Gauge,
     Zap,
     Fuel,
     DoorOpen,
     KeySquare,
     Satellite,
+    Gauge
   } from "lucide-react";
 import type { Sensor } from "@/lib/types";
 
@@ -52,5 +53,5 @@ export function SensorIcon({ sensor, className }: SensorIconProps) {
   }
 
   // Default icon for any other sensor
-  return <Gauge className={className} />;
+  return <Activity className={className} />;
 }
