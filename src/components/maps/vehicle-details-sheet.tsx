@@ -129,7 +129,9 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
   const hasImage = !!deviceImageUrl;
 
-  const totalDistance = `${device.device_data.total_distance.toFixed(2)} ${device.unit_of_distance}`;
+  const totalDistance = (device.device_data?.total_distance !== undefined)
+    ? `${device.device_data.total_distance.toFixed(2)} ${device.unit_of_distance}`
+    : 'N/A';
 
 
   return (
@@ -248,3 +250,5 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
+
+    
