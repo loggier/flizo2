@@ -9,6 +9,8 @@ import {
   Car,
   Clock,
   Compass,
+  FileText,
+  History,
   MapPin,
   Send,
   Share2,
@@ -141,6 +143,8 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <span>{status.text}</span>
                 </div>
                 <div className="flex items-center gap-1">
+                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><History className="h-4 w-4 text-gray-600" /></Button>
+                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><FileText className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Send className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Share2 className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
@@ -201,3 +205,5 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
+
+    
