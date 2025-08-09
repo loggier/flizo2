@@ -20,27 +20,28 @@ interface SensorIconProps {
 
 export function SensorIcon({ sensor, className }: SensorIconProps) {
   const name = sensor.name.toLowerCase();
+  const type = sensor.type.toLowerCase();
 
   // The most specific checks should come first.
-  if (name.includes("batería") || name.includes("battery")) {
+  if (type.includes("battery") || name.includes("batería") || name.includes("battery")) {
     return <BatteryIcon className={className} />;
   }
-  if (name.includes("ignición") || name.includes("ignition") || name.includes("acc")) {
+  if (type.includes("ignition") || name.includes("ignición") || name.includes("ignition") || name.includes("acc")) {
     return <Zap className={className} />;
   }
-  if (name.includes("motor")) {
+  if (type.includes("engine") || name.includes("motor")) {
     return <KeySquare className={className} />;
   }
-  if (name.includes("voltaje") || name.includes("voltage")) {
+  if (type.includes("voltage") || name.includes("voltaje") || name.includes("voltage")) {
     return <Zap className={className} />;
   }
-  if (name.includes("temperatura") || name.includes("temperature")) {
+  if (type.includes("temperature") || name.includes("temperatura") || name.includes("temperature")) {
     return <Thermometer className={className} />;
   }
-  if (name.includes("combustible") || name.includes("fuel")) {
+  if (type.includes("fuel") || name.includes("combustible") || name.includes("fuel")) {
     return <Fuel className={className} />;
   }
-  if (name.includes("puerta") || name.includes("door")) {
+  if (type.includes("door") || name.includes("puerta") || name.includes("door")) {
     return <DoorOpen className={className} />;
   }
   if (name.includes("rpm")) {
