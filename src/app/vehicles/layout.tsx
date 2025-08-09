@@ -12,7 +12,7 @@ export default function VehiclesLayout({
     <VehicleFilterProvider>
       <div className="flex flex-col h-screen bg-background">
         <VehicleHeader />
-        <main className="flex-1 overflow-y-auto pt-36 pb-20">{children}</main>
+        <main className="flex-1 overflow-y-auto pt-36 pb-16">{children}</main>
         <BottomNav />
       </div>
     </VehicleFilterProvider>

@@ -53,8 +53,8 @@ const getStatusInfo = (device: Device): { text: string; colorClass: string; icon
 };
 
 const InfoRow = ({ icon: Icon, value, isAddress = false }: { icon: React.ElementType, value: string | React.ReactNode, isAddress?: boolean }) => (
-    <div className="flex items-center gap-2 text-xs">
-        <Icon className="h-5 w-5 text-gray-500 flex-shrink-0" />
+    <div className="flex items-start gap-2 text-xs">
+        <Icon className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
         <div className={cn("text-gray-600 flex-1", isAddress ? "h-8 line-clamp-2" : "")}>{value}</div>
     </div>
 );
@@ -70,19 +70,17 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     
     if (device) {
       if (device.lat && device.lng) {
-        if (address === 'Ubicación no disponible') {
-          getAddress(device.lat, device.lng)
-            .then(fetchedAddress => {
-              if (isMounted) {
-                setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
-              }
-            })
-            .catch(() => {
-              if (isMounted) {
-                setAddress(device.address || 'No se pudo obtener la dirección');
-              }
-            });
-        }
+        getAddress(device.lat, device.lng)
+          .then(fetchedAddress => {
+            if (isMounted) {
+              setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
+            }
+          })
+          .catch(() => {
+            if (isMounted) {
+              setAddress(device.address || 'No se pudo obtener la dirección');
+            }
+          });
       } else if (device.address) {
         setAddress(device.address);
       } else {
@@ -91,7 +89,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     }
 
     return () => { isMounted = false; };
-  }, [device, address]);
+  }, [device]);
 
   useEffect(() => {
     if (!api) {
@@ -113,7 +111,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 p-2 pointer-events-none mb-20">
+    <div className="absolute bottom-0 left-0 right-0 z-20 p-2 pointer-events-none mb-16">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
         <div className="p-3 relative bg-white">
@@ -130,7 +128,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     className="w-16 h-16 object-contain rounded-lg p-1 flex-shrink-0"
                 />
                 <div className="flex-1">
-                    <h2 className="font-bold text-lg text-gray-800 truncate">{device.name}</h2>
+                    <h2 className="font-bold text-lg text-gray-800 truncate pr-8">{device.name}</h2>
                     <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
                 </div>
             </div>
@@ -154,7 +152,6 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
             <CarouselContent>
               <CarouselItem>
                 <div className="p-3 space-y-2">
-                  <div>
                     <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
                     <div className="space-y-2 p-3 bg-white rounded-lg">
                       <InfoRow icon={MapPin} value={address} isAddress={true} />
@@ -162,13 +159,11 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                       <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
                       <InfoRow icon={Timer} value={device.stop_duration} />
                     </div>
-                  </div>
                 </div>
               </CarouselItem>
               {hasSensors && (
                 <CarouselItem>
                   <div className="p-3 space-y-2">
-                    <div>
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
                       <div className="bg-white rounded-lg p-3">
                         <div className="grid grid-cols-2 gap-x-4 gap-y-3">
@@ -186,7 +181,6 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                           ))}
                         </div>
                       </div>
-                    </div>
                   </div>
                 </CarouselItem>
               )}
