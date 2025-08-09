@@ -136,7 +136,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 <X className="h-5 w-5" />
             </Button>
             
-            <div className="flex items-center gap-4">
+            <div className="flex items-start gap-4">
                 <Image
                     src={deviceIconUrl}
                     alt={device.name}
@@ -144,9 +144,19 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     height={64}
                     className="w-16 h-16 object-contain rounded-lg p-1 flex-shrink-0"
                 />
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                     <h2 className="font-bold text-lg text-gray-800 truncate pr-8">{device.name}</h2>
                     <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
+                </div>
+                <div className="flex flex-col items-end text-xs text-gray-500 space-y-1">
+                    <div className="flex items-center gap-1.5">
+                        <Compass className="h-4 w-4" />
+                        <span>{device.course}°</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <FootstepsIcon className="h-4 w-4" />
+                        <span>{totalDistance}</span>
+                    </div>
                 </div>
             </div>
 
@@ -170,21 +180,19 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
           <Carousel setApi={setApi} className="w-full">
             <CarouselContent>
               <CarouselItem>
-                <div className="p-3 space-y-2">
+                <div className="p-3 space-y-2 h-48 overflow-y-auto">
                     <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
                     <div className="space-y-2 p-3 bg-white rounded-lg">
                       <InfoRow icon={MapPin} label="Ubicación" value={address} isAddress={true} />
                       <InfoRow icon={Clock} label="Última Conexión" value={new Date(device.timestamp * 1000).toLocaleString()} />
                       <InfoRow icon={Signal} label="Hace" value={formatTimeAgo(device.timestamp)} />
                       <InfoRow icon={Timer} label="Parado desde" value={device.stop_duration} />
-                      <InfoRow icon={Compass} label="Ángulo" value={`${device.course}°`} />
-                      <InfoRow icon={FootstepsIcon} label="Distancia Total" value={totalDistance} />
                     </div>
                 </div>
               </CarouselItem>
               {hasSensors && (
                 <CarouselItem>
-                  <div className="p-3 space-y-2">
+                  <div className="p-3 space-y-2 h-48 overflow-y-auto">
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {device.sensors.map((sensor: Sensor) => (
@@ -200,7 +208,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
               )}
                {hasImage && (
                 <CarouselItem>
-                   <div className="p-3 space-y-2">
+                   <div className="p-3 space-y-2 h-48 overflow-y-auto">
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">IMAGEN</h3>
                       <div className="bg-white rounded-lg p-2 flex items-center justify-center">
                          <Image
