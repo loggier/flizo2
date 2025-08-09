@@ -138,26 +138,25 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                         className="w-16 h-16 object-contain rounded-lg p-1 flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between">
-                            <h2 className="font-bold text-lg text-gray-800 truncate">{device.name}</h2>
+                        <h2 className="font-bold text-lg text-gray-800 truncate">{device.name}</h2>
+                        <div className="flex items-end justify-between">
+                            <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
+                            <div className="flex flex-col items-end text-xs text-gray-500">
+                                <div className="flex items-center gap-1.5">
+                                    <span>{device.course}°</span>
+                                    <Compass className="h-4 w-4" />
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <span>{totalDistance}</span>
+                                    <FootstepsIcon className="h-4 w-4" />
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
                     </div>
                 </div>
 
-                <div className="flex-shrink-0 flex items-start gap-4">
-                    <div className="flex flex-col items-end text-xs text-gray-500 space-y-1.5 flex-shrink-0 w-24 mt-1.5">
-                        <div className="flex items-center gap-2">
-                            <span>{device.course}°</span>
-                            <Compass className="h-4 w-4" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <span>{totalDistance}</span>
-                            <FootstepsIcon className="h-4 w-4" />
-                        </div>
-                    </div>
-                    
-                    <Button size="icon" variant="ghost" onClick={onClose} className="rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 flex-shrink-0">
+                <div className="flex-shrink-0">
+                    <Button size="icon" variant="ghost" onClick={onClose} className="rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700">
                         <X className="h-5 w-5" />
                     </Button>
                 </div>
@@ -244,5 +243,3 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
-
-    
