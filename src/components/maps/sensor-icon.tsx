@@ -10,6 +10,7 @@ import {
     DoorOpen,
     HelpCircle,
     KeySquare,
+    Satellite,
   } from "lucide-react";
 import type { Sensor } from "@/lib/types";
 
@@ -43,6 +44,9 @@ export function SensorIcon({ sensor, className }: SensorIconProps) {
   }
   if (type.includes("door") || name.includes("puerta") || name.includes("door")) {
     return <DoorOpen className={className} />;
+  }
+  if (type.includes("satellites") || name.includes("satellites")) {
+    return <Satellite className={className} />;
   }
   if (name.includes("rpm")) {
     return <Gauge className={className} />;
