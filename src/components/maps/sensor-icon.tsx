@@ -8,7 +8,6 @@ import {
     Zap,
     Fuel,
     DoorOpen,
-    HelpCircle,
     KeySquare,
     Satellite,
   } from "lucide-react";
@@ -52,6 +51,6 @@ export function SensorIcon({ sensor, className }: SensorIconProps) {
     return <Gauge className={className} />;
   }
 
-  // Default icon
-  return <HelpCircle className={className} />;
+  // Default icon for any other sensor
+  return <Gauge className={className} />;
 }
