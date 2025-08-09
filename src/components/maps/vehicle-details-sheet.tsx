@@ -136,7 +136,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 <X className="h-5 w-5" />
             </Button>
             
-            <div className="flex items-start gap-4">
+            <div className="flex items-center gap-4">
                 <Image
                     src={deviceIconUrl}
                     alt={device.name}
@@ -145,17 +145,17 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     className="w-16 h-16 object-contain rounded-lg p-1 flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                    <h2 className="font-bold text-lg text-gray-800 truncate pr-8">{device.name}</h2>
+                    <h2 className="font-bold text-lg text-gray-800 truncate">{device.name}</h2>
                     <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
                 </div>
-                <div className="flex flex-col items-end text-xs text-gray-500 space-y-1">
-                    <div className="flex items-center gap-1.5">
-                        <Compass className="h-4 w-4" />
+                <div className="flex flex-col items-end text-xs text-gray-500 space-y-1.5 flex-shrink-0 w-24">
+                    <div className="flex items-center gap-2">
                         <span>{device.course}°</span>
+                        <Compass className="h-4 w-4" />
                     </div>
-                    <div className="flex items-center gap-1.5">
-                        <FootstepsIcon className="h-4 w-4" />
+                    <div className="flex items-center gap-2">
                         <span>{totalDistance}</span>
+                        <FootstepsIcon className="h-4 w-4" />
                     </div>
                 </div>
             </div>
