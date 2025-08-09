@@ -6,6 +6,7 @@ import { Button } from "../ui/button";
 import Image from "next/image";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import {
+  Car,
   Clock,
   Compass,
   FileText,
@@ -16,6 +17,7 @@ import {
   Signal,
   Star,
   Timer,
+  WifiOff,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -118,7 +120,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const totalDistance = (typeof device.total_distance === 'number')
     ? `${device.total_distance.toFixed(2)} ${device.unit_of_distance}`
     : 'N/A';
-
+    
   const carouselItemsCount = 1 + (hasSensors ? 1 : 0) + (hasImage ? 1 : 0);
 
   return (
@@ -235,3 +237,5 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
+
+    
