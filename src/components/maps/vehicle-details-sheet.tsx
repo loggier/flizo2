@@ -20,6 +20,7 @@ import {
   WifiOff,
   X,
   Zap,
+  Image as ImageIcon
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAddress } from "@/services/flizo.service";
@@ -29,8 +30,16 @@ import {
   CarouselItem,
   type CarouselApi,
 } from "@/components/ui/carousel"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "@/components/ui/dialog"
 import { SensorIcon } from "./sensor-icon";
-import { KeySquare } from "lucide-react";
+import { FootstepsIcon } from "../icons/footsteps-icon";
+
 
 interface VehicleDetailsSheetProps {
   device: Device | null;
@@ -56,12 +65,16 @@ const getStatusInfo = (device: Device): { text: string; colorClass: string; icon
     }
 };
 
-const InfoRow = ({ icon: Icon, value, isAddress = false }: { icon: React.ElementType, value: string | React.ReactNode, isAddress?: boolean }) => (
-    <div className="flex items-start gap-2 text-xs">
+const InfoRow = ({ icon: Icon, label, value, isAddress = false }: { icon: React.ElementType, label: string, value: string | React.ReactNode, isAddress?: boolean }) => (
+    <div className="flex items-start gap-3 text-xs">
         <Icon className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
-        <div className={cn("text-gray-600 flex-1", isAddress ? "h-8 line-clamp-2" : "")}>{value}</div>
+        <div className="flex-1 text-gray-600">
+            <span className="font-bold text-gray-700">{label}: </span>
+            <span className={cn(isAddress ? "h-8 line-clamp-2" : "")}>{value}</span>
+        </div>
     </div>
 );
+
 
 export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsSheetProps) {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
@@ -112,7 +125,12 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
 
   const status = getStatusInfo(device);
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
+  const deviceImageUrl = device.image ? `${serverUrl}${device.image}` : null;
   const hasSensors = device.sensors && device.sensors.length > 0;
+  const hasImage = !!deviceImageUrl;
+
+  const totalDistance = `${device.device_data.total_distance.toFixed(2)} ${device.unit_of_distance}`;
+
 
   return (
     <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none mb-3">
@@ -137,6 +155,29 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 </div>
             </div>
 
+            {hasImage && (
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="absolute top-2 left-2 h-8">
+                            <ImageIcon className="mr-2 h-4 w-4" />
+                            Ver Imagen
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="p-0 border-0 max-w-md">
+                        <DialogHeader className="sr-only">
+                            <DialogTitle>Imagen del vehículo: {device.name}</DialogTitle>
+                        </DialogHeader>
+                        <Image
+                            src={deviceImageUrl!}
+                            alt={`Imagen de ${device.name}`}
+                            width={1024}
+                            height={768}
+                            className="w-full h-auto rounded-lg object-contain"
+                        />
+                    </DialogContent>
+                </Dialog>
+            )}
+
             <div className="mt-3 flex items-center justify-between border-t pt-2">
                  <div className={cn("flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full text-white", status.colorClass)}>
                     {status.icon}
@@ -159,11 +200,13 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
               <CarouselItem>
                 <div className="p-3 space-y-2">
                     <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
-                    <div className="space-y-2 p-3 bg-white rounded-lg">
-                      <InfoRow icon={MapPin} value={address} isAddress={true} />
-                      <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
-                      <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
-                      <InfoRow icon={Timer} value={device.stop_duration} />
+                    <div className="space-y-3 p-3 bg-white rounded-lg">
+                      <InfoRow icon={MapPin} label="Ubicación" value={address} isAddress={true} />
+                      <InfoRow icon={Clock} label="Última Conexión" value={new Date(device.timestamp * 1000).toLocaleString()} />
+                      <InfoRow icon={Signal} label="Hace" value={formatTimeAgo(device.timestamp)} />
+                      <InfoRow icon={Timer} label="Parado desde" value={device.stop_duration} />
+                      <InfoRow icon={Compass} label="Ángulo" value={`${device.course}°`} />
+                      <InfoRow icon={FootstepsIcon} label="Distancia Total" value={totalDistance} />
                     </div>
                 </div>
               </CarouselItem>
@@ -173,9 +216,9 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
                       <div className="grid grid-cols-2 gap-2">
                         {device.sensors.map((sensor: Sensor) => (
-                           <div key={sensor.id} className="bg-white rounded-lg p-2 flex flex-col items-center justify-center text-center space-y-1">
+                           <div key={sensor.id} className="bg-white rounded-lg p-2 flex flex-col items-center justify-center text-center space-y-1 h-24">
                             <SensorIcon sensor={sensor} className="h-6 w-6 text-primary" />
-                            <div className="text-xs text-gray-600" dangerouslySetInnerHTML={{ __html: sensor.name }} />
+                            <div className="text-xs text-gray-600 line-clamp-1" dangerouslySetInnerHTML={{ __html: sensor.name }} />
                             <div className="text-sm font-bold text-gray-800" dangerouslySetInnerHTML={{ __html: sensor.value }} />
                           </div>
                         ))}
@@ -205,5 +248,3 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
-
-    
