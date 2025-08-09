@@ -69,27 +69,29 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     let isMounted = true;
     
     if (device) {
-        if (device.lat && device.lng) {
-            getAddress(device.lat, device.lng)
-                .then(fetchedAddress => {
-                    if (isMounted) {
-                        setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
-                    }
-                })
-                .catch(() => {
-                    if (isMounted) {
-                        setAddress(device.address || 'No se pudo obtener la dirección');
-                    }
-                });
-        } else if (device.address) {
-             setAddress(device.address);
-        } else {
-             setAddress('Ubicación no disponible');
+      if (device.lat && device.lng) {
+        if (address === 'Ubicación no disponible') {
+          getAddress(device.lat, device.lng)
+            .then(fetchedAddress => {
+              if (isMounted) {
+                setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
+              }
+            })
+            .catch(() => {
+              if (isMounted) {
+                setAddress(device.address || 'No se pudo obtener la dirección');
+              }
+            });
         }
+      } else if (device.address) {
+        setAddress(device.address);
+      } else {
+        setAddress('Ubicación no disponible');
+      }
     }
 
     return () => { isMounted = false; };
-  }, [device]);
+  }, [device, address]);
 
   useEffect(() => {
     if (!api) {
