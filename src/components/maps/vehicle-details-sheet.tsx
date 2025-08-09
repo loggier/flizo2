@@ -70,24 +70,20 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     let isMounted = true;
     
     if (device) {
-        if (!device.address) {
-            if (device.lat && device.lng) {
-                getAddress(device.lat, device.lng)
-                    .then(fetchedAddress => {
-                        if (isMounted) {
-                            setAddress(fetchedAddress || 'Ubicación no disponible');
-                        }
-                    })
-                    .catch(() => {
-                        if (isMounted) {
-                            setAddress('No se pudo obtener la dirección');
-                        }
-                    });
-            } else {
-                 setAddress('Ubicación no disponible');
-            }
+        if (device.lat && device.lng) {
+            getAddress(device.lat, device.lng)
+                .then(fetchedAddress => {
+                    if (isMounted) {
+                        setAddress(fetchedAddress || 'Ubicación no disponible');
+                    }
+                })
+                .catch(() => {
+                    if (isMounted) {
+                        setAddress('No se pudo obtener la dirección');
+                    }
+                });
         } else {
-            setAddress(device.address);
+             setAddress(device.address || 'Ubicación no disponible');
         }
     }
 
@@ -131,7 +127,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     className="w-16 h-16 object-contain rounded-lg p-1 flex-shrink-0"
                 />
                 <div className="flex-1">
-                    <h2 className="font-bold text-xl text-gray-800 truncate">{device.name}</h2>
+                    <h2 className="font-bold text-lg text-gray-800 truncate">{device.name}</h2>
                     <p className="text-3xl font-bold text-primary">{device.speed} <span className="text-base font-medium text-gray-500">{device.distance_unit_hour}</span></p>
                 </div>
             </div>
@@ -154,7 +150,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
           <Carousel setApi={setApi} className="w-full">
             <CarouselContent>
               <CarouselItem>
-                <div className="p-2 space-y-2">
+                <div className="p-3 space-y-2">
                   <div>
                     <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
                     <div className="space-y-2 p-3 bg-white rounded-lg">
@@ -168,7 +164,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
               </CarouselItem>
               {hasSensors && (
                 <CarouselItem>
-                  <div className="p-2 space-y-2">
+                  <div className="p-3 space-y-2">
                     <div>
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
                       <div className="bg-white rounded-lg p-3">
@@ -213,5 +209,3 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </div>
   );
 }
-
-    
