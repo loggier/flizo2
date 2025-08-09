@@ -58,18 +58,14 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
       }
     };
     
-    // If the address from the device object is empty or a placeholder, try fetching it
-    if (!device.address || device.address.trim() === '-' || address === 'Ubicación no disponible') {
+    if (address === 'Ubicación no disponible') {
         fetchAddress();
-    } else {
-        // Otherwise, just display the address from the device object.
-        setAddress(device.address);
     }
 
     return () => {
       isMounted = false;
     };
-  }, [device.lat, device.lng, device.address]);
+  }, [device.lat, device.lng, device.address, address]);
 
   const hasSensors = device.sensors && device.sensors.length > 0;
 
