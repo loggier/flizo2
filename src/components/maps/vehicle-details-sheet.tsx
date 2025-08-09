@@ -63,7 +63,10 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     let isMounted = true;
     
     if (device) {
-        setAddress(device.address || 'Cargando dirección...');
+        // Set initial address to the last known address to prevent flickering
+        if (device.address) {
+            setAddress(device.address);
+        }
 
         if (device.lat && device.lng) {
             getAddress(device.lat, device.lng)
@@ -77,7 +80,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                         setAddress(device.address || 'No se pudo obtener la dirección');
                     }
                 });
-        } else {
+        } else if (!device.address) {
              setAddress('Ubicación no disponible');
         }
     }
@@ -96,8 +99,8 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
         {/* New Header */}
-        <div className="p-3 relative bg-gray-50">
-            <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-gray-900/10 hover:bg-gray-900/20 h-8 w-8 text-gray-700 z-10">
+        <div className="p-3 relative bg-white">
+             <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-gray-900/10 hover:bg-gray-900/20 h-8 w-8 text-gray-700 z-10">
                 <X className="h-5 w-5" />
             </Button>
             
@@ -115,8 +118,8 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 </div>
             </div>
 
-            <div className="mt-3 flex items-center justify-between">
-                <div className={cn("flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full text-white", status.colorClass)}>
+            <div className="mt-3 flex items-center justify-between border-t pt-2">
+                 <div className={cn("flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full text-white", status.colorClass)}>
                     {status.icon}
                     <span>{status.text}</span>
                 </div>
@@ -129,7 +132,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
             </div>
         </div>
 
-        <div className="p-3 space-y-2 bg-white">
+        <div className="p-2 space-y-2 bg-gray-50">
             <div>
                 <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
                 <div className="space-y-2">
@@ -141,12 +144,12 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-2">
-                <Button size="lg" variant="outline" className="bg-gray-100 hover:bg-gray-200"><History className="mr-2"/> Historial</Button>
-                <Button size="lg" variant="outline" className="bg-gray-100 hover:bg-gray-200"><FileText className="mr-2"/> Reportes</Button>
+                <Button size="lg" variant="outline" className="bg-white hover:bg-gray-100"><History className="mr-2"/> Historial</Button>
+                <Button size="lg" variant="outline" className="bg-white hover:bg-gray-100"><FileText className="mr-2"/> Reportes</Button>
             </div>
 
             {device.sensors && device.sensors.length > 0 && (
-                <div className="bg-gray-100 rounded-lg p-2 mt-2">
+                <div className="bg-white rounded-lg p-2 mt-2">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         {device.sensors.map((sensor: Sensor) => (
                            <div key={sensor.id} className="text-xs">

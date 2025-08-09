@@ -35,41 +35,42 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
   const { bgColor, textColor } = getStatusInfo(device);
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
-  const [address, setAddress] = useState('Ubicación no disponible');
+  const [address, setAddress] = useState(device.address || 'Ubicación no disponible');
 
   useEffect(() => {
     let isMounted = true;
-    
-    // Set initial address from device data if available
-    setAddress(device.address || 'Cargando dirección...');
 
     const fetchAddress = async () => {
       if (device.lat && device.lng) {
         try {
           const fetchedAddress = await getAddress(device.lat, device.lng);
           if (isMounted) {
-            // Use fetched address, fallback to cached, then to default
             setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
           }
         } catch (error) {
-          if (isMounted) { 
-            setAddress(device.address || 'No se pudo obtener la dirección');
+          if (isMounted && !device.address) { 
+            setAddress('No se pudo obtener la dirección');
           }
           console.error("Error fetching address:", error);
         }
-      } else {
-        if (isMounted) {
-          setAddress('Ubicación no disponible');
-        }
+      } else if (isMounted) {
+         setAddress(device.address || 'Ubicación no disponible');
       }
     };
     
-    fetchAddress();
+    // If the address from the device object is empty, try fetching it
+    if (!device.address) {
+        fetchAddress();
+    } else {
+        // Otherwise, just display the address from the device object.
+        // The main map view will handle periodic updates for all devices.
+        setAddress(device.address);
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [device.lat, device.lng, device.address]); // Rerun if location or cached address changes
+  }, [device.lat, device.lng, device.address]);
 
   const hasSensors = device.sensors && device.sensors.length > 0;
 
