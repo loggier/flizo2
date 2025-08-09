@@ -112,10 +112,10 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 px-2 pb-2 pointer-events-none mb-2">
-       <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
+    <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none mb-3">
+       <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto p-2">
 
-        <div className="p-3 relative bg-white">
+        <div className="p-3 relative bg-white rounded-t-lg">
             <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 z-10">
                 <X className="h-5 w-5" />
             </Button>
@@ -148,7 +148,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
             </div>
         </div>
         
-        <div className="bg-gray-50">
+        <div className="bg-gray-50 rounded-b-lg">
           <Carousel setApi={setApi} className="w-full">
             <CarouselContent>
               <CarouselItem>
@@ -166,18 +166,12 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 <CarouselItem>
                   <div className="p-3 space-y-2">
                       <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
-                      <div className="bg-white rounded-lg p-3 space-y-2">
+                      <div className="grid grid-cols-2 gap-2">
                         {device.sensors.map((sensor: Sensor) => (
-                          <div key={sensor.id} className="flex items-center gap-3 text-sm">
+                           <div key={sensor.id} className="bg-white rounded-lg p-2 flex flex-col items-center justify-center text-center space-y-1">
                             <SensorIcon sensor={sensor} className="h-6 w-6 text-primary" />
-                            <div
-                              className="flex-1 text-gray-600"
-                              dangerouslySetInnerHTML={{ __html: sensor.name }}
-                            />
-                            <div
-                              className="font-bold text-gray-800"
-                              dangerouslySetInnerHTML={{ __html: sensor.value }}
-                            />
+                            <div className="text-xs text-gray-600" dangerouslySetInnerHTML={{ __html: sensor.name }} />
+                            <div className="text-sm font-bold text-gray-800" dangerouslySetInnerHTML={{ __html: sensor.value }} />
                           </div>
                         ))}
                       </div>
