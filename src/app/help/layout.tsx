@@ -11,7 +11,7 @@ export default function HelpLayout({
       <header className="bg-primary text-primary-foreground text-center py-3 shadow-md">
         <h1 className="text-xl font-bold">SOPORTE</h1>
       </header>
-      <main className="flex-1 overflow-y-auto">{children}</main>
+      <main className="flex-1 overflow-y-auto pb-20">{children}</main>
       <BottomNav />
     </div>
   );

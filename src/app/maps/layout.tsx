@@ -8,7 +8,7 @@ export default function MapsLayout({
 }) {
   return (
     <div className="flex flex-col h-screen">
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pb-20">{children}</main>
       <BottomNav />
     </div>
   );

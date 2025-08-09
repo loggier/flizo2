@@ -9,7 +9,6 @@ import {
   Car,
   Clock,
   Compass,
-  History,
   MapPin,
   Send,
   Share2,
@@ -56,7 +55,7 @@ const getStatusInfo = (device: Device): { text: string; colorClass: string; icon
 const InfoRow = ({ icon: Icon, value, isAddress = false }: { icon: React.ElementType, value: string | React.ReactNode, isAddress?: boolean }) => (
     <div className="flex items-center gap-2 text-xs">
         <Icon className="h-5 w-5 text-gray-500 flex-shrink-0" />
-        <div className={cn("text-gray-600 flex-1", isAddress ? "line-clamp-2 h-8" : "")}>{value}</div>
+        <div className={cn("text-gray-600 flex-1", isAddress ? "h-8 line-clamp-2" : "")}>{value}</div>
     </div>
 );
 
@@ -74,16 +73,18 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
             getAddress(device.lat, device.lng)
                 .then(fetchedAddress => {
                     if (isMounted) {
-                        setAddress(fetchedAddress || 'Ubicación no disponible');
+                        setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
                     }
                 })
                 .catch(() => {
                     if (isMounted) {
-                        setAddress('No se pudo obtener la dirección');
+                        setAddress(device.address || 'No se pudo obtener la dirección');
                     }
                 });
+        } else if (device.address) {
+             setAddress(device.address);
         } else {
-             setAddress(device.address || 'Ubicación no disponible');
+             setAddress('Ubicación no disponible');
         }
     }
 
@@ -110,11 +111,11 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 p-2 pointer-events-none">
+    <div className="absolute bottom-0 left-0 right-0 z-20 p-2 pointer-events-none mb-16">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
         <div className="p-3 relative bg-white">
-             <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-gray-900/10 hover:bg-gray-900/20 h-8 w-8 text-gray-700 z-10">
+             <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 z-10">
                 <X className="h-5 w-5" />
             </Button>
             
