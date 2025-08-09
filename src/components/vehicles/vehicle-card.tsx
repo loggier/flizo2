@@ -6,8 +6,7 @@ import { useState, useEffect } from 'react';
 import type { Device, Sensor } from "@/lib/types";
 import { cn, formatTimeAgo } from "@/lib/utils";
 import { getAddress } from "@/services/flizo.service";
-import { Clock } from "lucide-react";
-import { FootstepsIcon } from "../icons/footsteps-icon";
+import { Clock, Signal } from "lucide-react";
 import { MapPinIcon } from "../icons/map-pin-icon";
 
 interface VehicleCardProps {
@@ -89,11 +88,11 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />
-              <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
+              <span>{new Date(device.timestamp * 1000).toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-2">
-              <FootstepsIcon className="w-4 h-4" />
-              <span>Online: {formatTimeAgo(device.timestamp)}</span>
+              <Signal className="w-4 h-4" />
+              <span>{formatTimeAgo(device.timestamp)}</span>
             </div>
           </div>
 

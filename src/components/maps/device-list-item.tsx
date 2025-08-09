@@ -3,8 +3,9 @@
 
 import type { Device } from "@/lib/types";
 import { Checkbox } from "../ui/checkbox";
-import { Car, Clock, WifiOff, Zap, AlertTriangle, KeySquare } from "lucide-react";
+import { Car, Clock, WifiOff, Zap, AlertTriangle, KeySquare, Signal } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatTimeAgo } from "@/lib/utils";
 
 interface DeviceListItemProps {
   device: Device;
@@ -66,11 +67,11 @@ export default function DeviceListItem({ device, isVisible, onVisibilityChange, 
                       </div>
                       <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4" />
-                          <span>Conexión: {new Date(device.timestamp * 1000).toLocaleString()}</span>
+                          <span>{new Date(device.timestamp * 1000).toLocaleString()}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4" />
-                          <span>Online: {device.time}</span>
+                          <Signal className="h-4 w-4" />
+                          <span>{formatTimeAgo(device.timestamp)}</span>
                       </div>
                     </div>
                 </div>

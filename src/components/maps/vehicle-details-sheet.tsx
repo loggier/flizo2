@@ -28,6 +28,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel"
 import { SensorIcon } from "./sensor-icon";
+import { KeySquare } from "lucide-react";
 
 interface VehicleDetailsSheetProps {
   device: Device | null;
