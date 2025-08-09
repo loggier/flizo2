@@ -35,7 +35,7 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
   const { bgColor, textColor } = getStatusInfo(device);
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
-  const [address, setAddress] = useState(device.address || 'Ubicación no disponible');
+  const [address, setAddress] = useState(device.address || 'Cargando dirección...');
 
   useEffect(() => {
     let isMounted = true;
@@ -45,27 +45,25 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
         try {
           const fetchedAddress = await getAddress(device.lat, device.lng);
           if (isMounted) {
-            setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
+            setAddress(fetchedAddress || device.address || 'Dirección no disponible');
           }
         } catch (error) {
-          if (isMounted && !device.address) { 
-            setAddress('No se pudo obtener la dirección');
+          if (isMounted) { 
+            setAddress(device.address || 'No se pudo obtener la dirección');
           }
           console.error("Error fetching address:", error);
         }
       } else if (isMounted) {
-         setAddress(device.address || 'Ubicación no disponible');
+         setAddress(device.address || 'Dirección no disponible');
       }
     };
     
-    if (address === 'Ubicación no disponible') {
-        fetchAddress();
-    }
+    fetchAddress();
 
     return () => {
       isMounted = false;
     };
-  }, [device.lat, device.lng, device.address, address]);
+  }, [device.lat, device.lng, device.address]);
 
   const hasSensors = device.sensors && device.sensors.length > 0;
 
