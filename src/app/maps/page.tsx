@@ -111,7 +111,7 @@ export default function MapsPage() {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
       // Pan up to make space for the details sheet
-      map.panBy(0, -150); 
+      map.panBy(0, -50); 
     } else {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -295,4 +295,5 @@ export default function MapsPage() {
     </div>
   );
     
+
 
