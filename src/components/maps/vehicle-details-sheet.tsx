@@ -127,12 +127,9 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     <div className="absolute bottom-16 left-0 right-0 z-20 pointer-events-none mb-3">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto p-2">
 
-        <div className="p-3 relative bg-white rounded-t-lg">
-            <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 z-10">
-                <X className="h-5 w-5" />
-            </Button>
-            
-            <div className="flex items-center gap-4">
+        <div className="p-3 bg-white rounded-t-lg">
+            <div className="flex justify-between items-start gap-4">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
                 <Image
                     src={deviceIconUrl}
                     alt={device.name}
@@ -154,6 +151,10 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                         <FootstepsIcon className="h-4 w-4" />
                     </div>
                 </div>
+              </div>
+              <Button size="icon" variant="ghost" onClick={onClose} className="rounded-full bg-black/10 hover:bg-black/20 h-8 w-8 text-gray-700 flex-shrink-0">
+                  <X className="h-5 w-5" />
+              </Button>
             </div>
 
             <div className="mt-3 flex items-center justify-between border-t pt-2">
