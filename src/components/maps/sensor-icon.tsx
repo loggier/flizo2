@@ -2,7 +2,7 @@
 "use client";
 
 import {
-    Battery,
+    Battery as BatteryIcon,
     Thermometer,
     Gauge,
     Zap,
@@ -21,8 +21,9 @@ interface SensorIconProps {
 export function SensorIcon({ sensor, className }: SensorIconProps) {
   const name = sensor.name.toLowerCase();
 
+  // The most specific checks should come first.
   if (name.includes("batería") || name.includes("battery")) {
-    return <Battery className={className} />;
+    return <BatteryIcon className={className} />;
   }
   if (name.includes("ignición") || name.includes("ignition") || name.includes("acc")) {
     return <Zap className={className} />;
