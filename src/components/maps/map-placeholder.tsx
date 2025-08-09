@@ -26,9 +26,10 @@ interface MapComponentProps {
     devices: Device[];
     showLabels: boolean;
     onSelectDevice: (device: Device) => void;
+    onDeselectDevice: () => void;
 }
 
-function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels, onSelectDevice }: MapComponentProps) {
+function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels, onSelectDevice, onDeselectDevice }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -140,6 +141,7 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
         zoom={10}
         onLoad={onLoad}
         onUnmount={onUnmount}
+        onClick={onDeselectDevice}
         options={{
             disableDefaultUI: true,
             scrollwheel: true,

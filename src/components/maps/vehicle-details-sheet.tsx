@@ -1,12 +1,6 @@
 
 "use client";
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import type { Device, Sensor } from "@/lib/types";
 import { Button } from "../ui/button";
 import Image from "next/image";
@@ -25,6 +19,7 @@ import {
   Star,
   Timer,
   WifiOff,
+  X,
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -32,8 +27,7 @@ import { getAddress } from "@/services/flizo.service";
 
 interface VehicleDetailsSheetProps {
   device: Device | null;
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
+  onClose: () => void;
 }
 
 const getStatusInfo = (device: Device): { text: string; color: string; icon: React.ReactNode } => {
@@ -62,7 +56,7 @@ const InfoRow = ({ icon: Icon, value }: { icon: React.ElementType, value: string
     </div>
 );
 
-export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: VehicleDetailsSheetProps) {
+export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsSheetProps) {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const [address, setAddress] = useState('Ubicación no disponible');
   
@@ -90,7 +84,7 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
     }
 
     return () => { isMounted = false; };
-  }, [device?.lat, device?.lng, device?.address, device]);
+  }, [device?.lat, device?.lng, device?.address]);
 
 
   if (!device) return null;
@@ -99,41 +93,37 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
   const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
 
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent 
-        side="bottom" 
-        className="rounded-t-2xl p-0 bg-gray-100 h-[50vh] flex flex-col"
-        withHandle
-      >
-        <SheetHeader className="sr-only">
-          <SheetTitle>{device.name}</SheetTitle>
-        </SheetHeader>
-        <div className={cn("flex items-center p-4 text-white rounded-t-2xl", status.color)}>
-            <Image
+    <div className="absolute bottom-0 left-0 right-0 z-20 p-2 pointer-events-none">
+       <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
+        <div className={cn("flex items-center p-3 text-white", status.color)}>
+             <Image
                 src={deviceIconUrl}
                 alt={device.name}
                 width={56}
                 height={56}
                 className="w-14 h-14 object-contain bg-white/20 rounded-lg p-1"
             />
-            <div className="ml-4 flex-1">
-                <h2 className="font-bold text-lg">{device.name}</h2>
+            <div className="ml-3 flex-1">
+                <h2 className="font-bold text-base">{device.name}</h2>
                 <div className="flex items-center gap-1.5 text-xs font-medium">
                     {status.icon}
                     <span>{status.text}</span>
                 </div>
             </div>
-            <div className="flex items-center gap-2">
-                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30"><Send className="h-5 w-5" /></Button>
-                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30"><Share2 className="h-5 w-5" /></Button>
-                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30"><Compass className="h-5 w-5" /></Button>
-                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30"><Star className="h-5 w-5" /></Button>
+            <div className="flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30 h-8 w-8"><Send className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30 h-8 w-8"><Share2 className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30 h-8 w-8"><Compass className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" className="rounded-full bg-white/20 hover:bg-white/30 h-8 w-8"><Star className="h-4 w-4" /></Button>
             </div>
+             <Button size="icon" variant="ghost" onClick={onClose} className="rounded-full hover:bg-white/30 h-8 w-8 ml-1">
+                <X className="h-5 w-5" />
+            </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-2 space-y-2">
-            <div className="bg-white rounded-lg p-3 shadow-sm">
-                <h3 className="font-bold text-base mb-3 text-gray-800">INFORMACIÓN</h3>
+        <div className="p-2 space-y-2">
+            <div>
+                <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
                 <div className="space-y-2">
                     <InfoRow icon={MapPin} value={address} />
                     <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
@@ -144,12 +134,12 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-                <Button size="lg" variant="outline" className="bg-white"><History className="mr-2"/> Historial</Button>
-                <Button size="lg" variant="outline" className="bg-white"><FileText className="mr-2"/> Reportes</Button>
+                <Button size="lg" variant="outline" className="bg-gray-100"><History className="mr-2"/> Historial</Button>
+                <Button size="lg" variant="outline" className="bg-gray-100"><FileText className="mr-2"/> Reportes</Button>
             </div>
 
             {device.sensors && device.sensors.length > 0 && (
-                <div className="bg-white rounded-lg p-3 shadow-sm">
+                <div className="bg-gray-100 rounded-lg p-2">
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         {device.sensors.map((sensor: Sensor) => (
                            <div key={sensor.id} className="text-xs">
@@ -162,7 +152,7 @@ export default function VehicleDetailsSheet({ device, isOpen, onOpenChange }: Ve
                 </div>
             )}
         </div>
-      </SheetContent>
-    </Sheet>
+        </div>
+    </div>
   );
 }

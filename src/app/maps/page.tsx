@@ -235,6 +235,7 @@ export default function MapsPage() {
         devices={visibleDevices}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
+        onDeselectDevice={handleDeselectDevice}
       />
       {isLoading && isInitialLoad && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -268,12 +269,7 @@ export default function MapsPage() {
       />
        <VehicleDetailsSheet
         device={selectedDevice}
-        isOpen={!!selectedDevice}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleDeselectDevice();
-          }
-        }}
+        onClose={handleDeselectDevice}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">
@@ -296,5 +292,4 @@ export default function MapsPage() {
       </Sheet>
     </div>
   );
-
     
