@@ -172,7 +172,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
               <CarouselItem>
                 <div className="p-3 space-y-2">
                     <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
-                    <div className="space-y-3 p-3 bg-white rounded-lg">
+                    <div className="space-y-2 p-3 bg-white rounded-lg">
                       <InfoRow icon={MapPin} label="Ubicación" value={address} isAddress={true} />
                       <InfoRow icon={Clock} label="Última Conexión" value={new Date(device.timestamp * 1000).toLocaleString()} />
                       <InfoRow icon={Signal} label="Hace" value={formatTimeAgo(device.timestamp)} />
