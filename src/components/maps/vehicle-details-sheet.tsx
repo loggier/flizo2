@@ -111,7 +111,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-20 px-2 pointer-events-none">
+    <div className="absolute bottom-0 left-0 right-0 z-20 px-2 pb-2 pointer-events-none">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
         <div className="p-3 relative bg-white">
