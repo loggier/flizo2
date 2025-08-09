@@ -22,6 +22,12 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getAddress } from "@/services/flizo.service";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  type CarouselApi,
+} from "@/components/ui/carousel"
 
 interface VehicleDetailsSheetProps {
   device: Device | null;
@@ -57,34 +63,48 @@ const InfoRow = ({ icon: Icon, value, isAddress = false }: { icon: React.Element
 export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsSheetProps) {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const [address, setAddress] = useState('Ubicación no disponible');
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
   
   useEffect(() => {
     let isMounted = true;
     
     if (device) {
-        if (device.address && address === 'Ubicación no disponible') {
+        if (!device.address) {
+            if (device.lat && device.lng) {
+                getAddress(device.lat, device.lng)
+                    .then(fetchedAddress => {
+                        if (isMounted) {
+                            setAddress(fetchedAddress || 'Ubicación no disponible');
+                        }
+                    })
+                    .catch(() => {
+                        if (isMounted) {
+                            setAddress('No se pudo obtener la dirección');
+                        }
+                    });
+            } else {
+                 setAddress('Ubicación no disponible');
+            }
+        } else {
             setAddress(device.address);
-        }
-
-        if (device.lat && device.lng) {
-            getAddress(device.lat, device.lng)
-                .then(fetchedAddress => {
-                    if (isMounted) {
-                        setAddress(fetchedAddress || device.address || 'Ubicación no disponible');
-                    }
-                })
-                .catch(() => {
-                    if (isMounted) {
-                        setAddress(device.address || 'No se pudo obtener la dirección');
-                    }
-                });
-        } else if (!device.address) {
-             setAddress('Ubicación no disponible');
         }
     }
 
     return () => { isMounted = false; };
-  }, [device, address]);
+  }, [device]);
+
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+ 
+    setCurrent(api.selectedScrollSnap())
+ 
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap())
+    })
+  }, [api])
 
 
   if (!device) return null;
@@ -97,7 +117,6 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     <div className="absolute bottom-0 left-0 right-0 z-20 p-2 pointer-events-none">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto">
 
-        {/* New Header */}
         <div className="p-3 relative bg-white">
              <Button size="icon" variant="ghost" onClick={onClose} className="absolute top-2 right-2 rounded-full bg-gray-900/10 hover:bg-gray-900/20 h-8 w-8 text-gray-700 z-10">
                 <X className="h-5 w-5" />
@@ -130,41 +149,69 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                 </div>
             </div>
         </div>
-
-        <div className="p-2 space-y-2 bg-gray-50">
-            <div>
-                <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
-                <div className="space-y-2 p-3 bg-white rounded-lg">
-                    <InfoRow icon={MapPin} value={address} isAddress={true} />
-                    <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
-                    <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
-                    <InfoRow icon={Timer} value={device.stop_duration} />
-                </div>
-            </div>
-
-            {hasSensors && (
-                <div>
-                    <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
-                    <div className="bg-white rounded-lg p-3">
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                            {device.sensors.map((sensor: Sensor) => (
-                               <div key={sensor.id}>
-                                    <div 
-                                        className="text-xs font-bold text-gray-500"
-                                        dangerouslySetInnerHTML={{ __html: sensor.name }} 
-                                    />
-                                    <div 
-                                        className="text-sm font-semibold text-gray-800"
-                                        dangerouslySetInnerHTML={{ __html: sensor.value }}
-                                    />
-                               </div>
-                            ))}
-                        </div>
+        
+        <div className="bg-gray-50">
+          <Carousel setApi={setApi} className="w-full">
+            <CarouselContent>
+              <CarouselItem>
+                <div className="p-2 space-y-2">
+                  <div>
+                    <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
+                    <div className="space-y-2 p-3 bg-white rounded-lg">
+                      <InfoRow icon={MapPin} value={address} isAddress={true} />
+                      <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
+                      <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
+                      <InfoRow icon={Timer} value={device.stop_duration} />
                     </div>
+                  </div>
                 </div>
-            )}
+              </CarouselItem>
+              {hasSensors && (
+                <CarouselItem>
+                  <div className="p-2 space-y-2">
+                    <div>
+                      <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">SENSORES</h3>
+                      <div className="bg-white rounded-lg p-3">
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+                          {device.sensors.map((sensor: Sensor) => (
+                            <div key={sensor.id}>
+                              <div
+                                className="text-xs font-bold text-gray-500"
+                                dangerouslySetInnerHTML={{ __html: sensor.name }}
+                              />
+                              <div
+                                className="text-sm font-semibold text-gray-800"
+                                dangerouslySetInnerHTML={{ __html: sensor.value }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CarouselItem>
+              )}
+            </CarouselContent>
+          </Carousel>
+          {hasSensors && (
+            <div className="flex justify-center gap-2 py-2">
+              {[...Array(2)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => api?.scrollTo(i)}
+                  className={cn(
+                    "h-2 w-2 rounded-full transition-all",
+                    i === current ? "w-4 bg-primary" : "bg-gray-300"
+                  )}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        </div>
+
+      </div>
     </div>
   );
 }
+
+    
