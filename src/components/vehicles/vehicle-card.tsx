@@ -58,12 +58,11 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
       }
     };
     
-    // If the address from the device object is empty, try fetching it
-    if (!device.address) {
+    // If the address from the device object is empty or a placeholder, try fetching it
+    if (!device.address || device.address.trim() === '-' || address === 'Ubicación no disponible') {
         fetchAddress();
     } else {
         // Otherwise, just display the address from the device object.
-        // The main map view will handle periodic updates for all devices.
         setAddress(device.address);
     }
 
@@ -92,7 +91,7 @@ export function VehicleCard({ device, onClick }: VehicleCardProps) {
           <div className="flex-1 space-y-1.5 text-xs">
             <div className="flex items-start gap-2">
               <MapPinIcon className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span className="leading-tight">{address}</span>
+              <span className="leading-tight h-8 line-clamp-2">{address}</span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4" />

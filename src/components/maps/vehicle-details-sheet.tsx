@@ -51,7 +51,7 @@ const getStatusInfo = (device: Device): { text: string; colorClass: string; icon
 const InfoRow = ({ icon: Icon, value }: { icon: React.ElementType, value: string | React.ReactNode }) => (
     <div className="flex items-center gap-2 text-xs">
         <Icon className="h-5 w-5 text-gray-500 flex-shrink-0" />
-        <div className="text-gray-600 flex-1">{value}</div>
+        <div className="text-gray-600 flex-1 line-clamp-2 h-8">{value}</div>
     </div>
 );
 
@@ -63,8 +63,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     let isMounted = true;
     
     if (device) {
-        // Set initial address to the last known address to prevent flickering
-        if (device.address) {
+        if (device.address && address === 'Ubicación no disponible') {
             setAddress(device.address);
         }
 
@@ -86,7 +85,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     }
 
     return () => { isMounted = false; };
-  }, [device?.lat, device?.lng, device?.address, device]);
+  }, [device, address]);
 
 
   if (!device) return null;
@@ -135,7 +134,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
         <div className="p-2 space-y-2 bg-gray-50">
             <div>
                 <h3 className="font-bold text-sm mb-2 text-gray-800 px-1">INFORMACIÓN</h3>
-                <div className="space-y-2">
+                <div className="space-y-2 p-2 bg-white rounded-lg">
                     <InfoRow icon={MapPin} value={address} />
                     <InfoRow icon={Clock} value={new Date(device.timestamp * 1000).toLocaleString()} />
                     <InfoRow icon={Signal} value={formatTimeAgo(device.timestamp)} />
