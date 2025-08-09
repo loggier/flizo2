@@ -9,6 +9,7 @@ import {
     Fuel,
     DoorOpen,
     HelpCircle,
+    KeySquare,
   } from "lucide-react";
 import type { Sensor } from "@/lib/types";
 
@@ -23,6 +24,12 @@ export function SensorIcon({ sensor, className }: SensorIconProps) {
   if (name.includes("batería") || name.includes("battery")) {
     return <Battery className={className} />;
   }
+  if (name.includes("ignición") || name.includes("ignition") || name.includes("acc")) {
+    return <Zap className={className} />;
+  }
+  if (name.includes("motor")) {
+    return <KeySquare className={className} />;
+  }
   if (name.includes("voltaje") || name.includes("voltage")) {
     return <Zap className={className} />;
   }
@@ -34,9 +41,6 @@ export function SensorIcon({ sensor, className }: SensorIconProps) {
   }
   if (name.includes("puerta") || name.includes("door")) {
     return <DoorOpen className={className} />;
-  }
-  if (name.includes("ignición") || name.includes("ignition")) {
-    return <Zap className={className} />;
   }
   if (name.includes("rpm")) {
     return <Gauge className={className} />;
