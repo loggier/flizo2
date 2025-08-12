@@ -1,6 +1,5 @@
 
-
-import type { Device, DeviceGroup, Geofence, GeofenceGroup } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, Route } from "@/lib/types";
 
 const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
 
@@ -73,4 +72,24 @@ export async function getGeofences(user_api_hash: string): Promise<Geofence[]> {
   }
   
   return [];
+}
+
+export async function getRoutes(user_api_hash: string): Promise<Route[]> {
+    const response = await fetch(`${serverApi}get_routes?user_api_hash=${user_api_hash}`);
+
+    if (response.status === 401) {
+        throw new Error('Unauthorized');
+    }
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch routes');
+    }
+
+    const data = await response.json();
+
+    if (data && data.data) {
+        return data.data;
+    }
+    
+    return [];
 }

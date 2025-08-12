@@ -18,11 +18,12 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
-import type { Device, DeviceGroup, Geofence, GeofenceGroup } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, GeofenceGroup, Route, RouteGroup } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
 import { ScrollArea } from "../ui/scroll-area";
 import { DeviceListSkeleton } from "./device-list-skeleton";
 import GeofenceListItem from "./geofence-list-item";
+import RouteListItem from "./route-list-item";
 
 interface DeviceListSheetProps {
   isOpen: boolean;
@@ -35,6 +36,10 @@ interface DeviceListSheetProps {
   visibleGeofenceIds: Set<number>;
   toggleGeofenceVisibility: (geofenceIds: number | number[], visible: boolean) => void;
   onSelectGeofence: (geofence: Geofence) => void;
+  routes: Route[];
+  visibleRouteIds: Set<number>;
+  toggleRouteVisibility: (routeIds: number | number[], visible: boolean) => void;
+  onSelectRoute: (route: Route) => void;
   isLoading: boolean;
 }
 
@@ -49,6 +54,10 @@ export default function DeviceListSheet({
   visibleGeofenceIds,
   toggleGeofenceVisibility,
   onSelectGeofence,
+  routes,
+  visibleRouteIds,
+  toggleRouteVisibility,
+  onSelectRoute,
   isLoading,
 }: DeviceListSheetProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -71,6 +80,24 @@ export default function DeviceListSheet({
     return Object.values(groups);
   }, [geofences, deviceGroups, searchTerm]);
 
+  const routeGroups = useMemo(() => {
+    const groups: { [key: string]: RouteGroup } = {};
+    const filteredRoutes = routes.filter(route =>
+      route.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  
+    filteredRoutes.forEach(route => {
+      const groupId = route.group_id || 0;
+      if (!groups[groupId]) {
+        const groupTitle = deviceGroups.find(dg => dg.id === groupId)?.title || (groupId === 0 ? "Sin grupo" : `Grupo ${groupId}`);
+        groups[groupId] = { id: groupId, title: groupTitle, routes: [] };
+      }
+      groups[groupId].routes.push(route);
+    });
+  
+    return Object.values(groups);
+  }, [routes, deviceGroups, searchTerm]);
+
 
   const filteredDeviceGroups = deviceGroups
     .map((group) => ({
@@ -91,6 +118,11 @@ export default function DeviceListSheet({
     toggleGeofenceVisibility(geofenceIds, checked);
   };
 
+  const handleRouteGroupCheckChange = (group: RouteGroup, checked: boolean) => {
+    const routeIds = group.routes.map(r => r.id);
+    toggleRouteVisibility(routeIds, checked);
+  };
+
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
@@ -102,9 +134,10 @@ export default function DeviceListSheet({
         </SheetHeader>
         <Tabs defaultValue="dispositivos" className="w-full flex flex-col flex-1 min-h-0">
           <div className="bg-primary p-2">
-              <TabsList className="grid w-full grid-cols-3 bg-primary-foreground/20">
+              <TabsList className="grid w-full grid-cols-4 bg-primary-foreground/20">
                   <TabsTrigger value="dispositivos" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Dispositivos</TabsTrigger>
                   <TabsTrigger value="geozonas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Geozonas</TabsTrigger>
+                  <TabsTrigger value="rutas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Rutas</TabsTrigger>
                   <TabsTrigger value="poi" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">POI</TabsTrigger>
               </TabsList>
               <div className="relative mt-2">
@@ -216,6 +249,55 @@ export default function DeviceListSheet({
                       })}
                       </Accordion>
                   )}
+              </TabsContent>
+              <TabsContent value="rutas" className="m-0">
+                {isLoading ? (
+                  <DeviceListSkeleton />
+                ) : (
+                  <Accordion type="multiple" defaultValue={routeGroups.map(g => g.id.toString())} className="w-full">
+                    {routeGroups.map((group) => {
+                      const allRoutesInGroupVisible = group.routes.every(item => visibleRouteIds.has(item.id));
+                      const someRoutesInGroupVisible = group.routes.some(item => visibleRouteIds.has(item.id));
+
+                      return (
+                        <AccordionItem value={group.id.toString()} key={`route-group-${group.id}`} className="border-b">
+                          <div className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
+                            <div className="flex items-center flex-1">
+                              <div onClick={(e) => e.stopPropagation()} className="pr-2">
+                                <Checkbox
+                                  id={`route-group-${group.id}`}
+                                  checked={allRoutesInGroupVisible ? true : (someRoutesInGroupVisible ? 'indeterminate' : false)}
+                                  onCheckedChange={(checked) => handleRouteGroupCheckChange(group, !!checked)}
+                                />
+                              </div>
+                              <AccordionTrigger className="p-0 flex-1">
+                                <label htmlFor={`route-group-${group.id}`} className="font-semibold cursor-pointer">{group.title}</label>
+                              </AccordionTrigger>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                                {group.routes.length}
+                              </span>
+                            </div>
+                          </div>
+                          <AccordionContent>
+                            <div className="flex flex-col">
+                              {group.routes.map((route) => (
+                                <RouteListItem
+                                  key={route.id}
+                                  route={route}
+                                  isVisible={visibleRouteIds.has(route.id)}
+                                  onVisibilityChange={toggleRouteVisibility}
+                                  onSelect={onSelectRoute}
+                                />
+                              ))}
+                            </div>
+                          </AccordionContent>
+                        </AccordionItem>
+                      )
+                    })}
+                  </Accordion>
+                )}
               </TabsContent>
           </ScrollArea>
         </Tabs>

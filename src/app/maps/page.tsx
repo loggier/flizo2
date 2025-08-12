@@ -13,8 +13,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices, getGeofences } from "@/services/flizo.service";
-import type { Device, DeviceGroup, Geofence } from "@/lib/types";
+import { getDevices, getGeofences, getRoutes } from "@/services/flizo.service";
+import type { Device, DeviceGroup, Geofence, Route } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
@@ -36,12 +36,15 @@ export default function MapsPage() {
   const [deviceGroups, setDeviceGroups] = useState<DeviceGroup[]>([]);
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [geofences, setGeofences] = useState<Geofence[]>([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
 
   const [showLabels, setShowLabels] = useState(true);
   const [showGeofences, setShowGeofences] = useState(true);
   
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
+  const [visibleRouteIds, setVisibleRouteIds] = useState<Set<number>>(new Set());
+
 
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,6 +72,11 @@ export default function MapsPage() {
     if (savedVisibleGeofenceIds) {
       setVisibleGeofenceIds(new Set(JSON.parse(savedVisibleGeofenceIds)));
     }
+    const savedVisibleRouteIds = localStorage.getItem('visibleRouteIds');
+    if (savedVisibleRouteIds) {
+      setVisibleRouteIds(new Set(JSON.parse(savedVisibleRouteIds)));
+    }
+
 
     const clickedDeviceId = sessionStorage.getItem("selectedDeviceId");
     if (clickedDeviceId) {
@@ -85,15 +93,18 @@ export default function MapsPage() {
       }
 
       try {
-        const [fetchedGroups, fetchedGeofences] = await Promise.all([
+        const [fetchedGroups, fetchedGeofences, fetchedRoutes] = await Promise.all([
           getDevices(token),
-          getGeofences(token)
+          getGeofences(token),
+          getRoutes(token)
         ]);
 
         setDeviceGroups(fetchedGroups);
         const flattenedDevices = fetchedGroups.flatMap(group => group.items);
         setAllDevices(flattenedDevices);
         setGeofences(fetchedGeofences);
+        setRoutes(fetchedRoutes);
+
 
         if (isInitialLoad) {
             if (!savedVisibleDeviceIds) {
@@ -101,6 +112,9 @@ export default function MapsPage() {
             }
             if (!savedVisibleGeofenceIds) {
                 setVisibleGeofenceIds(new Set(fetchedGeofences.map(g => g.id)));
+            }
+            if (!savedVisibleRouteIds) {
+                setVisibleRouteIds(new Set(fetchedRoutes.map(r => r.id)));
             }
         }
         
@@ -135,7 +149,7 @@ export default function MapsPage() {
     if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
-      map.panBy(0, -100);
+      map.panBy(0, 100);
     } else {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -164,6 +178,12 @@ export default function MapsPage() {
         localStorage.setItem('visibleGeofenceIds', JSON.stringify(Array.from(visibleGeofenceIds)));
     }
   }, [visibleGeofenceIds, isInitialLoad]);
+
+    useEffect(() => {
+    if (!isInitialLoad) {
+        localStorage.setItem('visibleRouteIds', JSON.stringify(Array.from(visibleRouteIds)));
+    }
+    }, [visibleRouteIds, isInitialLoad]);
 
   useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
@@ -213,6 +233,21 @@ export default function MapsPage() {
     });
   }, []);
 
+  const toggleRouteVisibility = useCallback((routeIds: number | number[], visible: boolean) => {
+    setVisibleRouteIds(prevVisibleIds => {
+        const newVisibleIds = new Set(prevVisibleIds);
+        const ids = Array.isArray(routeIds) ? routeIds : [routeIds];
+        
+        if (visible) {
+            ids.forEach(id => newVisibleIds.add(id));
+        } else {
+            ids.forEach(id => newVisibleIds.delete(id));
+        }
+        
+        return newVisibleIds;
+    });
+  }, []);
+
   const handleSelectDevice = (device: Device) => {
     if (device.lat && device.lng) {
       setSelectedDeviceId(device.id);
@@ -245,6 +280,18 @@ export default function MapsPage() {
       bounds.union(circle.getBounds()!);
     }
   
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, 50); // 50px padding
+      setIsDeviceListOpen(false);
+    }
+  };
+
+  const handleSelectRoute = (route: Route) => {
+    if (!map || !route.coordinates || route.coordinates.length === 0) return;
+
+    const bounds = new google.maps.LatLngBounds();
+    route.coordinates.forEach(coord => bounds.extend(coord));
+
     if (!bounds.isEmpty()) {
       map.fitBounds(bounds, 50); // 50px padding
       setIsDeviceListOpen(false);
@@ -306,6 +353,7 @@ export default function MapsPage() {
 
   const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
   const visibleGeofences = geofences.filter(g => visibleGeofenceIds.has(g.id));
+  const visibleRoutes = routes.filter(r => visibleRouteIds.has(r.id));
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
 
   return (
@@ -317,6 +365,7 @@ export default function MapsPage() {
         heading={heading}
         devices={visibleDevices}
         geofences={showGeofences ? visibleGeofences : []}
+        routes={visibleRoutes}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
@@ -355,6 +404,10 @@ export default function MapsPage() {
         visibleGeofenceIds={visibleGeofenceIds}
         toggleGeofenceVisibility={toggleGeofenceVisibility}
         onSelectGeofence={handleSelectGeofence}
+        routes={routes}
+        visibleRouteIds={visibleRouteIds}
+        toggleRouteVisibility={toggleRouteVisibility}
+        onSelectRoute={handleSelectRoute}
         isLoading={isLoading}
       />
        <VehicleDetailsSheet

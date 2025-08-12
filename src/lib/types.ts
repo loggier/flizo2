@@ -1,6 +1,7 @@
 
 
 
+
 export interface Sensor {
   id: number;
   name: string;
@@ -173,4 +174,19 @@ export interface Device {
     id: number;
     title: string;
     geofences: Geofence[];
+  }
+
+  export interface Route {
+    id: number;
+    group_id: number | null;
+    active: number;
+    name: string;
+    color: string;
+    coordinates: { lat: number, lng: number }[];
+  }
+
+  export interface RouteGroup {
+      id: number;
+      title: string;
+      routes: Route[];
   }
