@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
-import type { Device, DeviceGroup, Geofence, GeofenceGroup, Route, RouteGroup } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, Route } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
 import { ScrollArea } from "../ui/scroll-area";
 import { DeviceListSkeleton } from "./device-list-skeleton";
@@ -62,41 +62,15 @@ export default function DeviceListSheet({
 }: DeviceListSheetProps) {
   const [searchTerm, setSearchTerm] = useState("");
   
-  const geofenceGroups = useMemo(() => {
-    const groups: { [key: string]: GeofenceGroup } = {};
-    const filteredGeofences = geofences.filter(geofence => 
+  const filteredGeofences = useMemo(() => 
+    geofences.filter(geofence => 
       geofence.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    ), [geofences, searchTerm]);
 
-    filteredGeofences.forEach(geofence => {
-      const groupId = geofence.group_id || 0;
-      if (!groups[groupId]) {
-        const groupTitle = deviceGroups.find(dg => dg.id === groupId)?.title || (groupId === 0 ? "Sin grupo" : `Grupo ${groupId}`);
-        groups[groupId] = { id: groupId, title: groupTitle, geofences: [] };
-      }
-      groups[groupId].geofences.push(geofence);
-    });
-
-    return Object.values(groups);
-  }, [geofences, deviceGroups, searchTerm]);
-
-  const routeGroups = useMemo(() => {
-    const groups: { [key: string]: RouteGroup } = {};
-    const filteredRoutes = routes.filter(route =>
+  const filteredRoutes = useMemo(() =>
+    routes.filter(route =>
       route.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  
-    filteredRoutes.forEach(route => {
-      const groupId = route.group_id || 0;
-      if (!groups[groupId]) {
-        const groupTitle = deviceGroups.find(dg => dg.id === groupId)?.title || (groupId === 0 ? "Sin grupo" : `Grupo ${groupId}`);
-        groups[groupId] = { id: groupId, title: groupTitle, routes: [] };
-      }
-      groups[groupId].routes.push(route);
-    });
-  
-    return Object.values(groups);
-  }, [routes, deviceGroups, searchTerm]);
+    ), [routes, searchTerm]);
 
 
   const filteredDeviceGroups = deviceGroups
@@ -113,15 +87,22 @@ export default function DeviceListSheet({
     toggleDeviceVisibility(deviceIds, checked);
   };
 
-  const handleGeofenceGroupCheckChange = (group: GeofenceGroup, checked: boolean) => {
-    const geofenceIds = group.geofences.map(g => g.id);
+  const handleToggleAllGeofences = (checked: boolean) => {
+    const geofenceIds = filteredGeofences.map(g => g.id);
     toggleGeofenceVisibility(geofenceIds, checked);
   };
 
-  const handleRouteGroupCheckChange = (group: RouteGroup, checked: boolean) => {
-    const routeIds = group.routes.map(r => r.id);
+  const handleToggleAllRoutes = (checked: boolean) => {
+    const routeIds = filteredRoutes.map(r => r.id);
     toggleRouteVisibility(routeIds, checked);
   };
+
+  const allFilteredGeofencesVisible = filteredGeofences.length > 0 && filteredGeofences.every(g => visibleGeofenceIds.has(g.id));
+  const someFilteredGeofencesVisible = filteredGeofences.some(g => visibleGeofenceIds.has(g.id));
+
+  const allFilteredRoutesVisible = filteredRoutes.length > 0 && filteredRoutes.every(r => visibleRouteIds.has(r.id));
+  const someFilteredRoutesVisible = filteredRoutes.some(r => visibleRouteIds.has(r.id));
+
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -205,98 +186,64 @@ export default function DeviceListSheet({
                   {isLoading ? (
                       <DeviceListSkeleton />
                   ) : (
-                      <Accordion type="multiple" defaultValue={geofenceGroups.map(g => g.id.toString())} className="w-full">
-                      {geofenceGroups.map((group) => {
-                          const allGeofencesInGroupVisible = group.geofences.every(item => visibleGeofenceIds.has(item.id));
-                          const someGeofencesInGroupVisible = group.geofences.some(item => visibleGeofenceIds.has(item.id));
-
-                          return (
-                          <AccordionItem value={group.id.toString()} key={`geofence-group-${group.id}`} className="border-b">
-                              <div className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
-                                  <div className="flex items-center flex-1">
-                                      <div onClick={(e) => e.stopPropagation()} className="pr-2">
-                                          <Checkbox 
-                                              id={`geofence-group-${group.id}`}
-                                              checked={allGeofencesInGroupVisible ? true : (someGeofencesInGroupVisible ? 'indeterminate' : false)}
-                                              onCheckedChange={(checked) => handleGeofenceGroupCheckChange(group, !!checked)}
-                                          />
-                                      </div>
-                                      <AccordionTrigger className="p-0 flex-1">
-                                          <label htmlFor={`geofence-group-${group.id}`} className="font-semibold cursor-pointer">{group.title}</label>
-                                      </AccordionTrigger>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                  <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                                      {group.geofences.length}
-                                  </span>
-                                  </div>
-                              </div>
-                              <AccordionContent>
-                                  <div className="flex flex-col">
-                                      {group.geofences.map((geofence) => (
-                                          <GeofenceListItem
-                                              key={geofence.id}
-                                              geofence={geofence}
-                                              isVisible={visibleGeofenceIds.has(geofence.id)}
-                                              onVisibilityChange={toggleGeofenceVisibility}
-                                              onSelect={onSelectGeofence}
-                                          />
-                                      ))}
-                                  </div>
-                              </AccordionContent>
-                          </AccordionItem>
-                          )
-                      })}
-                      </Accordion>
+                    <div>
+                      <div className="flex items-center justify-between px-4 py-2 border-b">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id="toggle-all-geofences"
+                            checked={allFilteredGeofencesVisible ? true : (someFilteredGeofencesVisible ? 'indeterminate' : false)}
+                            onCheckedChange={(checked) => handleToggleAllGeofences(!!checked)}
+                          />
+                          <label htmlFor="toggle-all-geofences" className="font-semibold">Mostrar todas</label>
+                        </div>
+                        <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                          {filteredGeofences.length}
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        {filteredGeofences.map((geofence) => (
+                          <GeofenceListItem
+                            key={geofence.id}
+                            geofence={geofence}
+                            isVisible={visibleGeofenceIds.has(geofence.id)}
+                            onVisibilityChange={toggleGeofenceVisibility}
+                            onSelect={onSelectGeofence}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
               </TabsContent>
               <TabsContent value="rutas" className="m-0">
                 {isLoading ? (
                   <DeviceListSkeleton />
                 ) : (
-                  <Accordion type="multiple" defaultValue={routeGroups.map(g => g.id.toString())} className="w-full">
-                    {routeGroups.map((group) => {
-                      const allRoutesInGroupVisible = group.routes.every(item => visibleRouteIds.has(item.id));
-                      const someRoutesInGroupVisible = group.routes.some(item => visibleRouteIds.has(item.id));
-
-                      return (
-                        <AccordionItem value={group.id.toString()} key={`route-group-${group.id}`} className="border-b">
-                          <div className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
-                            <div className="flex items-center flex-1">
-                              <div onClick={(e) => e.stopPropagation()} className="pr-2">
-                                <Checkbox
-                                  id={`route-group-${group.id}`}
-                                  checked={allRoutesInGroupVisible ? true : (someRoutesInGroupVisible ? 'indeterminate' : false)}
-                                  onCheckedChange={(checked) => handleRouteGroupCheckChange(group, !!checked)}
-                                />
-                              </div>
-                              <AccordionTrigger className="p-0 flex-1">
-                                <label htmlFor={`route-group-${group.id}`} className="font-semibold cursor-pointer">{group.title}</label>
-                              </AccordionTrigger>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-                                {group.routes.length}
-                              </span>
-                            </div>
-                          </div>
-                          <AccordionContent>
-                            <div className="flex flex-col">
-                              {group.routes.map((route) => (
-                                <RouteListItem
-                                  key={route.id}
-                                  route={route}
-                                  isVisible={visibleRouteIds.has(route.id)}
-                                  onVisibilityChange={toggleRouteVisibility}
-                                  onSelect={onSelectRoute}
-                                />
-                              ))}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      )
-                    })}
-                  </Accordion>
+                  <div>
+                    <div className="flex items-center justify-between px-4 py-2 border-b">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="toggle-all-routes"
+                          checked={allFilteredRoutesVisible ? true : (someFilteredRoutesVisible ? 'indeterminate' : false)}
+                          onCheckedChange={(checked) => handleToggleAllRoutes(!!checked)}
+                        />
+                        <label htmlFor="toggle-all-routes" className="font-semibold">Mostrar todas</label>
+                      </div>
+                      <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                        {filteredRoutes.length}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                        {filteredRoutes.map((route) => (
+                          <RouteListItem
+                            key={route.id}
+                            route={route}
+                            isVisible={visibleRouteIds.has(route.id)}
+                            onVisibilityChange={toggleRouteVisibility}
+                            onSelect={onSelectRoute}
+                          />
+                        ))}
+                    </div>
+                  </div>
                 )}
               </TabsContent>
           </ScrollArea>
