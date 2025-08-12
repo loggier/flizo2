@@ -13,8 +13,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices } from "@/services/flizo.service";
-import type { Device, DeviceGroup } from "@/lib/types";
+import { getDevices, getGeofences } from "@/services/flizo.service";
+import type { Device, DeviceGroup, Geofence } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
@@ -32,15 +32,22 @@ export default function MapsPage() {
   const [userPosition, setUserPosition] = useState<google.maps.LatLngLiteral | null>(null);
   const [heading, setHeading] = useState(0);
   const { t } = useLanguage();
+  
   const [deviceGroups, setDeviceGroups] = useState<DeviceGroup[]>([]);
   const [allDevices, setAllDevices] = useState<Device[]>([]);
+  const [geofences, setGeofences] = useState<Geofence[]>([]);
+
   const [showLabels, setShowLabels] = useState(true);
+  
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
+  const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
+
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
+    // Load preferences from localStorage
     const savedMapType = localStorage.getItem("mapType") as MapType;
     if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
       setMapType(savedMapType);
@@ -49,6 +56,14 @@ export default function MapsPage() {
     if (savedShowLabels) {
       setShowLabels(JSON.parse(savedShowLabels));
     }
+    const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
+    if (savedVisibleDeviceIds) {
+        setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
+    }
+     const savedVisibleGeofenceIds = localStorage.getItem('visibleGeofenceIds');
+    if (savedVisibleGeofenceIds) {
+      setVisibleGeofenceIds(new Set(JSON.parse(savedVisibleGeofenceIds)));
+    }
 
     const clickedDeviceId = sessionStorage.getItem("selectedDeviceId");
     if (clickedDeviceId) {
@@ -56,7 +71,7 @@ export default function MapsPage() {
         sessionStorage.removeItem("selectedDeviceId");
     }
 
-    const fetchDevices = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
       if (!token) {
@@ -65,24 +80,29 @@ export default function MapsPage() {
       }
 
       try {
-        const fetchedGroups = await getDevices(token);
+        const [fetchedGroups, fetchedGeofences] = await Promise.all([
+          getDevices(token),
+          getGeofences(token)
+        ]);
+
         setDeviceGroups(fetchedGroups);
         const flattenedDevices = fetchedGroups.flatMap(group => group.items);
         setAllDevices(flattenedDevices);
+        setGeofences(fetchedGeofences);
 
         if (isInitialLoad) {
-            if (localStorage.getItem('visibleDeviceIds')) {
-                const savedVisibleDeviceIds = JSON.parse(localStorage.getItem('visibleDeviceIds')!);
-                setVisibleDeviceIds(new Set(savedVisibleDeviceIds));
-            } else {
+            if (!savedVisibleDeviceIds) {
                 setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+            }
+            if (!savedVisibleGeofenceIds) {
+                setVisibleGeofenceIds(new Set(fetchedGeofences.map(g => g.id)));
             }
         }
         
         localStorage.setItem('devices', JSON.stringify(flattenedDevices));
         
       } catch (error) {
-        console.error("Failed to fetch devices:", error);
+        console.error("Failed to fetch data:", error);
         if ((error as Error).message === 'Unauthorized') {
           localStorage.clear();
           sessionStorage.clear();
@@ -96,22 +116,21 @@ export default function MapsPage() {
       }
     };
 
-    fetchDevices();
-    const intervalId = setInterval(fetchDevices, 30000); 
+    fetchData();
+    const intervalId = setInterval(fetchData, 30000); 
 
     return () => clearInterval(intervalId);
   }, [router, isInitialLoad]);
 
   useEffect(() => {
-    if (!map) return;
+    if (!map || isInitialLoad) return;
   
     const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
   
     if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
-      // Pan up to make space for the details sheet
-      map.panBy(0, 100); 
+      map.panBy(0, 100);
     } else {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -127,13 +146,19 @@ export default function MapsPage() {
         }
       }
     }
-  }, [map, allDevices, selectedDeviceId, visibleDeviceIds]);
+  }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad]);
 
   useEffect(() => {
-    if (allDevices.length > 0) { // Ensure we don't save an empty set on initial load
+    if (!isInitialLoad) {
         localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
     }
-  }, [visibleDeviceIds, allDevices]);
+  }, [visibleDeviceIds, isInitialLoad]);
+
+  useEffect(() => {
+    if (!isInitialLoad) {
+        localStorage.setItem('visibleGeofenceIds', JSON.stringify(Array.from(visibleGeofenceIds)));
+    }
+  }, [visibleGeofenceIds, isInitialLoad]);
 
   useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
@@ -168,6 +193,21 @@ export default function MapsPage() {
     });
   }, []);
 
+  const toggleGeofenceVisibility = useCallback((geofenceIds: number | number[], visible: boolean) => {
+    setVisibleGeofenceIds(prevVisibleIds => {
+      const newVisibleIds = new Set(prevVisibleIds);
+      const ids = Array.isArray(geofenceIds) ? geofenceIds : [geofenceIds];
+      
+      if (visible) {
+        ids.forEach(id => newVisibleIds.add(id));
+      } else {
+        ids.forEach(id => newVisibleIds.delete(id));
+      }
+      
+      return newVisibleIds;
+    });
+  }, []);
+
   const handleSelectDevice = (device: Device) => {
     if (device.lat && device.lng) {
       setSelectedDeviceId(device.id);
@@ -177,6 +217,33 @@ export default function MapsPage() {
 
   const handleDeselectDevice = () => {
     setSelectedDeviceId(null);
+  };
+  
+  const handleSelectGeofence = (geofence: Geofence) => {
+    if (!map) return;
+  
+    const bounds = new google.maps.LatLngBounds();
+  
+    if (geofence.type === 'polygon' && geofence.coordinates) {
+      try {
+        const coords = JSON.parse(geofence.coordinates);
+        coords.forEach((coord: { lat: number, lng: number }) => bounds.extend(coord));
+      } catch (e) {
+        console.error("Error parsing geofence coordinates:", e);
+        return;
+      }
+    } else if (geofence.type === 'circle' && geofence.center && geofence.radius) {
+      const circle = new google.maps.Circle({
+        center: geofence.center,
+        radius: geofence.radius,
+      });
+      bounds.union(circle.getBounds()!);
+    }
+  
+    if (!bounds.isEmpty()) {
+      map.fitBounds(bounds, 50); // 50px padding
+      setIsDeviceListOpen(false);
+    }
   };
 
   const handleLocateUser = () => {
@@ -225,6 +292,7 @@ export default function MapsPage() {
   ];
 
   const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
+  const visibleGeofences = geofences.filter(g => visibleGeofenceIds.has(g.id));
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
 
   return (
@@ -235,6 +303,7 @@ export default function MapsPage() {
         userPosition={userPosition} 
         heading={heading}
         devices={visibleDevices}
+        geofences={visibleGeofences}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
@@ -267,7 +336,11 @@ export default function MapsPage() {
         visibleDeviceIds={visibleDeviceIds}
         toggleDeviceVisibility={toggleDeviceVisibility}
         onSelectDevice={handleSelectDevice}
-        isLoading={isLoading && isInitialLoad}
+        geofences={geofences}
+        visibleGeofenceIds={visibleGeofenceIds}
+        toggleGeofenceVisibility={toggleGeofenceVisibility}
+        onSelectGeofence={handleSelectGeofence}
+        isLoading={isLoading}
       />
        <VehicleDetailsSheet
         device={selectedDevice}
@@ -294,9 +367,4 @@ export default function MapsPage() {
       </Sheet>
     </div>
   );
-    
-
-
-
-
-    
+}

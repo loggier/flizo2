@@ -4,8 +4,9 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
-import type { Device } from '@/lib/types';
+import type { Device, Geofence } from '@/lib/types';
 import DeviceMarker from './device-marker';
+import GeofenceMarker from './geofence-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 
 const containerStyle = {
@@ -24,12 +25,13 @@ interface MapComponentProps {
     userPosition: google.maps.LatLngLiteral | null;
     heading: number;
     devices: Device[];
+    geofences: Geofence[];
     showLabels: boolean;
     onSelectDevice: (device: Device) => void;
     onDeselectDevice: () => void;
 }
 
-function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, showLabels, onSelectDevice, onDeselectDevice }: MapComponentProps) {
+function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, geofences, showLabels, onSelectDevice, onDeselectDevice }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -178,6 +180,9 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, show
               showLabel={showLabels}
               onSelect={onSelectDevice}
             />
+        ))}
+         {geofences.map(geofence => (
+          <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
         ))}
       </GoogleMap>
   );

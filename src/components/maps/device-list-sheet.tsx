@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Sheet,
   SheetContent,
@@ -22,7 +22,6 @@ import type { Device, DeviceGroup, Geofence, GeofenceGroup } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
 import { ScrollArea } from "../ui/scroll-area";
 import { DeviceListSkeleton } from "./device-list-skeleton";
-import { getGeofences } from "@/services/flizo.service";
 import GeofenceListItem from "./geofence-list-item";
 
 interface DeviceListSheetProps {
@@ -32,6 +31,10 @@ interface DeviceListSheetProps {
   visibleDeviceIds: Set<number>;
   toggleDeviceVisibility: (deviceIds: number | number[], visible: boolean) => void;
   onSelectDevice: (device: Device) => void;
+  geofences: Geofence[];
+  visibleGeofenceIds: Set<number>;
+  toggleGeofenceVisibility: (geofenceIds: number | number[], visible: boolean) => void;
+  onSelectGeofence: (geofence: Geofence) => void;
   isLoading: boolean;
 }
 
@@ -42,47 +45,31 @@ export default function DeviceListSheet({
   visibleDeviceIds,
   toggleDeviceVisibility,
   onSelectDevice,
+  geofences,
+  visibleGeofenceIds,
+  toggleGeofenceVisibility,
+  onSelectGeofence,
   isLoading,
 }: DeviceListSheetProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [geofenceGroups, setGeofenceGroups] = useState<GeofenceGroup[]>([]);
-  const [isGeofenceLoading, setIsGeofenceLoading] = useState(true);
-  const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
+  
+  const geofenceGroups = useMemo(() => {
+    const groups: { [key: string]: GeofenceGroup } = {};
+    const filteredGeofences = geofences.filter(geofence => 
+      geofence.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  useEffect(() => {
-    const fetchGeofences = async () => {
-      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-      if (!token) return;
-
-      setIsGeofenceLoading(true);
-      try {
-        const geofences = await getGeofences(token);
-        
-        const groups: { [key: string]: GeofenceGroup } = {};
-
-        geofences.forEach(geofence => {
-          const groupId = geofence.group_id || 0;
-          if (!groups[groupId]) {
-            // Find a better name than group.title
-            const groupTitle = deviceGroups.find(dg => dg.id === groupId)?.title || `Grupo ${groupId}`
-            groups[groupId] = { id: groupId, title: groupTitle, geofences: [] };
-          }
-          groups[groupId].geofences.push(geofence);
-        });
-
-        setGeofenceGroups(Object.values(groups));
-        setVisibleGeofenceIds(new Set(geofences.map(g => g.id)))
-      } catch (error) {
-        console.error("Failed to fetch geofences:", error);
-      } finally {
-        setIsGeofenceLoading(false);
+    filteredGeofences.forEach(geofence => {
+      const groupId = geofence.group_id || 0;
+      if (!groups[groupId]) {
+        const groupTitle = deviceGroups.find(dg => dg.id === groupId)?.title || (groupId === 0 ? "Sin grupo" : `Grupo ${groupId}`);
+        groups[groupId] = { id: groupId, title: groupTitle, geofences: [] };
       }
-    };
+      groups[groupId].geofences.push(geofence);
+    });
 
-    if (isOpen) {
-      fetchGeofences();
-    }
-  }, [isOpen, deviceGroups]);
+    return Object.values(groups);
+  }, [geofences, deviceGroups, searchTerm]);
 
 
   const filteredDeviceGroups = deviceGroups
@@ -97,21 +84,6 @@ export default function DeviceListSheet({
   const handleGroupCheckChange = (group: DeviceGroup, checked: boolean) => {
     const deviceIds = group.items.map(d => d.id);
     toggleDeviceVisibility(deviceIds, checked);
-  };
-
-  const toggleGeofenceVisibility = (geofenceIds: number | number[], visible: boolean) => {
-    setVisibleGeofenceIds(prevVisibleIds => {
-      const newVisibleIds = new Set(prevVisibleIds);
-      const ids = Array.isArray(geofenceIds) ? geofenceIds : [geofenceIds];
-      
-      if (visible) {
-        ids.forEach(id => newVisibleIds.add(id));
-      } else {
-        ids.forEach(id => newVisibleIds.delete(id));
-      }
-      
-      return newVisibleIds;
-    });
   };
 
   const handleGeofenceGroupCheckChange = (group: GeofenceGroup, checked: boolean) => {
@@ -148,7 +120,7 @@ export default function DeviceListSheet({
           </div>
 
           <ScrollArea className="flex-1 bg-white text-black">
-              <TabsContent value="dispositivos">
+              <TabsContent value="dispositivos" className="m-0">
                 {isLoading ? (
                   <DeviceListSkeleton />
                 ) : (
@@ -196,8 +168,8 @@ export default function DeviceListSheet({
                   </Accordion>
                 )}
               </TabsContent>
-              <TabsContent value="geozonas">
-                  {isGeofenceLoading ? (
+              <TabsContent value="geozonas" className="m-0">
+                  {isLoading ? (
                       <DeviceListSkeleton />
                   ) : (
                       <Accordion type="multiple" defaultValue={geofenceGroups.map(g => g.id.toString())} className="w-full">
@@ -234,6 +206,7 @@ export default function DeviceListSheet({
                                               geofence={geofence}
                                               isVisible={visibleGeofenceIds.has(geofence.id)}
                                               onVisibilityChange={toggleGeofenceVisibility}
+                                              onSelect={onSelectGeofence}
                                           />
                                       ))}
                                   </div>

@@ -10,6 +10,7 @@ interface GeofenceListItemProps {
   geofence: Geofence;
   isVisible: boolean;
   onVisibilityChange: (id: number, visible: boolean) => void;
+  onSelect: (geofence: Geofence) => void;
 }
 
 function calculatePolygonArea(coordinates: { lat: number; lng: number }[]): number {
@@ -32,7 +33,7 @@ function calculatePolygonArea(coordinates: { lat: number; lng: number }[]): numb
 }
   
 
-export default function GeofenceListItem({ geofence, isVisible, onVisibilityChange }: GeofenceListItemProps) {
+export default function GeofenceListItem({ geofence, isVisible, onVisibilityChange, onSelect }: GeofenceListItemProps) {
     const [area, setArea] = useState<string>("Calculando...");
 
     useEffect(() => {
@@ -52,18 +53,17 @@ export default function GeofenceListItem({ geofence, isVisible, onVisibilityChan
     }, [geofence]);
 
     return (
-        <div className="relative p-4 pr-16 border-b border-gray-200">
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                <Checkbox 
-                    id={`geofence-vis-${geofence.id}`}
-                    checked={isVisible}
-                    onCheckedChange={(checked) => onVisibilityChange(geofence.id, !!checked)}
-                />
-            </div>
-            
+        <div className="relative p-4 pr-4 border-b border-gray-200 cursor-pointer" onClick={() => onSelect(geofence)}>
             <div className="flex items-center gap-3">
-                 <GeofenceIcon className="h-6 w-6 text-gray-500" style={{ color: geofence.polygon_color }} />
-                 <div>
+                 <div onClick={(e) => e.stopPropagation()} className="pr-2">
+                    <Checkbox 
+                        id={`geofence-vis-${geofence.id}`}
+                        checked={isVisible}
+                        onCheckedChange={(checked) => onVisibilityChange(geofence.id, !!checked)}
+                    />
+                 </div>
+                 <GeofenceIcon className="h-6 w-6 text-gray-500 flex-shrink-0" style={{ color: geofence.polygon_color }} />
+                 <div className="flex-1">
                     <p className="font-semibold text-gray-800">{geofence.name}</p>
                     <p className="text-sm text-primary">{area}</p>
                  </div>
