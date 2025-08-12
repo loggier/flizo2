@@ -154,7 +154,7 @@ export default function MapsPage() {
     if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
-      map.panBy(0, 100);
+      map.panBy(0, -100);
     } else {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -422,7 +422,7 @@ export default function MapsPage() {
         routes={routes}
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
-        onSelectRoute={onSelectRoute}
+        onSelectRoute={handleSelectRoute}
         isLoading={isLoading}
       />
        <VehicleDetailsSheet
