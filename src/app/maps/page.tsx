@@ -38,6 +38,7 @@ export default function MapsPage() {
   const [geofences, setGeofences] = useState<Geofence[]>([]);
 
   const [showLabels, setShowLabels] = useState(true);
+  const [showGeofences, setShowGeofences] = useState(true);
   
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
@@ -55,6 +56,10 @@ export default function MapsPage() {
     const savedShowLabels = localStorage.getItem("showLabels");
     if (savedShowLabels) {
       setShowLabels(JSON.parse(savedShowLabels));
+    }
+    const savedShowGeofences = localStorage.getItem("showGeofences");
+    if (savedShowGeofences) {
+      setShowGeofences(JSON.parse(savedShowGeofences));
     }
     const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
     if (savedVisibleDeviceIds) {
@@ -130,7 +135,7 @@ export default function MapsPage() {
     if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
-      map.panBy(0, 100);
+      map.panBy(0, -100);
     } else {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -285,6 +290,14 @@ export default function MapsPage() {
     });
   }
 
+  const handleToggleGeofences = () => {
+    setShowGeofences(prev => {
+        const newState = !prev;
+        localStorage.setItem("showGeofences", JSON.stringify(newState));
+        return newState;
+    });
+  }
+
   const layerOptions: { id: MapType; label: string }[] = [
     { id: "OSM", label: t.bottomNav.map },
     { id: "SATELLITE", label: "Satélite" },
@@ -303,7 +316,7 @@ export default function MapsPage() {
         userPosition={userPosition} 
         heading={heading}
         devices={visibleDevices}
-        geofences={visibleGeofences}
+        geofences={showGeofences ? visibleGeofences : []}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
@@ -328,6 +341,8 @@ export default function MapsPage() {
       <MapControls 
         onLayerChange={handleLayerChange}
         onLocateUser={handleLocateUser}
+        onToggleGeofences={handleToggleGeofences}
+        showGeofences={showGeofences}
       />
       <DeviceListSheet 
         isOpen={isDeviceListOpen} 
