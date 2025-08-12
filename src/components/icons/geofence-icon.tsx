@@ -13,13 +13,8 @@ export function GeofenceIcon({ className, ...props }: React.SVGProps<SVGSVGEleme
       className={cn(className)}
       {...props}
     >
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
-      <path d="M2 7v5"></path>
-      <path d="M12 12v10"></path>
-      <path d="M22 7v5"></path>
-      <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-      <path d="M2 17l10 5 10-5"></path>
-      <path d="M2 12l10 5 10-5"></path>
+      <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 9.8c0 7.3-8 11.8-8 11.8z" />
+      <circle cx="12" cy="10" r="3" />
     </svg>
   );
 }
