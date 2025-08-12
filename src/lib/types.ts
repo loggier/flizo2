@@ -1,5 +1,6 @@
 
 
+
 export interface Sensor {
   id: number;
   name: string;
@@ -149,5 +150,27 @@ export interface Device {
     items: Device[];
   }
 
+  export interface Geofence {
+    id: number;
+    user_id: number;
+    group_id: number | null;
+    active: number;
+    name: string;
+    coordinates: string;
+    polygon_color: string;
+    created_at: string;
+    updated_at: string;
+    type: 'polygon' | 'circle';
+    radius: number | null;
+    center: { lat: number, lng: number } | null;
+    device_id: null | number;
+    speed_limit: null | number;
+    diem_rate_id: null | number;
+    area?: number;
+  }
 
-    
+  export interface GeofenceGroup {
+    id: number;
+    title: string;
+    geofences: Geofence[];
+  }
