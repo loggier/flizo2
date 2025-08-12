@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, useGoogleMap } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route } from '@/lib/types';
 import DeviceMarker from './device-marker';
@@ -32,6 +32,27 @@ interface MapComponentProps {
     onSelectDevice: (device: Device) => void;
     onDeselectDevice: () => void;
 }
+
+function MapWrapper({ children, ...props }: Omit<MapComponentProps, 'onMapLoad' | 'userPosition' | 'heading' | 'devices' | 'geofences' | 'routes' | 'showLabels' | 'onSelectDevice' | 'onDeselectDevice'> & { children: React.ReactNode }) {
+    return (
+        <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={center}
+            zoom={10}
+            onLoad={props.onLoad}
+            onUnmount={props.onUnmount}
+            onClick={props.onClick}
+            options={{
+                disableDefaultUI: true,
+                scrollwheel: true,
+                streetViewControl: false,
+            }}
+        >
+            {children}
+        </GoogleMap>
+    )
+}
+
 
 function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, geofences, routes, showLabels, onSelectDevice, onDeselectDevice }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);

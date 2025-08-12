@@ -63,15 +63,15 @@ export default function MapsPage() {
       setShowLabels(JSON.parse(savedShowLabels));
     }
     const savedShowGeofences = localStorage.getItem("showGeofences");
-    if (savedShowGeofences) {
-      setShowGeofences(JSON.parse(savedShowGeofences));
+    if (savedShowGeofences !== null) {
+        setShowGeofences(JSON.parse(savedShowGeofences));
     }
     const savedShowRoutes = localStorage.getItem("showRoutes");
-    if (savedShowRoutes) {
-      setShowRoutes(JSON.parse(savedShowRoutes));
+    if (savedShowRoutes !== null) {
+        setShowRoutes(JSON.parse(savedShowRoutes));
     }
     const savedAutoCenter = localStorage.getItem("autoCenter");
-    if (savedAutoCenter) {
+    if (savedAutoCenter !== null) {
       setAutoCenter(JSON.parse(savedAutoCenter));
     }
     const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
@@ -378,8 +378,9 @@ export default function MapsPage() {
   ];
 
   const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
-  const visibleGeofences = geofences.filter(g => visibleGeofenceIds.has(g.id));
-  const visibleRoutes = routes.filter(r => visibleRouteIds.has(r.id));
+  const geofencesToRender = showGeofences ? geofences.filter(g => visibleGeofenceIds.has(g.id)) : [];
+  const routesToRender = showRoutes ? routes.filter(r => visibleRouteIds.has(r.id)) : [];
+
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
 
   return (
@@ -390,8 +391,8 @@ export default function MapsPage() {
         userPosition={userPosition} 
         heading={heading}
         devices={visibleDevices}
-        geofences={showGeofences ? visibleGeofences : []}
-        routes={showRoutes ? visibleRoutes : []}
+        geofences={geofencesToRender}
+        routes={routesToRender}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}

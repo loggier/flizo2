@@ -1,9 +1,10 @@
 
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Polyline, OverlayView } from '@react-google-maps/api';
 import type { Route } from '@/lib/types';
+import { useGoogleMap } from '@react-google-maps/api';
 
 interface RouteMarkerProps {
   route: Route;
@@ -17,9 +18,33 @@ const getCenter = (coordinates: {lat: number, lng: number}[]): google.maps.LatLn
 }
 
 const RouteMarker = ({ route }: RouteMarkerProps) => {
+    const map = useGoogleMap();
     const { color, coordinates, name } = route;
 
     const center = useMemo(() => getCenter(coordinates), [coordinates]);
+    
+    const polyline = useMemo(() => {
+        if (!map) return null;
+        const pl = new google.maps.Polyline({
+            path: coordinates,
+            strokeColor: color,
+            strokeOpacity: 0.8,
+            strokeWeight: 4,
+            zIndex: 50,
+        });
+        return pl;
+    }, [coordinates, color, map]);
+
+    useEffect(() => {
+        if (polyline && map) {
+            polyline.setMap(map);
+        }
+        return () => {
+            if (polyline) {
+                polyline.setMap(null);
+            }
+        };
+    }, [polyline, map]);
 
     if (!center) return null;
 
@@ -37,23 +62,12 @@ const RouteMarker = ({ route }: RouteMarkerProps) => {
       };
 
     return (
-        <>
-            <Polyline
-                path={coordinates}
-                options={{
-                    strokeColor: color,
-                    strokeOpacity: 0.8,
-                    strokeWeight: 4,
-                    zIndex: 50, 
-                }}
-            />
-             <OverlayView
-                position={center}
-                mapPaneName={OverlayView.OVERLAY_LAYER}
-            >
-                <div style={labelStyle}>{name}</div>
-            </OverlayView>
-        </>
+        <OverlayView
+            position={center}
+            mapPaneName={OverlayView.OVERLAY_LAYER}
+        >
+            <div style={labelStyle}>{name}</div>
+        </OverlayView>
     );
 };
 

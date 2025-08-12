@@ -1,10 +1,10 @@
 
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { Polygon, Circle, OverlayView } from '@react-google-maps/api';
 import type { Geofence } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { useGoogleMap } from '@react-google-maps/api';
 
 interface GeofenceMarkerProps {
   geofence: Geofence;
@@ -37,6 +37,7 @@ const getCenter = (geofence: Geofence): google.maps.LatLng | null => {
 }
 
 const GeofenceMarker = ({ geofence }: GeofenceMarkerProps) => {
+    const map = useGoogleMap();
     const { polygon_color, type } = geofence;
 
     const fillColor = useMemo(() => hexToRgba(polygon_color, 0.3), [polygon_color]);
