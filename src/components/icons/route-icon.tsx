@@ -4,19 +4,17 @@ import { cn } from "@/lib/utils";
 export function RouteIcon({ className, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      viewBox="0 0 124 124"
+      fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       className={cn(className)}
       {...props}
     >
-      <path d="M4 19.5a2.5 2.5 0 0 1 0-5c1.58 0 2.5-1 2.5-2.5S5.58 9.5 4 9.5s-2.5 1-2.5 2.5S2.42 14.5 4 14.5c1.58 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5" />
-      <path d="M12 19.5a2.5 2.5 0 0 1 0-5c1.58 0 2.5-1 2.5-2.5s-1-2.5-2.5-2.5-2.5 1-2.5 2.5 1 2.5 2.5 2.5c1.58 0 2.5 1 2.5 2.5s-1 2.5-2.5 2.5" />
-      <path d="M20 19.5a2.5 2.5 0 0 1 0-5c1.58 0 2.5-1 2.5-2.5s-1-2.5-2.5-2.5-2.5 1-2.5 2.5 1 2.5 2.5 2.5c1.58 0 2.5 1 2.5 2.5S21.58 19.5 20 19.5" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M48.34 0.25h26.68l27.17 122.88H21.81L48.34 0.25zM59.95 7.96h3.93l0.54 13.55h-5.29L59.95 7.96zM58.64 33.12h6.55l0.86 19.21h-8.33L58.64 33.12zM56.85 63.86h9.84l1.14 19.21h-11.9L56.85 63.86zM55.68 94.71h12.53l0.99 21.71h-15.06l1.54-21.84z"
+      />
     </svg>
   );
 }
