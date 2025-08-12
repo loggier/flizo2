@@ -1,8 +1,7 @@
-
 "use client";
 
-import React, { useMemo, useEffect, useState } from 'react';
-import { Polygon, Circle, OverlayView } from '@react-google-maps/api';
+import React, { useMemo, useEffect } from 'react';
+import { Polygon, OverlayView, Circle } from '@react-google-maps/api';
 import type { Geofence } from '@/lib/types';
 import { useGoogleMap } from '@react-google-maps/api';
 
@@ -38,20 +37,58 @@ const getCenter = (geofence: Geofence): google.maps.LatLng | null => {
 
 const GeofenceMarker = ({ geofence }: GeofenceMarkerProps) => {
     const map = useGoogleMap();
-    const { polygon_color, type } = geofence;
+    const { polygon_color, type, coordinates, center: geofenceCenter, radius } = geofence;
 
     const fillColor = useMemo(() => hexToRgba(polygon_color, 0.3), [polygon_color]);
 
     const polygonPath = useMemo(() => {
-        if (type !== 'polygon' || !geofence.coordinates) return [];
+        if (type !== 'polygon' || !coordinates) return [];
         try {
-            return JSON.parse(geofence.coordinates);
+            return JSON.parse(coordinates);
         } catch (e) {
             console.error("Failed to parse polygon coordinates", e);
             return [];
         }
-    }, [type, geofence.coordinates]);
+    }, [type, coordinates]);
 
+    const polygon = useMemo(() => {
+        if (type !== 'polygon' || !map) return null;
+        return new google.maps.Polygon({
+            paths: polygonPath,
+            fillColor,
+            strokeColor: polygon_color,
+            strokeWeight: 2,
+        });
+    }, [polygonPath, fillColor, polygon_color, map, type]);
+
+    const circle = useMemo(() => {
+        if (type !== 'circle' || !map || !geofenceCenter || !radius) return null;
+        return new google.maps.Circle({
+            center: geofenceCenter,
+            radius: radius,
+            fillColor,
+            strokeColor: polygon_color,
+            strokeWeight: 2,
+        });
+    }, [geofenceCenter, radius, fillColor, polygon_color, map, type]);
+
+    useEffect(() => {
+        if (polygon && map) {
+            polygon.setMap(map);
+        }
+        if (circle && map) {
+            circle.setMap(map);
+        }
+        return () => {
+            if (polygon) {
+                polygon.setMap(null);
+            }
+            if (circle) {
+                circle.setMap(null);
+            }
+        };
+    }, [polygon, circle, map]);
+    
     const center = useMemo(() => getCenter(geofence), [geofence]);
 
     if (!center) return null;
@@ -67,38 +104,15 @@ const GeofenceMarker = ({ geofence }: GeofenceMarkerProps) => {
         fontWeight: 'bold',
         whiteSpace: 'nowrap',
         border: `1px solid ${polygon_color}`
-      };
+    };
 
     return (
-        <>
-            {type === 'polygon' && (
-                <Polygon
-                    paths={polygonPath}
-                    options={{
-                        fillColor,
-                        strokeColor: polygon_color,
-                        strokeWeight: 2,
-                    }}
-                />
-            )}
-            {type === 'circle' && geofence.center && (
-                <Circle
-                    center={geofence.center}
-                    radius={geofence.radius || 0}
-                    options={{
-                        fillColor,
-                        strokeColor: polygon_color,
-                        strokeWeight: 2,
-                    }}
-                />
-            )}
-             <OverlayView
-                position={center}
-                mapPaneName={OverlayView.OVERLAY_LAYER}
-            >
-                <div style={labelStyle}>{geofence.name}</div>
-            </OverlayView>
-        </>
+        <OverlayView
+            position={center}
+            mapPaneName={OverlayView.OVERLAY_LAYER}
+        >
+            <div style={labelStyle}>{geofence.name}</div>
+        </OverlayView>
     );
 };
 
