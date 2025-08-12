@@ -46,7 +46,7 @@ export default function MapControls({
         )}
         onClick={onToggleGeofences}
       >
-        <GeofenceIcon className="h-6 w-6" strokeWidth={1.5} />
+        <GeofenceIcon className="h-6 w-6" />
       </Button>
     </div>
   );
