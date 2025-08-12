@@ -13,10 +13,10 @@ export function GeofenceIcon({ className, ...props }: React.SVGProps<SVGSVGEleme
       className={cn(className)}
       {...props}
     >
-      <path d="M12 5L20 19L4 19L12 5Z" strokeWidth="2.5" fill="none" />
-      <circle cx="12" cy="5" r="2" fill="currentColor" strokeWidth="0" />
-      <circle cx="20" cy="19" r="2" fill="currentColor" strokeWidth="0" />
-      <circle cx="4" cy="19" r="2" fill="currentColor" strokeWidth="0" />
+      <path d="M12 8L22 18L2 18Z" strokeWidth="2.5" fill="none" />
+      <circle cx="12" cy="8" r="2" fill="currentColor" strokeWidth="0" />
+      <circle cx="22" cy="18" r="2" fill="currentColor" strokeWidth="0" />
+      <circle cx="2" cy="18" r="2" fill="currentColor" strokeWidth="0" />
     </svg>
   );
 }
