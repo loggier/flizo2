@@ -40,6 +40,7 @@ export default function MapsPage() {
 
   const [showLabels, setShowLabels] = useState(true);
   const [showGeofences, setShowGeofences] = useState(true);
+  const [showRoutes, setShowRoutes] = useState(true);
   
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
@@ -63,6 +64,10 @@ export default function MapsPage() {
     const savedShowGeofences = localStorage.getItem("showGeofences");
     if (savedShowGeofences) {
       setShowGeofences(JSON.parse(savedShowGeofences));
+    }
+    const savedShowRoutes = localStorage.getItem("showRoutes");
+    if (savedShowRoutes) {
+      setShowRoutes(JSON.parse(savedShowRoutes));
     }
     const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
     if (savedVisibleDeviceIds) {
@@ -345,6 +350,14 @@ export default function MapsPage() {
     });
   }
 
+  const handleToggleRoutes = () => {
+    setShowRoutes(prev => {
+        const newState = !prev;
+        localStorage.setItem("showRoutes", JSON.stringify(newState));
+        return newState;
+    });
+  }
+
   const layerOptions: { id: MapType; label: string }[] = [
     { id: "OSM", label: t.bottomNav.map },
     { id: "SATELLITE", label: "Satélite" },
@@ -365,7 +378,7 @@ export default function MapsPage() {
         heading={heading}
         devices={visibleDevices}
         geofences={showGeofences ? visibleGeofences : []}
-        routes={visibleRoutes}
+        routes={showRoutes ? visibleRoutes : []}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
@@ -392,6 +405,8 @@ export default function MapsPage() {
         onLocateUser={handleLocateUser}
         onToggleGeofences={handleToggleGeofences}
         showGeofences={showGeofences}
+        onToggleRoutes={handleToggleRoutes}
+        showRoutes={showRoutes}
       />
       <DeviceListSheet 
         isOpen={isDeviceListOpen} 
@@ -407,7 +422,7 @@ export default function MapsPage() {
         routes={routes}
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
-        onSelectRoute={handleSelectRoute}
+        onSelectRoute={onSelectRoute}
         isLoading={isLoading}
       />
        <VehicleDetailsSheet
