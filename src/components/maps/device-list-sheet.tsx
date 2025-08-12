@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Sheet,
   SheetContent,
@@ -18,12 +18,13 @@ import {
 } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
-import type { Device, DeviceGroup, Geofence, Route } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
 import { ScrollArea } from "../ui/scroll-area";
 import { DeviceListSkeleton } from "./device-list-skeleton";
 import GeofenceListItem from "./geofence-list-item";
 import RouteListItem from "./route-list-item";
+import PoiListItem from "./poi-list-item";
 
 interface DeviceListSheetProps {
   isOpen: boolean;
@@ -40,6 +41,10 @@ interface DeviceListSheetProps {
   visibleRouteIds: Set<number>;
   toggleRouteVisibility: (routeIds: number | number[], visible: boolean) => void;
   onSelectRoute: (route: Route) => void;
+  pois: POI[];
+  visiblePoiIds: Set<number>;
+  togglePoiVisibility: (poiIds: number | number[], visible: boolean) => void;
+  onSelectPOI: (poi: POI) => void;
   isLoading: boolean;
 }
 
@@ -58,6 +63,10 @@ export default function DeviceListSheet({
   visibleRouteIds,
   toggleRouteVisibility,
   onSelectRoute,
+  pois,
+  visiblePoiIds,
+  togglePoiVisibility,
+  onSelectPOI,
   isLoading,
 }: DeviceListSheetProps) {
   const [searchTerm, setSearchTerm] = useState("");
@@ -72,6 +81,10 @@ export default function DeviceListSheet({
       route.name.toLowerCase().includes(searchTerm.toLowerCase())
     ), [routes, searchTerm]);
 
+  const filteredPois = useMemo(() =>
+    pois.filter(poi =>
+      poi.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [pois, searchTerm]);
 
   const filteredDeviceGroups = deviceGroups
     .map((group) => ({
@@ -97,12 +110,19 @@ export default function DeviceListSheet({
     toggleRouteVisibility(routeIds, checked);
   };
 
+  const handleToggleAllPois = (checked: boolean) => {
+    const poiIds = filteredPois.map(p => p.id);
+    togglePoiVisibility(poiIds, checked);
+  };
+
   const allFilteredGeofencesVisible = filteredGeofences.length > 0 && filteredGeofences.every(g => visibleGeofenceIds.has(g.id));
   const someFilteredGeofencesVisible = filteredGeofences.some(g => visibleGeofenceIds.has(g.id));
 
   const allFilteredRoutesVisible = filteredRoutes.length > 0 && filteredRoutes.every(r => visibleRouteIds.has(r.id));
   const someFilteredRoutesVisible = filteredRoutes.some(r => visibleRouteIds.has(r.id));
 
+  const allFilteredPoisVisible = filteredPois.length > 0 && filteredPois.every(p => visiblePoiIds.has(p.id));
+  const someFilteredPoisVisible = filteredPois.some(p => visiblePoiIds.has(p.id));
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -242,6 +262,38 @@ export default function DeviceListSheet({
                             onSelect={onSelectRoute}
                           />
                         ))}
+                    </div>
+                  </div>
+                )}
+              </TabsContent>
+              <TabsContent value="poi" className="m-0">
+                {isLoading ? (
+                  <DeviceListSkeleton />
+                ) : (
+                  <div>
+                    <div className="flex items-center justify-between px-4 py-2 border-b">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id="toggle-all-pois"
+                          checked={allFilteredPoisVisible ? true : (someFilteredPoisVisible ? 'indeterminate' : false)}
+                          onCheckedChange={(checked) => handleToggleAllPois(!!checked)}
+                        />
+                        <label htmlFor="toggle-all-pois" className="font-semibold">Mostrar todos</label>
+                      </div>
+                      <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
+                        {filteredPois.length}
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      {filteredPois.map((poi) => (
+                        <PoiListItem
+                          key={poi.id}
+                          poi={poi}
+                          isVisible={visiblePoiIds.has(poi.id)}
+                          onVisibilityChange={togglePoiVisibility}
+                          onSelect={onSelectPOI}
+                        />
+                      ))}
                     </div>
                   </div>
                 )}

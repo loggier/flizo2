@@ -2,7 +2,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Layers, Crosshair } from "lucide-react";
+import { Layers, Crosshair, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GeofenceIcon } from "../icons/geofence-icon";
 import { RouteIcon } from "../icons/route-icon";
@@ -17,6 +17,8 @@ interface MapControlsProps {
   showRoutes: boolean;
   onToggleAutoCenter: () => void;
   autoCenter: boolean;
+  onTogglePOIs: () => void;
+  showPOIs: boolean;
 }
 
 export default function MapControls({ 
@@ -28,6 +30,8 @@ export default function MapControls({
   showRoutes,
   onToggleAutoCenter,
   autoCenter,
+  onTogglePOIs,
+  showPOIs,
 }: MapControlsProps) {
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -79,6 +83,17 @@ export default function MapControls({
         onClick={onToggleRoutes}
       >
         <RouteIcon className="h-6 w-6" />
+      </Button>
+      <Button 
+        variant={showPOIs ? "default" : "outline"}
+        size="icon" 
+        className={cn(
+          "bg-background rounded-full shadow-md",
+          showPOIs ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+        )}
+        onClick={onTogglePOIs}
+      >
+        <MapPin className="h-6 w-6" />
       </Button>
     </div>
   );

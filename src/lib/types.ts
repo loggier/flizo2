@@ -2,6 +2,7 @@
 
 
 
+
 export interface Sensor {
   id: number;
   name: string;
@@ -170,12 +171,6 @@ export interface Device {
     area?: number;
   }
 
-  export interface GeofenceGroup {
-    id: number;
-    title: string;
-    geofences: Geofence[];
-  }
-
   export interface Route {
     id: number;
     group_id: number | null;
@@ -185,8 +180,24 @@ export interface Device {
     coordinates: { lat: number, lng: number }[];
   }
 
-  export interface RouteGroup {
-      id: number;
-      title: string;
-      routes: Route[];
+  export interface MapIcon {
+    id: number;
+    width: number;
+    height: number;
+    path: string;
+    url: string;
+  }
+
+  export interface POI {
+    id: number;
+    user_id: number;
+    map_icon_id: number;
+    active: number;
+    name: string;
+    description: string;
+    coordinates: string;
+    parsedCoordinates?: { lat: number; lng: number };
+    created_at: string;
+    updated_at: string;
+    map_icon: MapIcon;
   }

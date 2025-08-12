@@ -13,8 +13,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices, getGeofences, getRoutes } from "@/services/flizo.service";
-import type { Device, DeviceGroup, Geofence, Route } from "@/lib/types";
+import { getDevices, getGeofences, getRoutes, getPOIs } from "@/services/flizo.service";
+import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
@@ -37,15 +37,18 @@ export default function MapsPage() {
   const [allDevices, setAllDevices] = useState<Device[]>([]);
   const [geofences, setGeofences] = useState<Geofence[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
+  const [pois, setPois] = useState<POI[]>([]);
 
   const [showLabels, setShowLabels] = useState(true);
   const [showGeofences, setShowGeofences] = useState(true);
   const [showRoutes, setShowRoutes] = useState(true);
+  const [showPOIs, setShowPOIs] = useState(true);
   const [autoCenter, setAutoCenter] = useState(true);
   
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
   const [visibleRouteIds, setVisibleRouteIds] = useState<Set<number>>(new Set());
+  const [visiblePoiIds, setVisiblePoiIds] = useState<Set<number>>(new Set());
 
 
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
@@ -70,6 +73,10 @@ export default function MapsPage() {
     if (savedShowRoutes !== null) {
         setShowRoutes(JSON.parse(savedShowRoutes));
     }
+     const savedShowPOIs = localStorage.getItem("showPOIs");
+    if (savedShowPOIs !== null) {
+        setShowPOIs(JSON.parse(savedShowPOIs));
+    }
     const savedAutoCenter = localStorage.getItem("autoCenter");
     if (savedAutoCenter !== null) {
       setAutoCenter(JSON.parse(savedAutoCenter));
@@ -86,7 +93,10 @@ export default function MapsPage() {
     if (savedVisibleRouteIds) {
       setVisibleRouteIds(new Set(JSON.parse(savedVisibleRouteIds)));
     }
-
+    const savedVisiblePoiIds = localStorage.getItem('visiblePoiIds');
+    if (savedVisiblePoiIds) {
+        setVisiblePoiIds(new Set(JSON.parse(savedVisiblePoiIds)));
+    }
 
     const clickedDeviceId = sessionStorage.getItem("selectedDeviceId");
     if (clickedDeviceId) {
@@ -103,10 +113,11 @@ export default function MapsPage() {
       }
 
       try {
-        const [fetchedGroups, fetchedGeofences, fetchedRoutes] = await Promise.all([
+        const [fetchedGroups, fetchedGeofences, fetchedRoutes, fetchedPois] = await Promise.all([
           getDevices(token),
           getGeofences(token),
-          getRoutes(token)
+          getRoutes(token),
+          getPOIs(token)
         ]);
 
         setDeviceGroups(fetchedGroups);
@@ -114,7 +125,7 @@ export default function MapsPage() {
         setAllDevices(flattenedDevices);
         setGeofences(fetchedGeofences);
         setRoutes(fetchedRoutes);
-
+        setPois(fetchedPois);
 
         if (isInitialLoad) {
             if (!savedVisibleDeviceIds) {
@@ -125,6 +136,9 @@ export default function MapsPage() {
             }
             if (!savedVisibleRouteIds) {
                 setVisibleRouteIds(new Set(fetchedRoutes.map(r => r.id)));
+            }
+            if (!savedVisiblePoiIds) {
+                setVisiblePoiIds(new Set(fetchedPois.map(p => p.id)));
             }
         }
         
@@ -194,6 +208,12 @@ export default function MapsPage() {
         localStorage.setItem('visibleRouteIds', JSON.stringify(Array.from(visibleRouteIds)));
     }
     }, [visibleRouteIds, isInitialLoad]);
+    
+    useEffect(() => {
+    if (!isInitialLoad) {
+        localStorage.setItem('visiblePoiIds', JSON.stringify(Array.from(visiblePoiIds)));
+    }
+    }, [visiblePoiIds, isInitialLoad]);
 
   useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
@@ -257,6 +277,21 @@ export default function MapsPage() {
         return newVisibleIds;
     });
   }, []);
+  
+  const togglePoiVisibility = useCallback((poiIds: number | number[], visible: boolean) => {
+    setVisiblePoiIds(prevVisibleIds => {
+        const newVisibleIds = new Set(prevVisibleIds);
+        const ids = Array.isArray(poiIds) ? poiIds : [poiIds];
+        
+        if (visible) {
+            ids.forEach(id => newVisibleIds.add(id));
+        } else {
+            ids.forEach(id => newVisibleIds.delete(id));
+        }
+        
+        return newVisibleIds;
+    });
+    }, []);
 
   const handleSelectDevice = (device: Device) => {
     if (device.lat && device.lng) {
@@ -306,6 +341,13 @@ export default function MapsPage() {
       map.fitBounds(bounds, 50); // 50px padding
       setIsDeviceListOpen(false);
     }
+  };
+
+  const handleSelectPOI = (poi: POI) => {
+    if (!map || !poi.parsedCoordinates) return;
+    map.panTo(poi.parsedCoordinates);
+    map.setZoom(17);
+    setIsDeviceListOpen(false);
   };
 
   const handleLocateUser = () => {
@@ -363,6 +405,14 @@ export default function MapsPage() {
     });
   }
 
+   const handleTogglePOIs = () => {
+    setShowPOIs(prev => {
+        const newState = !prev;
+        localStorage.setItem("showPOIs", JSON.stringify(newState));
+        return newState;
+    });
+  }
+
   const handleToggleAutoCenter = () => {
     setAutoCenter(prev => {
         const newState = !prev;
@@ -380,6 +430,7 @@ export default function MapsPage() {
   const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
   const geofencesToRender = showGeofences ? geofences.filter(g => visibleGeofenceIds.has(g.id)) : [];
   const routesToRender = showRoutes ? routes.filter(r => visibleRouteIds.has(r.id)) : [];
+  const poisToRender = showPOIs ? pois.filter(p => visiblePoiIds.has(p.id)) : [];
 
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
 
@@ -393,6 +444,7 @@ export default function MapsPage() {
         devices={visibleDevices}
         geofences={geofencesToRender}
         routes={routesToRender}
+        pois={poisToRender}
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
@@ -423,6 +475,8 @@ export default function MapsPage() {
         showRoutes={showRoutes}
         onToggleAutoCenter={handleToggleAutoCenter}
         autoCenter={autoCenter}
+        onTogglePOIs={handleTogglePOIs}
+        showPOIs={showPOIs}
       />
       <DeviceListSheet 
         isOpen={isDeviceListOpen} 
@@ -439,6 +493,10 @@ export default function MapsPage() {
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
         onSelectRoute={handleSelectRoute}
+        pois={pois}
+        visiblePoiIds={visiblePoiIds}
+        togglePoiVisibility={togglePoiVisibility}
+        onSelectPOI={handleSelectPOI}
         isLoading={isLoading}
       />
        <VehicleDetailsSheet
@@ -467,4 +525,3 @@ export default function MapsPage() {
     </div>
   );
 }
-

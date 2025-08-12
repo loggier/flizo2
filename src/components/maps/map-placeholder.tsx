@@ -2,12 +2,13 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, useLoadScript, useGoogleMap } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
-import type { Device, Geofence, Route } from '@/lib/types';
+import type { Device, Geofence, Route, POI } from '@/lib/types';
 import DeviceMarker from './device-marker';
 import GeofenceMarker from './geofence-marker';
 import RouteMarker from './route-marker';
+import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 
 const containerStyle = {
@@ -28,33 +29,25 @@ interface MapComponentProps {
     devices: Device[];
     geofences: Geofence[];
     routes: Route[];
+    pois: POI[];
     showLabels: boolean;
     onSelectDevice: (device: Device) => void;
     onDeselectDevice: () => void;
 }
 
-function MapWrapper({ children, ...props }: Omit<MapComponentProps, 'onMapLoad' | 'userPosition' | 'heading' | 'devices' | 'geofences' | 'routes' | 'showLabels' | 'onSelectDevice' | 'onDeselectDevice'> & { children: React.ReactNode }) {
-    return (
-        <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={center}
-            zoom={10}
-            onLoad={props.onLoad}
-            onUnmount={props.onUnmount}
-            onClick={props.onClick}
-            options={{
-                disableDefaultUI: true,
-                scrollwheel: true,
-                streetViewControl: false,
-            }}
-        >
-            {children}
-        </GoogleMap>
-    )
-}
-
-
-function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, geofences, routes, showLabels, onSelectDevice, onDeselectDevice }: MapComponentProps) {
+function MapComponent({ 
+    mapType, 
+    onMapLoad, 
+    userPosition, 
+    heading, 
+    devices, 
+    geofences, 
+    routes,
+    pois, 
+    showLabels, 
+    onSelectDevice, 
+    onDeselectDevice 
+}: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -204,11 +197,14 @@ function MapComponent({ mapType, onMapLoad, userPosition, heading, devices, geof
               onSelect={onSelectDevice}
             />
         ))}
-         {geofences.map(geofence => (
+        {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
         ))}
         {routes.map(route => (
           <RouteMarker key={`route-${route.id}`} route={route} />
+        ))}
+        {pois.map(poi => (
+          <PoiMarker key={`poi-${poi.id}`} poi={poi} />
         ))}
       </GoogleMap>
   );
