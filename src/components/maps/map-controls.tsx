@@ -6,6 +6,7 @@ import { Layers, Crosshair } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GeofenceIcon } from "../icons/geofence-icon";
 import { RouteIcon } from "../icons/route-icon";
+import { AutocenterIcon } from "../icons/autocenter-icon";
 
 interface MapControlsProps {
   onLayerChange: () => void;
@@ -14,6 +15,8 @@ interface MapControlsProps {
   showGeofences: boolean;
   onToggleRoutes: () => void;
   showRoutes: boolean;
+  onToggleAutoCenter: () => void;
+  autoCenter: boolean;
 }
 
 export default function MapControls({ 
@@ -22,7 +25,9 @@ export default function MapControls({
   onToggleGeofences,
   showGeofences,
   onToggleRoutes,
-  showRoutes
+  showRoutes,
+  onToggleAutoCenter,
+  autoCenter,
 }: MapControlsProps) {
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -41,6 +46,17 @@ export default function MapControls({
         onClick={onLayerChange}
       >
         <Layers className="h-6 w-6" />
+      </Button>
+       <Button 
+        variant={autoCenter ? "default" : "outline"}
+        size="icon" 
+        className={cn(
+          "bg-background rounded-full shadow-md",
+          autoCenter ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+        )}
+        onClick={onToggleAutoCenter}
+      >
+        <AutocenterIcon className="h-6 w-6" />
       </Button>
       <Button 
         variant={showGeofences ? "default" : "outline"}

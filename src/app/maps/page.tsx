@@ -41,6 +41,7 @@ export default function MapsPage() {
   const [showLabels, setShowLabels] = useState(true);
   const [showGeofences, setShowGeofences] = useState(true);
   const [showRoutes, setShowRoutes] = useState(true);
+  const [autoCenter, setAutoCenter] = useState(true);
   
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
@@ -68,6 +69,10 @@ export default function MapsPage() {
     const savedShowRoutes = localStorage.getItem("showRoutes");
     if (savedShowRoutes) {
       setShowRoutes(JSON.parse(savedShowRoutes));
+    }
+    const savedAutoCenter = localStorage.getItem("autoCenter");
+    if (savedAutoCenter) {
+      setAutoCenter(JSON.parse(savedAutoCenter));
     }
     const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
     if (savedVisibleDeviceIds) {
@@ -155,7 +160,7 @@ export default function MapsPage() {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
       map.panBy(0, -100);
-    } else {
+    } else if (autoCenter) {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
         const bounds = new google.maps.LatLngBounds();
@@ -170,7 +175,7 @@ export default function MapsPage() {
         }
       }
     }
-  }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad]);
+  }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad, autoCenter]);
 
   useEffect(() => {
     if (!isInitialLoad) {
@@ -358,6 +363,14 @@ export default function MapsPage() {
     });
   }
 
+  const handleToggleAutoCenter = () => {
+    setAutoCenter(prev => {
+        const newState = !prev;
+        localStorage.setItem("autoCenter", JSON.stringify(newState));
+        return newState;
+    });
+  }
+
   const layerOptions: { id: MapType; label: string }[] = [
     { id: "OSM", label: t.bottomNav.map },
     { id: "SATELLITE", label: "Satélite" },
@@ -407,6 +420,8 @@ export default function MapsPage() {
         showGeofences={showGeofences}
         onToggleRoutes={handleToggleRoutes}
         showRoutes={showRoutes}
+        onToggleAutoCenter={handleToggleAutoCenter}
+        autoCenter={autoCenter}
       />
       <DeviceListSheet 
         isOpen={isDeviceListOpen} 
@@ -451,3 +466,4 @@ export default function MapsPage() {
     </div>
   );
 }
+
