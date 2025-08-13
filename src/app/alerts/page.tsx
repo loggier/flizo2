@@ -119,9 +119,12 @@ export default function AlertsPage() {
           ) : (
             <div className="p-4 space-y-4">
               {filteredEvents.length > 0 ? (
-                filteredEvents.map(event => (
-                  <AlertCard key={event.id} event={event} onSelect={handleSelectEvent}/>
-                ))
+                filteredEvents.map(event => {
+                  const device = getDeviceForEvent(event);
+                  return (
+                    <AlertCard key={event.id} event={event} onSelect={handleSelectEvent} deviceIconUrl={device?.icon?.path}/>
+                  )
+                })
               ) : (
                 <div className="text-center py-12">
                   <p className="text-muted-foreground">No se encontraron alertas.</p>
