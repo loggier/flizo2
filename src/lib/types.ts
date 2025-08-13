@@ -1,10 +1,4 @@
 
-
-
-
-
-
-
 export interface Sensor {
   id: number;
   name: string;
@@ -255,4 +249,44 @@ export interface Device {
     drivers: any[];
     geofences: any[];
     events_custom: any[];
+  }
+
+  export interface HistoryData {
+    items: HistoryItem[];
+    distance_sum: string;
+    top_speed: string;
+    move_duration: string;
+    stop_duration: string;
+    fuel_consumption: string;
+    fuel_cost: string;
+    avg_fuel_consumption: string;
+    engine_work: string;
+    engine_idle: string;
+    sensors: any[]; // Define more specifically if needed
+    images: { value: string }[];
+  }
+  
+  export interface HistoryItem {
+    group_id: string;
+    status: number;
+    time?: string;
+    raw_time?: string;
+    items: HistoryPoint[];
+  }
+
+  export interface HistoryPoint {
+    id: number;
+    lat: number;
+    lng: number;
+    altitude: number;
+    course: number;
+    speed: number;
+    time: string;
+    raw_time: string;
+    other: string;
+    driver?: string;
+    sensors_data?: any;
+    address?: string;
+    message?: string;
+    status: number;
   }

@@ -8,13 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { getHistory } from '@/services/flizo.service';
-import type { Device } from '@/lib/types';
+import type { Device, HistoryData } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 import { DateTimePicker } from '@/components/ui/datetime-picker';
+import HistoryMap from '@/components/history/history-map';
+import HistoryDetails from '@/components/history/history-details';
 
 function HistoryPageContent() {
-    const searchParams = useSearchParams();
     const router = useRouter();
     const { toast } = useToast();
     
@@ -27,21 +28,23 @@ function HistoryPageContent() {
     
     const [isLoading, setIsLoading] = useState(true);
     const [isFetchingHistory, setIsFetchingHistory] = useState(false);
-    const [historyData, setHistoryData] = useState<any | null>(null);
+    const [historyData, setHistoryData] = useState<HistoryData | null>(null);
 
     useEffect(() => {
         setIsLoading(true);
         const storedDevices = localStorage.getItem('devices');
         if (storedDevices) {
-            setDevices(JSON.parse(storedDevices));
-        }
-        
-        const deviceId = searchParams.get('deviceId');
-        if (deviceId) {
-            setSelectedVehicle(deviceId);
+            const allDevices: Device[] = JSON.parse(storedDevices);
+            setDevices(allDevices);
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const deviceId = urlParams.get('deviceId');
+            if (deviceId) {
+                setSelectedVehicle(deviceId);
+            }
         }
         setIsLoading(false);
-    }, [searchParams]);
+    }, []);
 
     const handleDayOptionChange = (value: string) => {
         setDayOption(value);
@@ -106,12 +109,14 @@ function HistoryPageContent() {
                 snap_to_road: snapToRoad,
             };
             const result = await getHistory(token, params);
-            setHistoryData(result);
             if(result.items.length === 0){
                 toast({
                     title: 'Sin Datos',
                     description: 'No se encontraron datos para el período seleccionado.',
                 });
+                setHistoryData(null);
+            } else {
+                setHistoryData(result);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
@@ -125,8 +130,22 @@ function HistoryPageContent() {
         }
     };
     
+    if (historyData) {
+        const selectedDevice = devices.find(d => d.id === Number(selectedVehicle));
+        return (
+            <div className="h-full w-full flex flex-col">
+                <div className="flex-1 w-full relative">
+                    <HistoryMap history={historyData} />
+                </div>
+                <div className="w-full">
+                   {selectedDevice && <HistoryDetails history={historyData} device={selectedDevice} onClose={() => setHistoryData(null)} />}
+                </div>
+            </div>
+        )
+    }
+
     return (
-        <div className="space-y-6">
+        <div className="p-4 space-y-6">
             <Card>
                 <CardContent className="p-4 space-y-4">
                     <div>
@@ -171,8 +190,8 @@ function HistoryPageContent() {
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="true">Sí</SelectItem>
                                 <SelectItem value="false">No</SelectItem>
+                                <SelectItem value="true">Sí</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -188,17 +207,6 @@ function HistoryPageContent() {
                     </div>
                 </CardContent>
             </Card>
-
-            {historyData && (
-                 <Card>
-                    <CardContent className="p-4">
-                        <h3 className="font-bold mb-2">Resultado del Historial</h3>
-                        <pre className="text-xs bg-gray-100 p-2 rounded-md overflow-x-auto">
-                            {JSON.stringify(historyData, null, 2)}
-                        </pre>
-                    </CardContent>
-                </Card>
-            )}
         </div>
     );
 }

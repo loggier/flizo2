@@ -1,6 +1,5 @@
 
-
-import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent, AlertSetting } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent, AlertSetting, HistoryData } from "@/lib/types";
 
 const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
 
@@ -215,7 +214,7 @@ export async function getHistory(user_api_hash: string, params: {
     to_date: string;
     to_time: string;
     snap_to_road: boolean;
-}): Promise<any> {
+}): Promise<HistoryData> {
     const queryParams = new URLSearchParams({
         user_api_hash,
         device_id: params.device_id.toString(),
@@ -242,6 +241,6 @@ export async function getHistory(user_api_hash: string, params: {
     if (data.status === 0) {
         throw new Error(data.message || 'Error fetching history data');
     }
-
-    return data;
+    
+    return data as HistoryData;
 }

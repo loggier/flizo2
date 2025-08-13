@@ -22,7 +22,7 @@ export default function HistoryLayout({
           <h1 className="text-xl font-bold">Historial</h1>
         </div>
       </header>
-      <main className="flex-1 p-4 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
         {children}
       </main>
     </div>
