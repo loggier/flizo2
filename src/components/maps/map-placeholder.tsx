@@ -33,6 +33,8 @@ interface MapComponentProps {
     showLabels: boolean;
     onSelectDevice: (device: Device) => void;
     onDeselectDevice: () => void;
+    selectedAlert?: AlertEvent | null;
+    selectedDeviceForAlert?: Device | null;
 }
 
 function MapComponent({ 
@@ -46,7 +48,9 @@ function MapComponent({
     pois, 
     showLabels, 
     onSelectDevice, 
-    onDeselectDevice 
+    onDeselectDevice,
+    selectedAlert,
+    selectedDeviceForAlert,
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
@@ -206,6 +210,24 @@ function MapComponent({
         {pois.map(poi => (
           <PoiMarker key={`poi-${poi.id}`} poi={poi} />
         ))}
+        {selectedAlert && selectedDeviceForAlert && (
+          <InfoWindow
+            position={{ lat: selectedAlert.latitude, lng: selectedAlert.longitude }}
+            onCloseClick={onDeselectDevice}
+            options={{
+              pixelOffset: new window.google.maps.Size(0, - (selectedDeviceForAlert?.icon?.height || 30) ),
+            }}
+          >
+             <div className="bg-white p-1 rounded-lg max-w-sm">
+                <h4 className="font-bold text-sm mb-1">{selectedAlert.device_name}</h4>
+                <p className="text-xs text-gray-600"><strong>Dirección:</strong> {selectedAlert.address}</p>
+                <p className="text-xs text-gray-600"><strong>Fecha:</strong> {selectedAlert.time}</p>
+                <p className="text-xs text-gray-600"><strong>Posición:</strong> {selectedAlert.latitude}, {selectedAlert.longitude}</p>
+                <p className="text-xs text-gray-600"><strong>Velocidad:</strong> {selectedAlert.speed} km/h</p>
+                <p className="text-xs text-gray-600"><strong>Evento:</strong> {selectedAlert.message}</p>
+             </div>
+          </InfoWindow>
+        )}
       </GoogleMap>
   );
 }

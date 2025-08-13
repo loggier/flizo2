@@ -84,6 +84,8 @@ export default function AlertsPage() {
     return allDevicesRef.current.find(d => d.id === event.device_id);
   }
 
+  const selectedDevice = getDeviceForEvent(selectedEvent);
+
   return (
     <>
       <div className="h-1/2 w-full relative">
@@ -92,25 +94,16 @@ export default function AlertsPage() {
           onMapLoad={setMap}
           userPosition={null}
           heading={0}
-          devices={selectedEvent ? [getDeviceForEvent(selectedEvent)!].filter(Boolean) : []}
+          devices={selectedDevice ? [selectedDevice] : []}
           geofences={[]}
           routes={[]}
           pois={[]}
           showLabels={false}
           onSelectDevice={() => {}}
           onDeselectDevice={handleDeselectEvent}
+          selectedAlert={selectedEvent}
+          selectedDeviceForAlert={selectedDevice}
         />
-        {selectedEvent && (
-           <div className="absolute top-2 left-2 z-10 bg-white p-3 rounded-lg shadow-lg max-w-sm">
-             <button onClick={handleDeselectEvent} className="absolute top-1 right-1 text-gray-500 hover:text-gray-800">&times;</button>
-             <h4 className="font-bold text-sm mb-1">{selectedEvent.device_name}</h4>
-             <p className="text-xs text-gray-600"><strong>Dirección:</strong> {selectedEvent.address}</p>
-             <p className="text-xs text-gray-600"><strong>Fecha:</strong> {selectedEvent.time}</p>
-             <p className="text-xs text-gray-600"><strong>Posición:</strong> {selectedEvent.latitude}, {selectedEvent.longitude}</p>
-             <p className="text-xs text-gray-600"><strong>Velocidad:</strong> {selectedEvent.speed} km/h</p>
-             <p className="text-xs text-gray-600"><strong>Evento:</strong> {selectedEvent.message}</p>
-           </div>
-        )}
       </div>
       <div className="h-1/2 w-full">
         <ScrollArea className="h-full">
