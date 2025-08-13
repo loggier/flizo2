@@ -69,7 +69,7 @@ export function AlertCard({ event, onSelect, deviceIconUrl }: AlertCardProps) {
             <h3 className="font-bold text-sm text-gray-800 truncate pr-2">{event.device_name}</h3>
             <p className="text-xs font-medium text-gray-500 flex-shrink-0">{date} {time}</p>
           </div>
-          <p className="text-sm text-destructive font-medium truncate">{event.message}</p>
+          <p className="text-sm text-destructive font-medium">{event.message}</p>
           <p className="text-xs text-gray-500 line-clamp-2 h-8">{address}</p>
         </div>
 
