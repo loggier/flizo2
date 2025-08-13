@@ -11,11 +11,9 @@ const containerStyle = {
   height: '100%'
 };
 
-interface HistoryMapProps {
-  history: HistoryData;
-}
-
 const getIconForStatus = (status: number) => {
+    if (typeof window === 'undefined' || !window.google) return null;
+
     switch (status) {
         case 1: // Drive - No specific icon, part of the polyline
             return null; 
@@ -61,6 +59,7 @@ function HistoryMap({ history }: HistoryMapProps) {
   }, [history]);
 
   const eventMarkers = useMemo(() => {
+    if (!isLoaded) return [];
     return history.items
       .filter(group => group.status !== 1 && group.items.length > 0) // Filter out 'drive' groups and empty groups
       .map((group: HistoryItem) => {
@@ -74,7 +73,7 @@ function HistoryMap({ history }: HistoryMapProps) {
           title: `Status: ${group.status} at ${point.time}`
         };
       }).filter(marker => marker && marker.icon);
-  }, [history]);
+  }, [history, isLoaded]);
 
   const startPoint = routePath.length > 0 ? routePath[0] : null;
   const endPoint = routePath.length > 0 ? routePath[routePath.length - 1] : null;
