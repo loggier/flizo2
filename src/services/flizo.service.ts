@@ -159,18 +159,10 @@ export async function getAlerts(user_api_hash: string): Promise<AlertSetting[]> 
 }
 
 export async function updateAlertStatus(user_api_hash: string, alertId: number, active: boolean): Promise<{ status: number }> {
-    const response = await fetch(`${serverApi}change_active_alert`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        user_api_hash,
-        id: alertId,
-        active: active ? 1 : 0,
-      }),
-    });
+    const activeValue = active ? 1 : 0;
+    const url = `${serverApi}change_active_alert?user_api_hash=${user_api_hash}&id=${alertId}&active=${activeValue}`;
+
+    const response = await fetch(url);
   
     if (response.status === 401) {
       throw new Error('Unauthorized');
