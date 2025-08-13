@@ -10,9 +10,13 @@ import { Button } from '@/components/ui/button';
 import { generateReport } from '@/services/flizo.service';
 import type { Device } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { TrendingUp, BarChart, Ban, Route as RouteIcon, List, Info, Loader } from 'lucide-react';
+import { TrendingUp, BarChart, Ban, Route as RouteIcon, List, Info, Loader, CalendarIcon } from 'lucide-react';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 import ReportViewerModal from '@/components/reports/report-viewer-modal';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const reportTypes = [
     { title: 'Información', icon: Info, type: 1 },
@@ -31,6 +35,8 @@ function ReportsPageContent() {
     const [selectedDay, setSelectedDay] = useState('today');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [customDateFrom, setCustomDateFrom] = useState<Date | undefined>(new Date());
+    const [customDateTo, setCustomDateTo] = useState<Date | undefined>(new Date());
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState<number | null>(null);
     const [reportUrl, setReportUrl] = useState<string | null>(null);
@@ -52,41 +58,53 @@ function ReportsPageContent() {
     }, [searchParams]);
 
     useEffect(() => {
-        const setDatesBasedOnSelectedDay = () => {
-            const today = new Date();
-            let from: Date, to: Date;
+        const setDatesBasedOnSelection = () => {
+            const now = new Date();
+            let fromDate: Date, toDate: Date;
 
-            switch (selectedDay) {
-                case 'yesterday':
-                    from = new Date(today);
-                    from.setDate(today.getDate() - 1);
-                    to = new Date(from);
-                    break;
-                case 'last7days':
-                    from = new Date(today);
-                    from.setDate(today.getDate() - 6);
-                    to = new Date(today);
-                    break;
-                case 'today':
-                default:
-                    from = new Date(today);
-                    to = new Date(today);
-                    break;
-            }
-
-            from.setHours(0, 0, 0, 0);
-            to.setHours(23, 59, 59, 999);
-            
             const formatDate = (date: Date) => {
                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
             };
+
+            if (selectedDay === 'custom') {
+                if (customDateFrom && customDateTo) {
+                    fromDate = new Date(customDateFrom);
+                    toDate = new Date(customDateTo);
+                    fromDate.setHours(0, 0, 0, 0);
+                    toDate.setHours(23, 59, 59, 999);
+                    setDateFrom(formatDate(fromDate));
+                    setDateTo(formatDate(toDate));
+                }
+                return;
+            }
+
+            switch (selectedDay) {
+                case 'yesterday':
+                    fromDate = new Date(now);
+                    fromDate.setDate(now.getDate() - 1);
+                    toDate = new Date(fromDate);
+                    break;
+                case 'last7days':
+                    fromDate = new Date(now);
+                    fromDate.setDate(now.getDate() - 6);
+                    toDate = new Date(now);
+                    break;
+                case 'today':
+                default:
+                    fromDate = new Date(now);
+                    toDate = new Date(now);
+                    break;
+            }
             
-            setDateFrom(formatDate(from));
-            setDateTo(formatDate(to));
+            fromDate.setHours(0, 0, 0, 0);
+            toDate.setHours(23, 59, 59, 999);
+            
+            setDateFrom(formatDate(fromDate));
+            setDateTo(formatDate(toDate));
         };
 
-        setDatesBasedOnSelectedDay();
-    }, [selectedDay]);
+        setDatesBasedOnSelection();
+    }, [selectedDay, customDateFrom, customDateTo]);
 
     const handleGenerateReport = async (type: number) => {
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
@@ -177,9 +195,64 @@ function ReportsPageContent() {
                             <SelectItem value="today">Hoy</SelectItem>
                             <SelectItem value="yesterday">Ayer</SelectItem>
                             <SelectItem value="last7days">Últimos 7 días</SelectItem>
+                            <SelectItem value="custom">Personalizado</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
+                 {selectedDay === 'custom' && (
+                    <div className="flex items-center gap-4">
+                        <div className="flex-1 space-y-2">
+                             <Label>Desde</Label>
+                             <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !customDateFrom && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {customDateFrom ? format(customDateFrom, "PPP") : <span>Seleccionar fecha</span>}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={customDateFrom}
+                                    onSelect={setCustomDateFrom}
+                                    initialFocus
+                                />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+                       <div className="flex-1 space-y-2">
+                            <Label>Hasta</Label>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <Button
+                                    variant={"outline"}
+                                    className={cn(
+                                    "w-full justify-start text-left font-normal",
+                                    !customDateTo && "text-muted-foreground"
+                                    )}
+                                >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {customDateTo ? format(customDateTo, "PPP") : <span>Seleccionar fecha</span>}
+                                </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                <Calendar
+                                    mode="single"
+                                    selected={customDateTo}
+                                    onSelect={setCustomDateTo}
+                                    initialFocus
+                                />
+                                </PopoverContent>
+                            </Popover>
+                       </div>
+                    </div>
+                )}
             </Card>
 
             <div className="grid grid-cols-2 gap-4">
@@ -219,3 +292,5 @@ export default function ReportsPage() {
         </Suspense>
     );
 }
+
+    
