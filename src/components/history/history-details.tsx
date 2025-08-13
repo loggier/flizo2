@@ -31,8 +31,8 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
     switch (status) {
       case 1: return 'D'; // Drive
       case 2: return 'P'; // Stop
-      case 3: return 'I'; // Idle?
-      case 4: return 'F'; // End?
+      case 3: return 'I'; // Idle
+      case 4: return 'F'; // End
       case 5: return 'E'; // Event
       default: return '?';
     }
@@ -68,11 +68,11 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           <TabsContent value="details" className="flex-1 -mx-2">
             <ScrollArea className="h-full px-2">
               <div className="space-y-2 text-xs">
-                {history.items.flatMap(group => group.items).map((item, index) => (
-                   <div key={index} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
-                        <span className="font-mono bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-sm">{getStatusText(item.status)}</span>
-                        <span className="font-semibold">{item.time}</span>
-                        <span className="text-gray-600 truncate">{item.address || "Obteniendo dirección..."}</span>
+                {history.items.map((group, groupIndex) => (
+                   <div key={groupIndex} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
+                        <span className="font-mono bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-sm">{getStatusText(group.status)}</span>
+                        <span className="font-semibold">{group.raw_time}</span>
+                        <span className="text-gray-600 truncate">{group.items[0]?.address || "Obteniendo dirección..."}</span>
                    </div>
                 ))}
               </div>
@@ -81,11 +81,11 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           <TabsContent value="events" className="flex-1 -mx-2">
             <ScrollArea className="h-full px-2">
               <div className="space-y-2 text-xs">
-                {events.flatMap(group => group.items).map((item, index) => (
-                  <div key={index} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
-                      <span className="font-mono bg-red-200 text-red-800 px-1.5 py-0.5 rounded-sm">{getStatusText(item.status)}</span>
-                      <span className="font-semibold">{item.time}</span>
-                      <span className="text-gray-600 truncate">{item.message || "Evento"}</span>
+                {events.map((group, groupIndex) => (
+                  <div key={groupIndex} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
+                      <span className="font-mono bg-red-200 text-red-800 px-1.5 py-0.5 rounded-sm">{getStatusText(group.status)}</span>
+                      <span className="font-semibold">{group.raw_time}</span>
+                      <span className="text-gray-600 truncate">{group.items[0]?.message || "Evento"}</span>
                   </div>
                 ))}
                 {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}

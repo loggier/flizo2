@@ -3,7 +3,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { GoogleMap, useLoadScript, Polyline, Marker } from '@react-google-maps/api';
-import type { HistoryData } from '@/lib/types';
+import type { HistoryData, HistoryItem } from '@/lib/types';
 import { LoaderIcon } from '../icons/loader-icon';
 
 const containerStyle = {
@@ -14,6 +14,36 @@ const containerStyle = {
 interface HistoryMapProps {
   history: HistoryData;
 }
+
+const getIconForStatus = (status: number) => {
+    switch (status) {
+        case 1: // Drive - No specific icon, part of the polyline
+            return null; 
+        case 2: // Stop
+            return {
+                url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+                scaledSize: new google.maps.Size(32, 32)
+            };
+        case 3: // Idle
+            return {
+                url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                scaledSize: new google.maps.Size(32, 32)
+            };
+        case 4: // End
+             return {
+                url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
+                scaledSize: new google.maps.Size(40, 40)
+            };
+        case 5: // Event
+            return {
+                url: 'http://maps.google.com/mapfiles/kml/paddle/ylw-stars.png',
+                scaledSize: new google.maps.Size(40, 40)
+            };
+        default:
+            return null;
+    }
+}
+
 
 function HistoryMap({ history }: HistoryMapProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -28,6 +58,22 @@ function HistoryMap({ history }: HistoryMapProps) {
       .flatMap(group => group.items)
       .filter(point => typeof point.lat === 'number' && typeof point.lng === 'number' && isFinite(point.lat) && isFinite(point.lng))
       .map(point => ({ lat: point.lat, lng: point.lng }));
+  }, [history]);
+
+  const eventMarkers = useMemo(() => {
+    return history.items
+      .filter(group => group.status !== 1 && group.items.length > 0) // Filter out 'drive' groups and empty groups
+      .map((group: HistoryItem) => {
+        const point = group.items[0];
+        if (typeof point.lat !== 'number' || typeof point.lng !== 'number' || !isFinite(point.lat) || !isFinite(point.lng)) {
+            return null;
+        }
+        return {
+          position: { lat: point.lat, lng: point.lng },
+          icon: getIconForStatus(group.status),
+          title: `Status: ${group.status} at ${point.time}`
+        };
+      }).filter(marker => marker && marker.icon);
   }, [history]);
 
   const startPoint = routePath.length > 0 ? routePath[0] : null;
@@ -97,14 +143,17 @@ function HistoryMap({ history }: HistoryMapProps) {
       <Polyline
         path={routePath}
         options={{
-          strokeColor: '#FF0000',
-          strokeOpacity: 0.8,
-          strokeWeight: 4,
+          strokeColor: '#4978d0',
+          strokeOpacity: 1,
+          strokeWeight: 3,
           geodesic: true,
         }}
       />
       {startPoint && <Marker position={startPoint} title="Inicio" icon={startIcon} />}
       {endPoint && <Marker position={endPoint} title="Fin" icon={endIcon} />}
+      {eventMarkers.map((marker, index) => (
+        marker ? <Marker key={index} position={marker.position} icon={marker.icon as google.maps.Icon} title={marker.title} /> : null
+      ))}
     </GoogleMap>
   );
 }
