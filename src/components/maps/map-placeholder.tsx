@@ -2,9 +2,9 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, useLoadScript } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
-import type { Device, Geofence, Route, POI } from '@/lib/types';
+import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
 import DeviceMarker from './device-marker';
 import GeofenceMarker from './geofence-marker';
 import RouteMarker from './route-marker';
@@ -189,7 +189,7 @@ function MapComponent({
           />
         )}
         {devices.map((device) => (
-            <DeviceMarker 
+            device && <DeviceMarker 
               key={device.id} 
               device={device} 
               isUserLocation={false} 

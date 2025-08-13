@@ -9,9 +9,10 @@ import { Button } from '../ui/button';
 
 interface AlertCardProps {
   event: AlertEvent;
+  onSelect: (event: AlertEvent) => void;
 }
 
-export function AlertCard({ event }: AlertCardProps) {
+export function AlertCard({ event, onSelect }: AlertCardProps) {
   const [address, setAddress] = useState(event.address || 'Cargando dirección...');
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export function AlertCard({ event }: AlertCardProps) {
           const fetchedAddress = await getAddress(event.latitude, event.longitude);
           if (isMounted) {
             setAddress(fetchedAddress || 'Dirección no disponible');
+            event.address = fetchedAddress; // Update event object for map info window
           }
         } catch (error) {
           if (isMounted) {
@@ -39,18 +41,16 @@ export function AlertCard({ event }: AlertCardProps) {
     fetchAddress();
 
     return () => { isMounted = false; };
-  }, [event.latitude, event.longitude, event.address]);
+  }, [event]);
 
   const handleViewClick = () => {
-    sessionStorage.setItem('selectedDeviceId', event.device_id.toString());
-    // Potentially also store lat/lng to focus map
-    window.location.href = `/maps?lat=${event.latitude}&lng=${event.longitude}`;
+    onSelect(event);
   };
 
   const [date, time] = event.time.split(' ');
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-3 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-md p-3 overflow-hidden cursor-pointer" onClick={handleViewClick}>
       <div className="flex items-start gap-4">
         <div className="text-center flex-shrink-0 w-20">
           <p className="text-sm font-semibold text-destructive">{date}</p>
