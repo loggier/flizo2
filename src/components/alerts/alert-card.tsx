@@ -43,27 +43,28 @@ export function AlertCard({ event, onSelect }: AlertCardProps) {
     return () => { isMounted = false; };
   }, [event]);
 
-  const handleViewClick = () => {
+  const handleViewClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
     onSelect(event);
   };
 
   const [date, time] = event.time.split(' ');
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-3 overflow-hidden cursor-pointer" onClick={handleViewClick}>
+    <div className="bg-white rounded-xl shadow-md p-3 overflow-hidden cursor-pointer" onClick={() => onSelect(event)}>
       <div className="flex items-start gap-4">
-        <div className="text-center flex-shrink-0 w-20">
-          <p className="text-xs font-semibold text-destructive">{date}</p>
-          <p className="text-xs text-destructive">{time}</p>
-        </div>
-
         <div className="flex-1 space-y-1">
-          <h3 className="font-bold text-sm text-gray-800">{event.device_name}</h3>
-          <p className="text-sm text-destructive">{event.message}</p>
+          <div className="flex justify-between items-baseline">
+            <h3 className="font-bold text-sm text-gray-800 truncate pr-2">{event.device_name}</h3>
+            <div className="text-center flex-shrink-0">
+              <p className="text-xs font-semibold text-gray-600">{date} {time}</p>
+            </div>
+          </div>
+          <p className="text-sm text-destructive font-medium">{event.message}</p>
           <p className="text-xs text-gray-500 h-8 line-clamp-2">{address}</p>
         </div>
 
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 self-center">
           <Button variant="ghost" size="icon" onClick={handleViewClick} className="text-destructive hover:bg-destructive/10 rounded-full">
             <Eye className="h-5 w-5" />
           </Button>
