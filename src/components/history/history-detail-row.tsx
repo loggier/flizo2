@@ -43,7 +43,7 @@ export default function HistoryDetailRow({ group, getStatusText }: HistoryDetail
         };
     }, [group]);
     
-    const timeToDisplay = (group.status === 2 || group.status === 3 || group.status === 4) ? group.raw_time : (group.items[0]?.time || group.raw_time);
+    const timeToDisplay = (group.status === 2 || group.status === 3 || group.status === 4 || group.status === 5) ? (group.items[0]?.time || group.raw_time) : (group.raw_time);
     const [date, time] = (timeToDisplay || " ").split(" ");
 
     return (
@@ -52,22 +52,19 @@ export default function HistoryDetailRow({ group, getStatusText }: HistoryDetail
                 {getStatusText(group.status)}
             </div>
             
-            <div className="font-semibold text-gray-800">
-              <p>{time}</p>
-              {group.status === 2 && ( // Only for stops
-                <p className="font-normal text-primary text-xs">{group.time}</p>
+            <div className="text-gray-800">
+              <p className="font-semibold">{date}</p>
+              <p className="font-semibold">{time}</p>
+              {group.status === 2 && (
+                <p className="font-normal text-primary text-xs pt-1">{group.time}</p>
+              )}
+               {group.status === 5 && group.items[0]?.message && (
+                <p className="font-normal text-gray-600 text-xs pt-1">{group.items[0].message}</p>
               )}
             </div>
 
             <div className="text-gray-600 break-words">
-              {group.status === 5 ? (
-                <>
-                  <p className="font-semibold">{group.items[0]?.message || 'Evento'}</p>
-                  <p>{address}</p>
-                </>
-              ) : (
-                address
-              )}
+              {address}
             </div>
         </div>
     );
