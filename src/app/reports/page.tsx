@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { generateReport } from '@/services/flizo.service';
 import type { Device } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { TrendingUp, BarChart, Ban, Route as RouteIcon, List, Info, Loader, CalendarIcon } from 'lucide-react';
+import { TrendingUp, BarChart, Ban, Route as RouteIcon, List, Info, Loader, Calendar as CalendarIcon } from 'lucide-react';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 import ReportViewerModal from '@/components/reports/report-viewer-modal';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -56,15 +56,22 @@ function ReportsPageContent() {
         }
         setIsLoading(false);
     }, [searchParams]);
+    
+    const formatDateForApi = (date: Date): string => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1);
+        const day = pad(date.getDate());
+        const hours = pad(date.getHours());
+        const minutes = pad(date.getMinutes());
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
+    };
+
 
     useEffect(() => {
         const setDatesBasedOnSelection = () => {
             const now = new Date();
             let fromDate: Date, toDate: Date;
-
-            const formatDate = (date: Date) => {
-                return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-            };
 
             if (selectedDay === 'custom') {
                 if (customDateFrom && customDateTo) {
@@ -72,8 +79,8 @@ function ReportsPageContent() {
                     toDate = new Date(customDateTo);
                     fromDate.setHours(0, 0, 0, 0);
                     toDate.setHours(23, 59, 59, 999);
-                    setDateFrom(formatDate(fromDate));
-                    setDateTo(formatDate(toDate));
+                    setDateFrom(formatDateForApi(fromDate));
+                    setDateTo(formatDateForApi(toDate));
                 }
                 return;
             }
@@ -99,8 +106,8 @@ function ReportsPageContent() {
             fromDate.setHours(0, 0, 0, 0);
             toDate.setHours(23, 59, 59, 999);
             
-            setDateFrom(formatDate(fromDate));
-            setDateTo(formatDate(toDate));
+            setDateFrom(formatDateForApi(fromDate));
+            setDateTo(formatDateForApi(toDate));
         };
 
         setDatesBasedOnSelection();
@@ -292,5 +299,3 @@ export default function ReportsPage() {
         </Suspense>
     );
 }
-
-    
