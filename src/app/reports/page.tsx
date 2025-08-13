@@ -12,6 +12,7 @@ import type { Device } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { TrendingUp, BarChart, Ban, Route as RouteIcon, List, Info, Loader } from 'lucide-react';
 import { LoaderIcon } from '@/components/icons/loader-icon';
+import ReportViewerModal from '@/components/reports/report-viewer-modal';
 
 const reportTypes = [
     { title: 'Información', icon: Info, type: 1 },
@@ -32,6 +33,9 @@ function ReportsPageContent() {
     const [dateTo, setDateTo] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState<number | null>(null);
+    const [reportUrl, setReportUrl] = useState<string | null>(null);
+    const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
         setIsLoading(true);
@@ -106,7 +110,15 @@ function ReportsPageContent() {
             };
             const result = await generateReport(token, params);
             if (result?.url) {
-                window.open(result.url, '_blank');
+                const response = await fetch(result.url);
+                if (!response.ok) {
+                    throw new Error('Failed to download report content');
+                }
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                setReportUrl(blobUrl);
+                setDownloadUrl(result.url);
+                setIsModalOpen(true);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
@@ -118,6 +130,15 @@ function ReportsPageContent() {
         } finally {
             setIsGenerating(null);
         }
+    };
+
+    const handleCloseModal = () => {
+        if (reportUrl) {
+            URL.revokeObjectURL(reportUrl);
+        }
+        setIsModalOpen(false);
+        setReportUrl(null);
+        setDownloadUrl(null);
     };
 
     if (isLoading) {
@@ -181,6 +202,12 @@ function ReportsPageContent() {
                     </Button>
                 ))}
             </div>
+             <ReportViewerModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                reportUrl={reportUrl}
+                downloadUrl={downloadUrl}
+            />
         </div>
     );
 }
