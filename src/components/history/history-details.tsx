@@ -58,31 +58,35 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
             <TabsTrigger value="details">Detalles</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
           </TabsList>
-          <ScrollArea className="flex-1 mt-2">
-            <TabsContent value="resume" className="pt-2">
-              <div className="grid grid-cols-2 gap-4">
-                  <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
-                  <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
-                  <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
-                  <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
-              </div>
-            </TabsContent>
-            <TabsContent value="details" className="pt-2">
-                <div className="space-y-4 text-xs">
+          
+          <TabsContent value="resume" className="pt-4 flex-1">
+            <div className="grid grid-cols-2 gap-4">
+                <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
+                <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
+                <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
+                <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
+            </div>
+          </TabsContent>
+          <TabsContent value="details" className="pt-2 flex-1 min-h-0">
+              <ScrollArea className="h-full">
+                <div className="space-y-4 text-xs pr-4">
                   {history.items.map((group, groupIndex) => (
                     <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
                   ))}
                 </div>
-            </TabsContent>
-            <TabsContent value="events" className="pt-2">
-                <div className="space-y-4 text-xs">
+              </ScrollArea>
+          </TabsContent>
+          <TabsContent value="events" className="pt-2 flex-1 min-h-0">
+             <ScrollArea className="h-full">
+                <div className="space-y-4 text-xs pr-4">
                   {events.map((group, groupIndex) => (
                      <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
                   ))}
                   {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
                 </div>
-            </TabsContent>
-          </ScrollArea>
+              </ScrollArea>
+          </TabsContent>
+          
         </Tabs>
       </CardContent>
     </Card>
