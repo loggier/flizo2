@@ -36,7 +36,12 @@ export default function HistoryDetailRow({ group, getStatusText }: HistoryDetail
             }
         };
 
-        fetchAddress();
+        if (group.status !== 5) { // No fetch address for events with message
+            fetchAddress();
+        } else {
+            setAddress(group.items[0]?.message || 'Evento sin mensaje');
+        }
+
 
         return () => {
             isMounted = false;
@@ -47,23 +52,23 @@ export default function HistoryDetailRow({ group, getStatusText }: HistoryDetail
 
     return (
         <div className="grid grid-cols-[auto,1fr,2fr] items-start gap-x-3">
-            <span className="font-mono bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-sm">
+            <span className="font-mono bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-sm text-center">
                 {getStatusText(group.status)}
             </span>
             
             <div className="font-semibold text-gray-700">
                 {group.status === 2 ? (
-                    <div>{group.time}</div> // Duration for stops
-                ) : (
                     <>
-                        <div>{date}</div>
-                        <div>{time}</div>
+                      <div>{time}</div>
+                      <div className="font-normal text-primary">{group.time}</div>
                     </>
+                ) : (
+                    <div>{time}</div>
                 )}
             </div>
 
             <div className="text-gray-600 break-words">
-              {group.status === 5 ? group.items[0]?.message : address}
+              {address}
             </div>
         </div>
     );

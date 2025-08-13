@@ -51,40 +51,38 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-2">
+      <CardContent className="flex-1 flex flex-col p-2 min-h-0">
         <Tabs defaultValue="resume" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
           </TabsList>
-          <TabsContent value="resume" className="pt-4 flex-1">
-            <div className="grid grid-cols-2 gap-4">
-                <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
-                <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
-                <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
-                <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
-            </div>
-          </TabsContent>
-          <TabsContent value="details" className="flex-1 -mx-2">
-            <ScrollArea className="h-full px-2">
-              <div className="space-y-4 text-xs">
-                {history.items.map((group, groupIndex) => (
-                  <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                ))}
+          <ScrollArea className="flex-1 mt-2">
+            <TabsContent value="resume" className="pt-2">
+              <div className="grid grid-cols-2 gap-4">
+                  <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
+                  <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
+                  <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
+                  <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
               </div>
-            </ScrollArea>
-          </TabsContent>
-          <TabsContent value="events" className="flex-1 -mx-2">
-            <ScrollArea className="h-full px-2">
-              <div className="space-y-2 text-xs">
-                {events.map((group, groupIndex) => (
-                   <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                ))}
-                {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
-              </div>
-            </ScrollArea>
-          </TabsContent>
+            </TabsContent>
+            <TabsContent value="details" className="pt-2">
+                <div className="space-y-4 text-xs">
+                  {history.items.map((group, groupIndex) => (
+                    <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                  ))}
+                </div>
+            </TabsContent>
+            <TabsContent value="events" className="pt-2">
+                <div className="space-y-4 text-xs">
+                  {events.map((group, groupIndex) => (
+                     <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                  ))}
+                  {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
+                </div>
+            </TabsContent>
+          </ScrollArea>
         </Tabs>
       </CardContent>
     </Card>
