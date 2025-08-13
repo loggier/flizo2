@@ -166,6 +166,13 @@ function ReportsPageContent() {
         setDownloadUrl(null);
     };
 
+    const handleDateFromChange = (date: Date | undefined) => {
+        setCustomDateFrom(date);
+        if (date && customDateTo && date > customDateTo) {
+            setCustomDateTo(date);
+        }
+    };
+
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-full">
@@ -227,7 +234,8 @@ function ReportsPageContent() {
                                 <Calendar
                                     mode="single"
                                     selected={customDateFrom}
-                                    onSelect={setCustomDateFrom}
+                                    onSelect={handleDateFromChange}
+                                    disabled={{ after: customDateTo }}
                                     initialFocus
                                 />
                                 </PopoverContent>
@@ -253,6 +261,7 @@ function ReportsPageContent() {
                                     mode="single"
                                     selected={customDateTo}
                                     onSelect={setCustomDateTo}
+                                    disabled={{ before: customDateFrom }}
                                     initialFocus
                                 />
                                 </PopoverContent>
