@@ -10,6 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SpeedIcon } from "../icons/speed-icon";
 import { DistanceIcon } from "../icons/distance-icon";
 import { EngineIdleIcon } from "../icons/engine-idle-icon";
+import HistoryDetailRow from "./history-detail-row";
 
 interface HistoryDetailsProps {
   history: HistoryData;
@@ -68,29 +69,9 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           <TabsContent value="details" className="flex-1 -mx-2">
             <ScrollArea className="h-full px-2">
               <div className="space-y-4 text-xs">
-                {history.items.map((group, groupIndex) => {
-                  const [date, time] = (group.raw_time || '').split(' ');
-                  return (
-                    <div key={groupIndex} className="grid grid-cols-[auto,1fr,2fr] items-start gap-x-3">
-                        <span className="font-mono bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-sm">{getStatusText(group.status)}</span>
-                        
-                        <div className="font-semibold text-gray-700">
-                          {group.status === 2 ? (
-                            <div>{group.time}</div> // Duration for stops
-                          ) : (
-                            <>
-                              <div>{date}</div>
-                              <div>{time}</div>
-                            </>
-                          )}
-                        </div>
-
-                        <div className="text-gray-600 break-words">
-                          {group.items[0]?.address || "Obteniendo dirección..."}
-                        </div>
-                    </div>
-                  );
-                })}
+                {history.items.map((group, groupIndex) => (
+                  <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                ))}
               </div>
             </ScrollArea>
           </TabsContent>
@@ -98,11 +79,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
             <ScrollArea className="h-full px-2">
               <div className="space-y-2 text-xs">
                 {events.map((group, groupIndex) => (
-                  <div key={groupIndex} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
-                      <span className="font-mono bg-red-200 text-red-800 px-1.5 py-0.5 rounded-sm">{getStatusText(group.status)}</span>
-                      <span className="font-semibold">{group.raw_time}</span>
-                      <span className="text-gray-600 truncate">{group.items[0]?.message || "Evento"}</span>
-                  </div>
+                   <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
                 ))}
                 {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
               </div>
