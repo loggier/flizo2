@@ -31,6 +31,7 @@ import {
 import { SensorIcon } from "./sensor-icon";
 import { FootstepsIcon } from "../icons/footsteps-icon";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 
 interface VehicleDetailsSheetProps {
@@ -66,6 +67,7 @@ const InfoRow = ({ icon: Icon, label, value, isAddress = false }: { icon: React.
 
 
 export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsSheetProps) {
+  const router = useRouter();
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const [address, setAddress] = useState('Ubicación no disponible');
   const [api, setApi] = useState<CarouselApi>()
@@ -124,6 +126,10 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     
   const carouselItemsCount = 1 + (hasSensors ? 1 : 0) + (hasImage ? 1 : 0);
 
+  const handleHistoryClick = () => {
+    router.push(`/history?deviceId=${device?.id}`);
+  };
+
   return (
     <div className="absolute bottom-16 left-0 right-0 z-20 pointer-events-none mb-3">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto p-2">
@@ -169,7 +175,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <span>{status.text}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><History className="h-4 w-4 text-gray-600" /></Button>
+                    <Button size="icon" variant="ghost" onClick={handleHistoryClick} className="rounded-full hover:bg-gray-200 h-8 w-8"><History className="h-4 w-4 text-gray-600" /></Button>
                     <Button asChild size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8">
                       <Link href={`/reports?deviceId=${device.id}`}>
                         <FileText className="h-4 w-4 text-gray-600" />

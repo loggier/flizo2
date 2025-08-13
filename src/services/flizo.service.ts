@@ -184,7 +184,6 @@ export async function generateReport(user_api_hash: string, params: any): Promis
         ...params,
     });
     
-    // The devices array needs to be handled specially for URLSearchParams
     const devices = params.devices || [];
     queryParams.delete('devices');
     devices.forEach((deviceId: number) => {
@@ -207,4 +206,42 @@ export async function generateReport(user_api_hash: string, params: any): Promis
         console.error('Error generating report:', data);
         throw new Error(data.message || 'Failed to generate report');
     }
+}
+
+export async function getHistory(user_api_hash: string, params: {
+    device_id: number;
+    from_date: string;
+    from_time: string;
+    to_date: string;
+    to_time: string;
+    snap_to_road: boolean;
+}): Promise<any> {
+    const queryParams = new URLSearchParams({
+        user_api_hash,
+        device_id: params.device_id.toString(),
+        from_date: params.from_date,
+        from_time: params.from_time,
+        to_date: params.to_date,
+        to_time: params.to_time,
+        snap_to_road: params.snap_to_road ? 'true' : 'false',
+        '_': Date.now().toString()
+    });
+
+    const response = await fetch(`${serverApi}get_history?${queryParams.toString()}`);
+
+    if (response.status === 401) {
+        throw new Error('Unauthorized');
+    }
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch history');
+    }
+
+    const data = await response.json();
+
+    if (data.status === 0) {
+        throw new Error(data.message || 'Error fetching history data');
+    }
+
+    return data;
 }
