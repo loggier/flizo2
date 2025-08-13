@@ -26,6 +26,7 @@ function HistoryMap({ history }: HistoryMapProps) {
   const routePath = useMemo(() => {
     return history.items
       .flatMap(group => group.items)
+      .filter(point => typeof point.lat === 'number' && typeof point.lng === 'number' && isFinite(point.lat) && isFinite(point.lng))
       .map(point => ({ lat: point.lat, lng: point.lng }));
   }, [history]);
 
@@ -40,7 +41,7 @@ function HistoryMap({ history }: HistoryMapProps) {
     if (map && routePath.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       routePath.forEach(point => bounds.extend(point));
-      map.fitBounds(bounds);
+      map.fitBounds(bounds, 50); // Add 50px padding
     }
   }, [map, routePath]);
   
