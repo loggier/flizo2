@@ -177,3 +177,30 @@ export async function updateAlertStatus(user_api_hash: string, alertId: number, 
   
     return data;
 }
+
+export async function generateReport(user_api_hash: string, params: any): Promise<{url: string} | null> {
+  const response = await fetch(`${serverApi}generate_report`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+          user_api_hash,
+          ...params
+      }),
+  });
+
+  if (response.status === 401) {
+      throw new Error('Unauthorized');
+  }
+
+  const data = await response.json();
+
+  if (data.status === 3 && data.url) {
+      return data;
+  } else {
+      console.error('Error generating report:', data);
+      throw new Error(data.message || 'Failed to generate report');
+  }
+}
