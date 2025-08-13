@@ -52,7 +52,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-2 min-h-0">
-        <Tabs defaultValue="resume" className="w-full flex-1 flex flex-col">
+        <Tabs defaultValue="details" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
@@ -67,24 +67,22 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
                 <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
             </div>
           </TabsContent>
-          <TabsContent value="details" className="pt-2 flex-1 min-h-0">
-              <ScrollArea className="h-full">
-                <div className="space-y-4 text-xs pr-4">
-                  {history.items.map((group, groupIndex) => (
-                    <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                  ))}
-                </div>
-              </ScrollArea>
+
+          <TabsContent value="details" className="flex-1 min-h-0 overflow-y-auto mt-2">
+              <div className="space-y-4 text-xs pr-4">
+                {history.items.map((group, groupIndex) => (
+                  <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                ))}
+              </div>
           </TabsContent>
-          <TabsContent value="events" className="pt-2 flex-1 min-h-0">
-             <ScrollArea className="h-full">
-                <div className="space-y-4 text-xs pr-4">
-                  {events.map((group, groupIndex) => (
-                     <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                  ))}
-                  {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
-                </div>
-              </ScrollArea>
+
+          <TabsContent value="events" className="flex-1 min-h-0 overflow-y-auto mt-2">
+              <div className="space-y-4 text-xs pr-4">
+                {events.map((group, groupIndex) => (
+                   <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                ))}
+                {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
+              </div>
           </TabsContent>
           
         </Tabs>
