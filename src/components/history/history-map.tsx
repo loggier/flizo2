@@ -11,31 +11,35 @@ const containerStyle = {
   height: '100%'
 };
 
+const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+
 const getIconForStatus = (status: number) => {
     if (typeof window === 'undefined' || !window.google) return null;
 
+    const iconSize = new google.maps.Size(32, 32);
+
     switch (status) {
-        case 1: // Drive - No specific icon, part of the polyline
-            return null; 
+        case 1: // Start - handled separately but can have a default
+            return {
+                url: `${serverUrl}assets/images/route_start.png`,
+                scaledSize: iconSize
+            };
         case 2: // Stop
             return {
-                url: 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-                scaledSize: new google.maps.Size(32, 32)
+                url: `${serverUrl}assets/images/route_stop.png`,
+                scaledSize: iconSize
             };
-        case 3: // Idle
-            return {
-                url: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
-                scaledSize: new google.maps.Size(32, 32)
-            };
-        case 4: // End
+        case 3: // Idle - Let's use stop icon for now
              return {
-                url: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png',
-                scaledSize: new google.maps.Size(40, 40)
+                url: `${serverUrl}assets/images/route_stop.png`,
+                scaledSize: iconSize
             };
+        case 4: // End - handled separately
+            return null;
         case 5: // Event
             return {
-                url: 'http://maps.google.com/mapfiles/kml/paddle/ylw-stars.png',
-                scaledSize: new google.maps.Size(40, 40)
+                url: `${serverUrl}assets/images/route_event.png`,
+                scaledSize: iconSize
             };
         default:
             return null;
@@ -43,7 +47,7 @@ const getIconForStatus = (status: number) => {
 }
 
 
-function HistoryMap({ history }: HistoryMapProps) {
+function HistoryMap({ history }: { history: HistoryData }) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -121,14 +125,16 @@ function HistoryMap({ history }: HistoryMapProps) {
     return <div>API Key for Google Maps is missing.</div>;
   }
 
+  const iconSize = new google.maps.Size(40, 40);
+
   const startIcon = {
-    url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
-    scaledSize: new google.maps.Size(40, 40)
+    url: `${serverUrl}assets/images/route_start.png`,
+    scaledSize: iconSize
   };
 
   const endIcon = {
-    url: 'https://maps.google.com/mapfiles/ms/icons/red-dot.png',
-    scaledSize: new google.maps.Size(40, 40)
+    url: `${serverUrl}assets/images/route_end.png`,
+    scaledSize: iconSize
   };
 
   return (
