@@ -22,7 +22,7 @@ export default function AlertsSettingsLayout({
           <h1 className="text-xl font-bold">Configuración de Alertas</h1>
         </div>
       </header>
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-16">
         {children}
       </main>
     </div>

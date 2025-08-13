@@ -130,7 +130,7 @@ export default function AlertsSettingsPage() {
   }
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="px-4 pb-4 space-y-4">
       <Alert>
         <Info className="h-4 w-4" />
         <AlertDescription>
