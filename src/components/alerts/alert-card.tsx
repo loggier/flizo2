@@ -53,8 +53,8 @@ export function AlertCard({ event, onSelect }: AlertCardProps) {
     <div className="bg-white rounded-xl shadow-md p-3 overflow-hidden cursor-pointer" onClick={handleViewClick}>
       <div className="flex items-start gap-4">
         <div className="text-center flex-shrink-0 w-20">
-          <p className="text-sm font-semibold text-destructive">{date}</p>
-          <p className="text-sm text-destructive">{time}</p>
+          <p className="text-xs font-semibold text-destructive">{date}</p>
+          <p className="text-xs text-destructive">{time}</p>
         </div>
 
         <div className="flex-1 space-y-1">
