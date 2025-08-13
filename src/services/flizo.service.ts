@@ -179,28 +179,32 @@ export async function updateAlertStatus(user_api_hash: string, alertId: number, 
 }
 
 export async function generateReport(user_api_hash: string, params: any): Promise<{url: string} | null> {
-  const response = await fetch(`${serverApi}generate_report`, {
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-          user_api_hash,
-          ...params
-      }),
-  });
+    const queryParams = new URLSearchParams({
+        user_api_hash,
+        ...params,
+    });
+    
+    // The devices array needs to be handled specially for URLSearchParams
+    const devices = params.devices || [];
+    queryParams.delete('devices');
+    devices.forEach((deviceId: number) => {
+        queryParams.append('devices[]', deviceId.toString());
+    });
 
-  if (response.status === 401) {
-      throw new Error('Unauthorized');
-  }
+    const response = await fetch(`${serverApi}generate_report?${queryParams.toString()}`, {
+        method: 'GET',
+    });
 
-  const data = await response.json();
+    if (response.status === 401) {
+        throw new Error('Unauthorized');
+    }
 
-  if (data.status === 3 && data.url) {
-      return data;
-  } else {
-      console.error('Error generating report:', data);
-      throw new Error(data.message || 'Failed to generate report');
-  }
+    const data = await response.json();
+    
+    if (data.status === 3 && data.url) {
+        return data;
+    } else {
+        console.error('Error generating report:', data);
+        throw new Error(data.message || 'Failed to generate report');
+    }
 }
