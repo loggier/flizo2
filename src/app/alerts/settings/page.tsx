@@ -16,15 +16,18 @@ function AlertSettingItem({ alert, onStatusChange }: { alert: AlertSetting, onSt
   const handleCheckedChange = async (checked: boolean) => {
     setIsUpdating(true);
     await onStatusChange(alert.id, checked);
-    setIsChecked(checked);
+    // The parent component will handle the state update on success
     setIsUpdating(false);
   };
+
+  useEffect(() => {
+    setIsChecked(alert.active === 1);
+  }, [alert.active]);
 
   return (
     <div className="flex items-center justify-between p-4 bg-white border-b">
       <div className="flex-1">
         <p className="font-semibold text-gray-800">{alert.name}</p>
-        <p className="text-sm text-gray-500">{alert.type}</p>
       </div>
       <Switch
         checked={isChecked}
@@ -42,8 +45,7 @@ function SettingsSkeleton() {
         {[...Array(5)].map((_, i) => (
             <div key={i} className="flex items-center justify-between p-4 bg-white border-b">
                 <div className="flex-1 space-y-2">
-                    <Skeleton className="h-5 w-1/3" />
-                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-5 w-2/3" />
                 </div>
                 <Skeleton className="h-6 w-11 rounded-full" />
             </div>
@@ -114,7 +116,7 @@ export default function AlertsSettingsPage() {
             title: 'Error al actualizar',
             description: 'No se pudo cambiar el estado de la alerta.',
         });
-         // Revert the switch state on failure by re-fetching or flipping the local state back
+         // Revert the switch state on failure by re-triggering a re-render of the original state
          setAlerts(prevAlerts => [...prevAlerts]);
     }
   };
@@ -128,7 +130,7 @@ export default function AlertsSettingsPage() {
       {alerts.map(alert => (
         <AlertSettingItem key={alert.id} alert={alert} onStatusChange={handleStatusChange} />
       ))}
-       {alerts.length === 0 && (
+       {alerts.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <p className="text-muted-foreground">No se encontraron configuraciones de alertas.</p>
           </div>

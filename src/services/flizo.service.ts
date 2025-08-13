@@ -159,15 +159,16 @@ export async function getAlerts(user_api_hash: string): Promise<AlertSetting[]> 
 }
 
 export async function updateAlertStatus(user_api_hash: string, alertId: number, active: boolean): Promise<{ status: number }> {
-    const response = await fetch(`${serverApi}alerts/${alertId}`, {
-      method: 'PUT',
+    const response = await fetch(`${serverApi}change_alert_active`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify({
         user_api_hash,
+        id: alertId,
         active: active ? 1 : 0,
-        name: `dummy_name_${alertId}` // Backend requires a name, sending a placeholder
       }),
     });
   
@@ -175,11 +176,12 @@ export async function updateAlertStatus(user_api_hash: string, alertId: number, 
       throw new Error('Unauthorized');
     }
   
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Failed to update alert status' }));
-      console.error('Update failed:', errorData);
-      throw new Error(errorData.message || 'Failed to update alert status');
+    const data = await response.json();
+
+    if (!response.ok || data.status !== 1) {
+      console.error('Update failed:', data);
+      throw new Error(data.message || 'Failed to update alert status');
     }
   
-    return await response.json();
+    return data;
 }
