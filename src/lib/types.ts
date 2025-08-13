@@ -3,6 +3,7 @@
 
 
 
+
 export interface Sensor {
   id: number;
   name: string;
@@ -200,4 +201,33 @@ export interface Device {
     created_at: string;
     updated_at: string;
     map_icon: MapIcon;
+  }
+
+  export interface AlertEvent {
+    id: number;
+    user_id: number;
+    device_id: number;
+    geofence_id: number | null;
+    poi_id: number | null;
+    position_id: number | null;
+    alert_id: number;
+    type: string;
+    message: string;
+    address: string | null;
+    altitude: number;
+    course: number;
+    latitude: number;
+    longitude: number;
+    power: null;
+    speed: number;
+    time: string;
+    deleted: number;
+    created_at: string;
+    updated_at: string;
+    additional: any | null;
+    silent: null;
+    name: string;
+    detail: string;
+    geofence: null;
+    device_name: string;
   }
