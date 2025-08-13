@@ -34,6 +34,22 @@ function HistoryMap({ history }: HistoryMapProps) {
   const endPoint = routePath.length > 0 ? routePath[routePath.length - 1] : null;
 
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
+    const osmMapType = new google.maps.ImageMapType({
+        getTileUrl: function(coord, zoom) {
+          if (!coord || zoom === undefined) return null;
+          const tilesPerGlobe = 1 << zoom;
+          let x = coord.x % tilesPerGlobe;
+          if (x < 0) x = tilesPerGlobe + x;
+          return `https://mt0.google.com/vt/lyrs=m&x=${x}&y=${coord.y}&z=${zoom}&s=Ga`;
+        },
+        tileSize: new google.maps.Size(256, 256),
+        name: "OSM",
+        maxZoom: 18
+      });
+  
+      mapInstance.mapTypes.set("OSM", osmMapType);
+      mapInstance.setMapTypeId("OSM");
+
     setMap(mapInstance);
   }, []);
 
