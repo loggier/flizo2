@@ -134,10 +134,10 @@ function HistoryPageContent() {
         const selectedDevice = devices.find(d => d.id === Number(selectedVehicle));
         return (
             <div className="h-full w-full flex flex-col">
-                <div className="flex-1 w-full relative">
+                <div className="h-1/2 w-full relative">
                     <HistoryMap history={historyData} />
                 </div>
-                <div className="w-full">
+                <div className="h-1/2 w-full">
                    {selectedDevice && <HistoryDetails history={historyData} device={selectedDevice} onClose={() => setHistoryData(null)} />}
                 </div>
             </div>

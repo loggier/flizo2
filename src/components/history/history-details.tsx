@@ -18,14 +18,10 @@ interface HistoryDetailsProps {
 }
 
 const SummaryItem = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string, label: string }) => (
-    <div className="flex items-center gap-4">
-        <div className="p-3 bg-primary/10 rounded-full">
-            <Icon className="h-6 w-6 text-primary" />
-        </div>
-        <div>
-            <p className="text-xl font-bold">{value}</p>
-            <p className="text-sm text-muted-foreground">{label}</p>
-        </div>
+    <div className="flex flex-col items-center justify-center text-center p-2 bg-gray-50 rounded-lg">
+        <Icon className="h-8 w-8 text-primary mb-2" />
+        <p className="text-lg font-bold text-gray-800">{value}</p>
+        <p className="text-xs text-muted-foreground">{label}</p>
     </div>
 );
 
@@ -45,23 +41,23 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
   const events = history.items.filter(item => item.status === 5);
 
   return (
-    <Card className="rounded-t-2xl shadow-lg">
-      <CardHeader>
+    <Card className="rounded-t-2xl shadow-lg h-full flex flex-col">
+      <CardHeader className="py-2">
         <div className="flex justify-between items-center">
-          <CardTitle>{device.name}</CardTitle>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <CardTitle className="text-lg">{device.name}</CardTitle>
+          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
             <X className="h-5 w-5" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="resume" className="w-full">
+      <CardContent className="flex-1 flex flex-col p-2">
+        <Tabs defaultValue="resume" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
           </TabsList>
-          <TabsContent value="resume" className="pt-4">
+          <TabsContent value="resume" className="pt-4 flex-1">
             <div className="grid grid-cols-2 gap-4">
                 <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
                 <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
@@ -69,8 +65,8 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
                 <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
             </div>
           </TabsContent>
-          <TabsContent value="details">
-            <ScrollArea className="h-48">
+          <TabsContent value="details" className="flex-1 -mx-2">
+            <ScrollArea className="h-full px-2">
               <div className="space-y-2 text-xs">
                 {history.items.flatMap(group => group.items).map((item, index) => (
                    <div key={index} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
@@ -82,8 +78,8 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
               </div>
             </ScrollArea>
           </TabsContent>
-          <TabsContent value="events">
-            <ScrollArea className="h-48">
+          <TabsContent value="events" className="flex-1 -mx-2">
+            <ScrollArea className="h-full px-2">
               <div className="space-y-2 text-xs">
                 {events.flatMap(group => group.items).map((item, index) => (
                   <div key={index} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
