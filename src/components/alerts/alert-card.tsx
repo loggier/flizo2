@@ -70,7 +70,7 @@ export function AlertCard({ event, onSelect, deviceIconUrl }: AlertCardProps) {
             <p className="text-xs font-medium text-gray-500 flex-shrink-0">{date} {time}</p>
           </div>
           <p className="text-sm text-destructive font-medium truncate">{event.message}</p>
-          <p className="text-xs text-gray-500 truncate">{address}</p>
+          <p className="text-xs text-gray-500 line-clamp-2 h-8">{address}</p>
         </div>
 
         <div className="flex-shrink-0 self-center ml-2">
