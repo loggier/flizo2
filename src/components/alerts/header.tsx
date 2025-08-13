@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import Link from "next/link";
 
 // Note: This is a skeleton component. The search functionality will be passed via props from the page.
 export function AlertsHeader() {
@@ -23,8 +24,10 @@ export function AlertsHeader() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-primary/80">
-          <Bell className="h-6 w-6" />
+        <Button asChild variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-primary/80">
+          <Link href="/alerts/settings">
+            <Bell className="h-6 w-6" />
+          </Link>
         </Button>
       </div>
     </header>

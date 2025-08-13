@@ -4,6 +4,7 @@
 
 
 
+
 export interface Sensor {
   id: number;
   name: string;
@@ -230,4 +231,28 @@ export interface Device {
     detail: string;
     geofence: null;
     device_name: string;
+  }
+
+  export interface AlertSetting {
+    id: number;
+    user_id: number;
+    active: 0 | 1;
+    name: string;
+    type: string;
+    schedules: null | any;
+    notifications: {
+      [key: string]: {
+        active: string;
+        input?: string;
+      }
+    };
+    created_at: string;
+    updated_at: string;
+    zone: number;
+    schedule: number;
+    command: null | any;
+    devices: number[];
+    drivers: any[];
+    geofences: any[];
+    events_custom: any[];
   }

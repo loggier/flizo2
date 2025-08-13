@@ -1,6 +1,6 @@
 
 
-import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent, AlertSetting } from "@/lib/types";
 
 const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
 
@@ -136,4 +136,50 @@ export async function getEvents(user_api_hash: string): Promise<AlertEvent[]> {
   }
   
   return [];
+}
+
+export async function getAlerts(user_api_hash: string): Promise<AlertSetting[]> {
+    const response = await fetch(`${serverApi}get_alerts?user_api_hash=${user_api_hash}`);
+  
+    if (response.status === 401) {
+      throw new Error('Unauthorized');
+    }
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch alerts');
+    }
+  
+    const data = await response.json();
+    
+    if (data && data.items && data.items.alerts) {
+      return data.items.alerts;
+    }
+    
+    return [];
+}
+
+export async function updateAlertStatus(user_api_hash: string, alertId: number, active: boolean): Promise<{ status: number }> {
+    const response = await fetch(`${serverApi}alerts/${alertId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_api_hash,
+        active: active ? 1 : 0,
+        name: `dummy_name_${alertId}` // Backend requires a name, sending a placeholder
+      }),
+    });
+  
+    if (response.status === 401) {
+      throw new Error('Unauthorized');
+    }
+  
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Failed to update alert status' }));
+      console.error('Update failed:', errorData);
+      throw new Error(errorData.message || 'Failed to update alert status');
+    }
+  
+    return await response.json();
 }
