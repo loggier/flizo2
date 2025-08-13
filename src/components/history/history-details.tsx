@@ -67,14 +67,30 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           </TabsContent>
           <TabsContent value="details" className="flex-1 -mx-2">
             <ScrollArea className="h-full px-2">
-              <div className="space-y-2 text-xs">
-                {history.items.map((group, groupIndex) => (
-                   <div key={groupIndex} className="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
+              <div className="space-y-4 text-xs">
+                {history.items.map((group, groupIndex) => {
+                  const [date, time] = (group.raw_time || '').split(' ');
+                  return (
+                    <div key={groupIndex} className="grid grid-cols-[auto,1fr,2fr] items-start gap-x-3">
                         <span className="font-mono bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded-sm">{getStatusText(group.status)}</span>
-                        <span className="font-semibold">{group.raw_time}</span>
-                        <span className="text-gray-600 truncate">{group.items[0]?.address || "Obteniendo dirección..."}</span>
-                   </div>
-                ))}
+                        
+                        <div className="font-semibold text-gray-700">
+                          {group.status === 2 ? (
+                            <div>{group.time}</div> // Duration for stops
+                          ) : (
+                            <>
+                              <div>{date}</div>
+                              <div>{time}</div>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="text-gray-600 break-words">
+                          {group.items[0]?.address || "Obteniendo dirección..."}
+                        </div>
+                    </div>
+                  );
+                })}
               </div>
             </ScrollArea>
           </TabsContent>
