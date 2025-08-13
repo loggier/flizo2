@@ -159,7 +159,7 @@ export async function getAlerts(user_api_hash: string): Promise<AlertSetting[]> 
 }
 
 export async function updateAlertStatus(user_api_hash: string, alertId: number, active: boolean): Promise<{ status: number }> {
-    const response = await fetch(`${serverApi}change_alert_active`, {
+    const response = await fetch(`${serverApi}change_active_alert`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
