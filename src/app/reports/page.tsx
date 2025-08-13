@@ -10,12 +10,12 @@ import { Button } from '@/components/ui/button';
 import { generateReport } from '@/services/flizo.service';
 import type { Device } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { Analytics, BarChart, Ban, Route as RouteIcon, List, Info, Loader } from 'lucide-react';
+import { TrendingUp, BarChart, Ban, Route as RouteIcon, List, Info, Loader } from 'lucide-react';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 
 const reportTypes = [
     { title: 'Información', icon: Info, type: 1 },
-    { title: 'Recorridos', icon: Analytics, type: 3 },
+    { title: 'Recorridos', icon: TrendingUp, type: 3 },
     { title: 'Eventos', icon: BarChart, type: 8 },
     { title: 'Geocercas', icon: Ban, type: 53 },
     { title: 'Horas de trabajo', icon: List, type: 48 },
