@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { SpeedIcon } from "../icons/speed-icon";
 import { DistanceIcon } from "../icons/distance-icon";
 import { EngineIdleIcon } from "../icons/engine-idle-icon";
@@ -51,7 +50,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-2 min-h-0">
+      <CardContent className="flex-1 flex flex-col p-2 min-h-0 overflow-y-auto">
         <Tabs defaultValue="details" className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
