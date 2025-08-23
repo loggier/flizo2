@@ -186,7 +186,7 @@ function HistoryMap({
   };
 
   const polylineOptions = {
-    strokeColor: '#4978d0',
+    strokeColor: '#FF0000',
     strokeOpacity: 1,
     strokeWeight: 3,
     geodesic: true,
@@ -194,11 +194,11 @@ function HistoryMap({
       icon: {
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
         scale: 2,
-        strokeColor: '#FFFFFF',
+        strokeColor: '#FF0000',
         strokeWeight: 1,
       },
       offset: '0',
-      repeat: '35px'
+      repeat: '70px'
     }]
   };
 
