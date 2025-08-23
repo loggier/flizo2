@@ -58,7 +58,6 @@ function HistoryMap({
     selectedPoint: HistoryPoint | null,
     onCloseInfoWindow: () => void,
  }) {
-  const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   const { isLoaded } = useLoadScript({
@@ -68,7 +67,11 @@ function HistoryMap({
   const routePath = useMemo(() => {
     return history.items
       .flatMap(group => group.items)
-      .map(point => ({ lat: parseFloat(point.lat as any), lng: parseFloat(point.lng as any) }))
+      .map(point => {
+        const lat = parseFloat(point.lat as any);
+        const lng = parseFloat(point.lng as any);
+        return { lat, lng };
+      })
       .filter(point => !isNaN(point.lat) && !isNaN(point.lng));
   }, [history]);
 
@@ -113,17 +116,15 @@ function HistoryMap({
       mapInstance.mapTypes.set("OSM", osmMapType);
       mapInstance.setMapTypeId("OSM");
 
-    setMap(mapInstance);
     onMapLoad(mapInstance);
-  }, [onMapLoad]);
-
-  useEffect(() => {
-    if (map && routePath.length > 0 && !selectedPoint) {
+    
+    // Fit bounds only on initial load of the route
+    if (routePath.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       routePath.forEach(point => bounds.extend(point));
-      map.fitBounds(bounds, 50); // Add 50px padding
+      mapInstance.fitBounds(bounds, 50); // Add 50px padding
     }
-  }, [map, routePath, selectedPoint]);
+  }, [onMapLoad, routePath]);
   
   if (!isLoaded) {
     return (

@@ -50,9 +50,13 @@ function HistoryPageContent() {
 
     useEffect(() => {
         if (map && selectedPoint) {
-            const position = { lat: parseFloat(selectedPoint.lat as any), lng: parseFloat(selectedPoint.lng as any) };
-            map.panTo(position);
-            map.setZoom(18);
+            const lat = parseFloat(selectedPoint.lat as any);
+            const lng = parseFloat(selectedPoint.lng as any);
+            if (!isNaN(lat) && !isNaN(lng)) {
+                const position = { lat, lng };
+                map.panTo(position);
+                map.setZoom(18);
+            }
         }
     }, [map, selectedPoint]);
 
