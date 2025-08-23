@@ -6,6 +6,7 @@ const config: CapacitorConfig = {
   appName: 'Flizo Copilot',
   webDir: 'out',
   server: {
+    hostname: 'app.flizo.com',
     androidScheme: 'https',
   },
   plugins: {
