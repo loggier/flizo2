@@ -77,26 +77,29 @@ export default function ShareDialog({
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!generatedUrl) return;
 
-    try {
-      if (!navigator.share) {
-        throw new Error("La API para compartir no está disponible en este navegador.");
-      }
-      await navigator.share({
-        title: `Compartir Ubicación de ${device.name}`,
-        text: `Hola, te quiero compartir la ubicación del dispositivo ${device.name}`,
-        url: generatedUrl,
+    if (!navigator.share) {
+      toast({
+        variant: "destructive",
+        title: "No Soportado",
+        description: "La API para compartir no está disponible en este navegador.",
       });
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        // User cancelled the share operation, do nothing.
-      } else {
-        const errorMessage = error instanceof Error ? error.message : 'No se pudo compartir el enlace.';
-        toast({ variant: "destructive", title: "Error al compartir", description: errorMessage });
-      }
+      return;
     }
+
+    navigator.share({
+      title: `Compartir Ubicación de ${device.name}`,
+      text: `Hola, te quiero compartir la ubicación del dispositivo ${device.name}`,
+      url: generatedUrl,
+    }).catch((error) => {
+        // We only care about errors that are not AbortError
+        if (error.name !== 'AbortError') {
+            const errorMessage = error instanceof Error ? error.message : 'No se pudo compartir el enlace.';
+            toast({ variant: "destructive", title: "Error al compartir", description: errorMessage });
+        }
+    });
   };
 
   const handleCopyToClipboard = () => {
