@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { SpeedIcon } from "../icons/speed-icon";
+import { SpeedometerIcon } from "../icons/speedometer-icon";
 import { DistanceIcon } from "../icons/distance-icon";
 import { EngineIdleIcon } from "../icons/engine-idle-icon";
 import HistoryDetailRow from "./history-detail-row";
@@ -63,7 +63,7 @@ export default function HistoryDetails({ history, device, onClose, onPointSelect
           
             <TabsContent value="resume" className="pt-4 flex-1">
               <div className="grid grid-cols-2 gap-4">
-                  <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
+                  <SummaryItem icon={SpeedometerIcon} value={history.top_speed} label="Vel. Máxima" />
                   <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
                   <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
                   <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
