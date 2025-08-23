@@ -130,6 +130,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const deviceImageUrl = device.image ? `${serverUrl}${device.image}` : null;
   const hasSensors = device.sensors && device.sensors.length > 0;
   const hasImage = !!deviceImageUrl;
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${device.lat},${device.lng}`;
 
   const totalDistance = (typeof device.total_distance === 'number')
     ? `${device.total_distance.toFixed(2)} ${device.unit_of_distance}`
@@ -168,18 +169,11 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
       return;
     }
   
-    const params: { type: string; device_id: number; data?: any; index: number } = {
+    const params: { type: string; device_id: number; data?: any; index: number; } = {
       type: command.type,
       device_id: device.id,
       index: index,
     };
-  
-    const commandTypePrefix = command.type.split('_')[0];
-    if (commandTypePrefix === 'template' && command.attributes && command.attributes.length > 0) {
-      params.data = command.attributes[0].default;
-    } else if (commandTypePrefix.startsWith('setdigout') && command.attributes && command.attributes.length > 0) {
-        params.data = command.attributes[0].default;
-    }
   
     try {
       await sendGPRSCommand(token, params);
@@ -261,7 +255,9 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                         {isFetchingCommands ? <LoaderIcon className="h-4 w-4 text-gray-600" /> : <SendIcon className="h-4 w-4 text-gray-600" />}
                     </Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8" onClick={handleShareClick}><Share2 className="h-4 w-4 text-gray-600" /></Button>
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
+                    <Link href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                      <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
+                    </Link>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Star className="h-4 w-4 text-gray-600" /></Button>
                 </div>
             </div>
@@ -345,3 +341,5 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     </>
   );
 }
+
+    
