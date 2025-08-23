@@ -14,7 +14,6 @@ import {
   MapPin,
   Share2,
   Signal,
-  UserRound,
   Timer,
   WifiOff,
   X,
@@ -36,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import CommandDialog from "./command-dialog";
 import { LoaderIcon } from "../icons/loader-icon";
 import ShareDialog from "./share-dialog";
+import { StreetViewIcon } from "../icons/street-view-icon";
 
 
 interface VehicleDetailsSheetProps {
@@ -252,7 +252,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                       <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
                     </Link>
                     <Link href={streetViewUrl} target="_blank" rel="noopener noreferrer">
-                      <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><UserRound className="h-4 w-4 text-gray-600" /></Button>
+                      <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><StreetViewIcon className="h-4 w-4 text-gray-600" /></Button>
                     </Link>
                 </div>
             </div>
