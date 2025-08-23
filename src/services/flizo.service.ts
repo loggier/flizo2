@@ -301,9 +301,10 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
 
         throw new Error('Failed to send command. Server responded with status ' + response.status);
     }
-
+    
     const responseText = await response.text();
 
+    // If response is empty but status is OK, consider it a success.
     if (!responseText) {
         return { status: 1, message: 'Comando enviado con éxito.' };
     }
@@ -319,8 +320,45 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
         return responseData;
 
     } catch (error) {
-        // If parsing fails but the response was OK, treat as success.
-        console.warn('Could not parse JSON response, but request was successful.');
+        // If parsing fails but the response was OK, treat as success, as the server might send plain text "OK".
+        console.warn('Could not parse JSON response, but request was successful. Assuming success.');
         return { status: 1, message: 'Comando enviado con éxito (respuesta no es JSON).' };
     }
+}
+
+export async function createSharingLink(user_api_hash: string, deviceId: number, expirationDate: string): Promise<{ hash: string }> {
+    const url = `${serverApi}sharing`;
+
+    const body = new URLSearchParams();
+    body.append('user_api_hash', user_api_hash);
+    body.append('expiration_by', 'date');
+    body.append('expiration_date', expirationDate);
+    body.append('duration', '1');
+    body.append('delete_after_expiration', '1');
+    body.append('send_sms', '0');
+    body.append('send_email', '0');
+    body.append('active', '1');
+    body.append('name', 'App');
+    body.append('devices[]', deviceId.toString());
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body,
+    });
+    
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to create sharing link' }));
+        throw new Error(errorData.message);
+    }
+
+    const responseData = await response.json();
+
+    if (responseData && responseData.data && responseData.data.hash) {
+        return responseData.data;
+    }
+
+    throw new Error('Invalid response from server when creating sharing link');
 }

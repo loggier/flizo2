@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import CommandDialog from "./command-dialog";
 import { LoaderIcon } from "../icons/loader-icon";
+import ShareDialog from "./share-dialog";
 
 
 interface VehicleDetailsSheetProps {
@@ -81,6 +82,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const [commands, setCommands] = useState<Command[]>([]);
   const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
   const [isFetchingCommands, setIsFetchingCommands] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   
   useEffect(() => {
     let isMounted = true;
@@ -190,6 +192,18 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     }
   };
 
+  const handleShareClick = () => {
+    if (navigator.share) {
+        setIsShareDialogOpen(true);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "No Soportado",
+            description: "Tu navegador no soporta la función de compartir.",
+        });
+    }
+  };
+
 
   return (
     <>
@@ -246,7 +260,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8" onClick={handleCommandClick} disabled={isFetchingCommands}>
                         {isFetchingCommands ? <LoaderIcon className="h-4 w-4 text-gray-600" /> : <SendIcon className="h-4 w-4 text-gray-600" />}
                     </Button>
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Share2 className="h-4 w-4 text-gray-600" /></Button>
+                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8" onClick={handleShareClick}><Share2 className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Star className="h-4 w-4 text-gray-600" /></Button>
                 </div>
@@ -322,6 +336,11 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
         commands={commands}
         deviceName={device.name}
         onSendCommand={handleSendCommand}
+    />
+    <ShareDialog
+        isOpen={isShareDialogOpen}
+        onOpenChange={setIsShareDialogOpen}
+        device={device}
     />
     </>
   );
