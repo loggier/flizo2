@@ -95,19 +95,19 @@ export function LoginForm() {
 
       const token = data.user_api_hash;
       const permissions = data.permissions;
+      const profile = { email: data.email, id: data.id, full_name: data.full_name };
 
       if (token) {
-        if (values.rememberMe) {
-          localStorage.setItem("user_api_hash", token);
-          if (permissions) {
-            localStorage.setItem("permissions", JSON.stringify(permissions));
-          }
-        } else {
-          sessionStorage.setItem("user_api_hash", token);
-          if (permissions) {
-            sessionStorage.setItem("permissions", JSON.stringify(permissions));
-          }
+        const storage = values.rememberMe ? localStorage : sessionStorage;
+        
+        storage.setItem("user_api_hash", token);
+        if (permissions) {
+          storage.setItem("permissions", JSON.stringify(permissions));
         }
+        if (profile) {
+            storage.setItem("profile", JSON.stringify(profile));
+        }
+
         router.push("/maps");
       } else {
          throw new Error(data.message || loginTranslations.genericError);

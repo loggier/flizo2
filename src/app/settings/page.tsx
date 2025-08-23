@@ -46,7 +46,7 @@ export default function SettingsPage() {
 
     useEffect(() => {
         setIsClient(true);
-        const storedProfile = localStorage.getItem('profile');
+        const storedProfile = localStorage.getItem('profile') || sessionStorage.getItem('profile');
         if(storedProfile){
             try {
                 const profile = JSON.parse(storedProfile);
