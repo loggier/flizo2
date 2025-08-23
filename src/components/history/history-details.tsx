@@ -1,7 +1,7 @@
 
 "use client";
 
-import { HistoryData, Device } from "@/lib/types";
+import { HistoryData, Device, HistoryPoint } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ interface HistoryDetailsProps {
   history: HistoryData;
   device: Device;
   onClose: () => void;
+  onPointSelect: (point: HistoryPoint) => void;
 }
 
 const SummaryItem = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string, label: string }) => (
@@ -26,7 +27,7 @@ const SummaryItem = ({ icon: Icon, value, label }: { icon: React.ElementType, va
     </div>
 );
 
-export default function HistoryDetails({ history, device, onClose }: HistoryDetailsProps) {
+export default function HistoryDetails({ history, device, onClose, onPointSelect }: HistoryDetailsProps) {
 
   const getStatusText = (status: number) => {
     switch (status) {
@@ -52,7 +53,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-2 min-h-0">
+      <CardContent className="flex-1 flex flex-col p-2 min-h-0 overflow-y-auto">
         <Tabs defaultValue="details" className="w-full flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
@@ -73,7 +74,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
                 <ScrollArea className="h-full">
                     <div className="space-y-1 text-xs pr-2">
                         {details.map((group, groupIndex) => (
-                        <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                        <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} onSelect={onPointSelect}/>
                         ))}
                     </div>
                 </ScrollArea>
@@ -83,7 +84,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
                  <ScrollArea className="h-full">
                     <div className="space-y-1 text-xs pr-2">
                         {events.map((group, groupIndex) => (
-                        <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} />
+                        <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} onSelect={onPointSelect} />
                         ))}
                         {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
                     </div>

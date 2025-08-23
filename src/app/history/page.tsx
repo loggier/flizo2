@@ -29,6 +29,8 @@ function HistoryPageContent() {
     const [isLoading, setIsLoading] = useState(true);
     const [isFetchingHistory, setIsFetchingHistory] = useState(false);
     const [historyData, setHistoryData] = useState<HistoryData | null>(null);
+    const [map, setMap] = useState<google.maps.Map | null>(null);
+    const [selectedPoint, setSelectedPoint] = useState<HistoryPoint | null>(null);
 
     useEffect(() => {
         setIsLoading(true);
@@ -45,6 +47,14 @@ function HistoryPageContent() {
         }
         setIsLoading(false);
     }, []);
+
+    useEffect(() => {
+        if (map && selectedPoint) {
+            const position = { lat: parseFloat(selectedPoint.lat as any), lng: parseFloat(selectedPoint.lng as any) };
+            map.panTo(position);
+            map.setZoom(18);
+        }
+    }, [map, selectedPoint]);
 
     const handleDayOptionChange = (value: string) => {
         setDayOption(value);
@@ -160,16 +170,30 @@ function HistoryPageContent() {
             setIsFetchingHistory(false);
         }
     };
+
+    const handlePointSelect = (point: HistoryPoint) => {
+        setSelectedPoint(point);
+    };
+
+    const handleMapClose = () => {
+        setHistoryData(null);
+        setSelectedPoint(null);
+    }
     
     if (historyData) {
         const selectedDevice = devices.find(d => d.id === Number(selectedVehicle));
         return (
             <div className="h-full w-full flex flex-col">
                 <div className="h-1/2 w-full relative">
-                    <HistoryMap history={historyData} />
+                    <HistoryMap 
+                        history={historyData} 
+                        onMapLoad={setMap} 
+                        selectedPoint={selectedPoint}
+                        onCloseInfoWindow={() => setSelectedPoint(null)}
+                    />
                 </div>
                 <div className="h-1/2 w-full">
-                   {selectedDevice && <HistoryDetails history={historyData} device={selectedDevice} onClose={() => setHistoryData(null)} />}
+                   {selectedDevice && <HistoryDetails history={historyData} device={selectedDevice} onClose={handleMapClose} onPointSelect={handlePointSelect} />}
                 </div>
             </div>
         )

@@ -2,8 +2,8 @@
 "use client";
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { GoogleMap, useLoadScript, Polyline, Marker } from '@react-google-maps/api';
-import type { HistoryData, HistoryItem } from '@/lib/types';
+import { GoogleMap, useLoadScript, Polyline, Marker, InfoWindow } from '@react-google-maps/api';
+import type { HistoryData, HistoryItem, HistoryPoint } from '@/lib/types';
 import { LoaderIcon } from '../icons/loader-icon';
 
 const containerStyle = {
@@ -47,7 +47,17 @@ const getIconForStatus = (status: number) => {
 }
 
 
-function HistoryMap({ history }: { history: HistoryData }) {
+function HistoryMap({ 
+    history, 
+    onMapLoad,
+    selectedPoint,
+    onCloseInfoWindow
+ }: { 
+    history: HistoryData, 
+    onMapLoad: (map: google.maps.Map | null) => void,
+    selectedPoint: HistoryPoint | null,
+    onCloseInfoWindow: () => void,
+ }) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
@@ -68,8 +78,8 @@ function HistoryMap({ history }: { history: HistoryData }) {
       .filter(group => group.status !== 1 && group.items.length > 0) // Filter out 'drive' groups and empty groups
       .map((group: HistoryItem) => {
         const point = group.items[0];
-        const lat = parseFloat(point.lat as any);
-        const lng = parseFloat(point.lng as any);
+        const lat = parseFloat((point as any).lat ?? (point as any).latitude);
+        const lng = parseFloat((point as any).lng ?? (point as any).longitude);
 
         if (isNaN(lat) || isNaN(lng)) {
             return null;
@@ -104,15 +114,16 @@ function HistoryMap({ history }: { history: HistoryData }) {
       mapInstance.setMapTypeId("OSM");
 
     setMap(mapInstance);
-  }, []);
+    onMapLoad(mapInstance);
+  }, [onMapLoad]);
 
   useEffect(() => {
-    if (map && routePath.length > 0) {
+    if (map && routePath.length > 0 && !selectedPoint) {
       const bounds = new google.maps.LatLngBounds();
       routePath.forEach(point => bounds.extend(point));
       map.fitBounds(bounds, 50); // Add 50px padding
     }
-  }, [map, routePath]);
+  }, [map, routePath, selectedPoint]);
   
   if (!isLoaded) {
     return (
@@ -163,6 +174,18 @@ function HistoryMap({ history }: { history: HistoryData }) {
       {eventMarkers.map((marker, index) => (
         marker ? <Marker key={index} position={marker.position} icon={marker.icon as google.maps.Icon} title={marker.title} /> : null
       ))}
+      {selectedPoint && (
+          <InfoWindow
+            position={{ lat: parseFloat(selectedPoint.lat as any), lng: parseFloat(selectedPoint.lng as any) }}
+            onCloseClick={onCloseInfoWindow}
+          >
+             <div className="p-1 text-sm">
+                <p><strong>Hora:</strong> {selectedPoint.time}</p>
+                <p><strong>Velocidad:</strong> {selectedPoint.speed} kph</p>
+                {selectedPoint.address && <p><strong>Dirección:</strong> {selectedPoint.address}</p>}
+             </div>
+          </InfoWindow>
+        )}
     </GoogleMap>
   );
 }
