@@ -26,8 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { changePassword } from "@/services/flizo.service";
-import { LockClosedIcon } from "@radix-ui/react-icons";
-import { Book, LogOut, RefreshCcw } from "lucide-react";
+import { Book, LogOut, RefreshCcw, Lock } from "lucide-react";
 import Link from "next/link";
 
 
@@ -124,7 +123,7 @@ export default function SettingsPage() {
                         <AlertDialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
                             <AlertDialogTrigger asChild>
                                 <Button variant="secondary" className="flex-grow">
-                                    <LockClosedIcon className="mr-2" />
+                                    <Lock className="mr-2" />
                                     Cambiar Contraseña
                                 </Button>
                             </AlertDialogTrigger>
