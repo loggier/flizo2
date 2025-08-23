@@ -290,3 +290,15 @@ export interface Device {
     message?: string;
     status: number;
   }
+
+  export interface Command {
+    id: number;
+    title: string;
+    type: string;
+    show: number;
+    attributes: {
+      name: string;
+      type: string;
+      default: any;
+    }[];
+  }

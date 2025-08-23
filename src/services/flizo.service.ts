@@ -1,5 +1,5 @@
 
-import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent, AlertSetting, HistoryData } from "@/lib/types";
+import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent, AlertSetting, HistoryData, Command } from "@/lib/types";
 
 const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
 
@@ -243,4 +243,53 @@ export async function getHistory(user_api_hash: string, params: {
     }
     
     return data as HistoryData;
+}
+
+export async function getDeviceCommands(user_api_hash: string, device_id: number): Promise<Command[]> {
+    const response = await fetch(`${serverApi}get_device_commands?user_api_hash=${user_api_hash}&device_id=${device_id}`);
+
+    if (response.status === 401) {
+        throw new Error('Unauthorized');
+    }
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch device commands');
+    }
+
+    const data = await response.json();
+    
+    if (data && Array.isArray(data)) {
+        return data.filter((cmd: Command) => cmd.type.split('_')[0] !== 'custom');
+    }
+
+    return [];
+}
+
+export async function sendGPRSCommand(user_api_hash: string, params: { type: string; device_id: number; data?: any }): Promise<any> {
+    const url = `${serverApi}send_gprs_command`;
+    const body = {
+        user_api_hash,
+        ...params
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+    });
+
+    if (response.status === 401) {
+        throw new Error('Unauthorized');
+    }
+
+    const responseData = await response.json();
+
+    if (!response.ok || responseData.status !== 1) {
+        console.error('Failed to send command:', responseData);
+        throw new Error(responseData.message || 'Failed to send command');
+    }
+
+    return responseData;
 }

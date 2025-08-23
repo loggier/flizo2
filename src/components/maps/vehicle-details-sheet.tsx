@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { Device, Sensor } from "@/lib/types";
+import type { Command, Device, Sensor } from "@/lib/types";
 import { Button } from "../ui/button";
 import Image from "next/image";
 import { cn, formatTimeAgo } from "@/lib/utils";
@@ -12,7 +12,6 @@ import {
   FileText,
   History,
   MapPin,
-  Send,
   Share2,
   Signal,
   Star,
@@ -20,8 +19,9 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
+import { SendIcon } from "../icons/send-icon";
 import { useEffect, useState } from "react";
-import { getAddress } from "@/services/flizo.service";
+import { getAddress, getDeviceCommands, sendGPRSCommand } from "@/services/flizo.service";
 import {
   Carousel,
   CarouselContent,
@@ -32,6 +32,9 @@ import { SensorIcon } from "./sensor-icon";
 import { FootstepsIcon } from "../icons/footsteps-icon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
+import CommandDialog from "./command-dialog";
+import { LoaderIcon } from "../icons/loader-icon";
 
 
 interface VehicleDetailsSheetProps {
@@ -68,10 +71,16 @@ const InfoRow = ({ icon: Icon, label, value, isAddress = false }: { icon: React.
 
 export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsSheetProps) {
   const router = useRouter();
+  const { toast } = useToast();
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+  
   const [address, setAddress] = useState('Ubicación no disponible');
   const [api, setApi] = useState<CarouselApi>()
   const [current, setCurrent] = useState(0)
+
+  const [commands, setCommands] = useState<Command[]>([]);
+  const [isCommandDialogOpen, setIsCommandDialogOpen] = useState(false);
+  const [isFetchingCommands, setIsFetchingCommands] = useState(false);
   
   useEffect(() => {
     let isMounted = true;
@@ -130,7 +139,57 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     router.push(`/history?deviceId=${device?.id}`);
   };
 
+  const handleCommandClick = async () => {
+    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    if (!token) {
+        toast({ variant: 'destructive', title: 'Error', description: 'No se encontró el token de autenticación.' });
+        return;
+    }
+
+    setIsFetchingCommands(true);
+    try {
+        const fetchedCommands = await getDeviceCommands(token, device.id);
+        setCommands(fetchedCommands);
+        setIsCommandDialogOpen(true);
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+        toast({ variant: 'destructive', title: 'Error al obtener comandos', description: errorMessage });
+    } finally {
+        setIsFetchingCommands(false);
+    }
+  };
+
+  const handleSendCommand = async (command: Command) => {
+    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    if (!token) {
+      toast({ variant: 'destructive', title: 'Error', description: 'No se encontró el token de autenticación.' });
+      return;
+    }
+  
+    const params: { type: string; device_id: number; data?: any } = {
+      type: command.type,
+      device_id: device.id,
+    };
+  
+    const commandTypePrefix = command.type.split('_')[0];
+    if (commandTypePrefix === 'template' || commandTypePrefix.startsWith('setdigout')) {
+      params.data = command.attributes[0]?.default;
+    }
+  
+    try {
+      await sendGPRSCommand(token, params);
+      toast({ title: 'Éxito', description: 'Comando enviado correctamente.' });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      toast({ variant: 'destructive', title: 'Error al enviar comando', description: errorMessage });
+    } finally {
+      setIsCommandDialogOpen(false);
+    }
+  };
+
+
   return (
+    <>
     <div className="absolute bottom-16 left-0 right-0 z-20 pointer-events-none mb-3">
        <div className="bg-background rounded-xl shadow-2xl overflow-hidden pointer-events-auto max-w-lg mx-auto p-2">
 
@@ -181,7 +240,9 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                         <FileText className="h-4 w-4 text-gray-600" />
                       </Link>
                     </Button>
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Send className="h-4 w-4 text-gray-600" /></Button>
+                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8" onClick={handleCommandClick} disabled={isFetchingCommands}>
+                        {isFetchingCommands ? <LoaderIcon className="h-4 w-4 text-gray-600" /> : <SendIcon className="h-4 w-4 text-gray-600" />}
+                    </Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Share2 className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Star className="h-4 w-4 text-gray-600" /></Button>
@@ -252,5 +313,13 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
 
       </div>
     </div>
+    <CommandDialog
+        isOpen={isCommandDialogOpen}
+        onOpenChange={setIsCommandDialogOpen}
+        commands={commands}
+        deviceName={device.name}
+        onSendCommand={handleSendCommand}
+    />
+    </>
   );
 }
