@@ -54,7 +54,7 @@ export default function HistoryDetails({ history, device, onClose, onPointSelect
         </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-2 min-h-0 overflow-y-auto">
-        <Tabs defaultValue="details" className="w-full flex-1 flex flex-col min-h-0">
+        <Tabs defaultValue="resume" className="w-full flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
