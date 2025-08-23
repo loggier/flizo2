@@ -72,9 +72,7 @@ export default function SettingsPage() {
     };
 
     const handleResetApp = () => {
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = '/';
+        window.location.reload();
     }
 
     const handleChangePassword = async () => {
