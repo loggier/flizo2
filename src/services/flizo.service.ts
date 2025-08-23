@@ -267,18 +267,22 @@ export async function getDeviceCommands(user_api_hash: string, device_id: number
 
 export async function sendGPRSCommand(user_api_hash: string, params: { type: string; device_id: number; data?: any }): Promise<any> {
     const url = `${serverApi}send_gprs_command`;
-    const body = {
-        user_api_hash,
-        ...params,
-        devices: [params.device_id],
-    };
+    
+    const body = new URLSearchParams();
+    body.append('user_api_hash', user_api_hash);
+    body.append('type', params.type);
+    body.append('device_id', params.device_id.toString());
+    body.append('devices[]', params.device_id.toString());
+    if (params.data) {
+        body.append('data', params.data);
+    }
 
     const response = await fetch(url, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify(body),
+        body: body,
     });
 
     if (response.status === 401) {
