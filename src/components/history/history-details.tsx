@@ -60,33 +60,35 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
             <TabsTrigger value="events">Eventos</TabsTrigger>
           </TabsList>
           
-          <div className="flex-1 min-h-0 overflow-y-auto mt-2">
-              <TabsContent value="resume" className="pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
-                    <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
-                    <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
-                    <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
-                </div>
-              </TabsContent>
+            <TabsContent value="resume" className="pt-4 flex-1">
+              <div className="grid grid-cols-2 gap-4">
+                  <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
+                  <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
+                  <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
+                  <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
+              </div>
+            </TabsContent>
 
-              <TabsContent value="details">
-                  <div className="space-y-1 text-xs pr-2">
-                    {details.map((group, groupIndex) => (
-                      <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                    ))}
-                  </div>
-              </TabsContent>
+            <TabsContent value="details" className="flex-1 min-h-0 mt-2">
+                <ScrollArea className="h-full">
+                    <div className="space-y-1 text-xs pr-2">
+                        {details.map((group, groupIndex) => (
+                        <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                        ))}
+                    </div>
+                </ScrollArea>
+            </TabsContent>
 
-              <TabsContent value="events">
-                  <div className="space-y-1 text-xs pr-2">
-                    {events.map((group, groupIndex) => (
-                      <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} />
-                    ))}
-                    {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
-                  </div>
-              </TabsContent>
-          </div>
+            <TabsContent value="events" className="flex-1 min-h-0 mt-2">
+                 <ScrollArea className="h-full">
+                    <div className="space-y-1 text-xs pr-2">
+                        {events.map((group, groupIndex) => (
+                        <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} />
+                        ))}
+                        {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
+                    </div>
+                </ScrollArea>
+            </TabsContent>
         </Tabs>
       </CardContent>
     </Card>

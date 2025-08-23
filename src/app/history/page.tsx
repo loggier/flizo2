@@ -80,14 +80,16 @@ function HistoryPageContent() {
 
     const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
         const processedItems = await Promise.all(data.items.map(async (group) => {
-            const pointToProcess = group.items[0]; // Most groups have their primary point here
+            const pointToProcess = group.items[0];
             
-            // Check if address is missing and there are coordinates to use
             if (pointToProcess && !pointToProcess.address) {
-                const lat = 'latitude' in pointToProcess ? (pointToProcess as any).latitude : pointToProcess.lat;
-                const lon = 'longitude' in pointToProcess ? (pointToProcess as any).longitude : pointToProcess.lng;
+                const latStr = (pointToProcess as any).lat ?? (pointToProcess as any).latitude;
+                const lonStr = (pointToProcess as any).lng ?? (pointToProcess as any).longitude;
+    
+                const lat = parseFloat(latStr);
+                const lon = parseFloat(lonStr);
 
-                if (typeof lat === 'number' && typeof lon === 'number' && lat !== 0 && lon !== 0) {
+                if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
                     try {
                         const address = await getAddress(lat, lon);
                         pointToProcess.address = address || 'Dirección no disponible';

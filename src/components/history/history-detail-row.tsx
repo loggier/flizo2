@@ -1,7 +1,7 @@
 
 "use client";
 
-import type { HistoryItem } from "@/lib/types";
+import type { HistoryItem, HistoryPoint } from "@/lib/types";
 
 interface HistoryDetailRowProps {
     group: HistoryItem;
@@ -9,11 +9,10 @@ interface HistoryDetailRowProps {
 }
 
 export default function HistoryDetailRow({ group, getStatusText }: HistoryDetailRowProps) {
-    const point = group.items[0];
+    const point: HistoryPoint | undefined = group.items[0];
     const address = point?.address || 'Obteniendo dirección...';
     
-    // For events (status 5), the primary date is at the group level
-    const timeToDisplay = group.status === 5 ? group.raw_time : point?.time || group.time || " ";
+    const timeToDisplay = point?.time || group.time || " ";
     const [date, time] = (timeToDisplay).split(" ");
 
     return (
@@ -25,19 +24,19 @@ export default function HistoryDetailRow({ group, getStatusText }: HistoryDetail
             
             {/* Column 2: Date / Time */}
             <div className="text-gray-800 font-semibold space-y-0.5">
-                <p>{date}</p>
-                <p>{time}</p>
+                 <p>{date}</p>
+                 <p>{time}</p>
+                 {group.status === 2 && ( // Stop, show duration below time
+                    <p className="text-primary font-bold">{group.time}</p>
+                 )}
             </div>
 
             {/* Column 3: Duration or Event Message */}
             <div className="text-gray-600 font-medium break-words self-center">
                  {(group.status === 1 || group.status === 3 || group.status === 4) && (
-                    <p>{group.time}</p> // Duration
+                    <p>{group.time}</p> // Drive, Idle, End -> Duration
                  )}
-                 {group.status === 2 && ( // Stop
-                    <p className="text-primary font-bold">{group.time}</p> // Duration
-                 )}
-                 {group.status === 5 && ( // Event
+                 {group.status === 5 && ( // Event -> Message
                     <p>{group.message}</p>
                  )}
             </div>
