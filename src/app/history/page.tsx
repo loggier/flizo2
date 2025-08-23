@@ -148,26 +148,24 @@ function HistoryPageContent() {
 
     const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
         const processedItems = await Promise.all(data.items.map(async (group) => {
-            if (group.items && group.items.length > 0) {
-                const pointToProcess = group.items[0];
-                
-                if (pointToProcess && !pointToProcess.address) {
-                    const latStr = (pointToProcess as any).lat ?? (pointToProcess as any).latitude;
-                    const lonStr = (pointToProcess as any).lng ?? (pointToProcess as any).longitude;
-        
-                    const lat = parseFloat(latStr);
-                    const lon = parseFloat(lonStr);
-    
-                    if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
-                        try {
-                            const address = await getAddress(lat, lon);
-                            pointToProcess.address = address || 'Dirección no disponible';
-                        } catch {
-                            pointToProcess.address = 'No se pudo obtener la dirección';
-                        }
-                    } else {
-                         pointToProcess.address = 'Coordenadas no válidas';
+            const pointToProcess = group.items[0];
+
+            if (pointToProcess && !pointToProcess.address) {
+                const latStr = (pointToProcess as any).lat ?? (pointToProcess as any).latitude;
+                const lonStr = (pointToProcess as any).lng ?? (pointToProcess as any).longitude;
+
+                const lat = parseFloat(latStr);
+                const lon = parseFloat(lonStr);
+
+                if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
+                    try {
+                        const address = await getAddress(lat, lon);
+                        pointToProcess.address = address || 'Dirección no disponible';
+                    } catch {
+                        pointToProcess.address = 'No se pudo obtener la dirección';
                     }
+                } else {
+                    pointToProcess.address = 'Coordenadas no válidas';
                 }
             }
             return group;
