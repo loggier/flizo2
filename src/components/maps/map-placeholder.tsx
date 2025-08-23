@@ -53,7 +53,7 @@ function MapComponent({
     selectedDeviceForAlert,
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const apiKey = "AQUÍ_VA_TU_API_KEY_DE_GOOGLE_MAPS";
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -233,3 +233,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    

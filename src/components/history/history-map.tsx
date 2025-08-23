@@ -65,7 +65,7 @@ function HistoryMap({
     playbackPoint: HistoryPoint | null,
     isPlaying: boolean,
  }) {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const apiKey = "AQUÍ_VA_TU_API_KEY_DE_GOOGLE_MAPS";
   const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const { isLoaded, loadError } = useLoadScript({
@@ -253,4 +253,3 @@ function HistoryMap({
 export default React.memo(HistoryMap);
 
     
-
