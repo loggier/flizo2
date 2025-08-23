@@ -68,7 +68,7 @@ export default function SettingsPage() {
         localStorage.clear();
         sessionStorage.clear();
         localStorage.setItem('lng', lng);
-        router.push('/login');
+        router.push('/');
     };
 
     const handleResetApp = () => {
