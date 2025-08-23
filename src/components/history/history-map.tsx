@@ -58,8 +58,8 @@ function HistoryMap({ history }: { history: HistoryData }) {
   const routePath = useMemo(() => {
     return history.items
       .flatMap(group => group.items)
-      .filter(point => typeof point.lat === 'number' && typeof point.lng === 'number' && isFinite(point.lat) && isFinite(point.lng))
-      .map(point => ({ lat: point.lat, lng: point.lng }));
+      .map(point => ({ lat: parseFloat(point.lat as any), lng: parseFloat(point.lng as any) }))
+      .filter(point => !isNaN(point.lat) && !isNaN(point.lng));
   }, [history]);
 
   const eventMarkers = useMemo(() => {
@@ -68,11 +68,15 @@ function HistoryMap({ history }: { history: HistoryData }) {
       .filter(group => group.status !== 1 && group.items.length > 0) // Filter out 'drive' groups and empty groups
       .map((group: HistoryItem) => {
         const point = group.items[0];
-        if (typeof point.lat !== 'number' || typeof point.lng !== 'number' || !isFinite(point.lat) || !isFinite(point.lng)) {
+        const lat = parseFloat(point.lat as any);
+        const lng = parseFloat(point.lng as any);
+
+        if (isNaN(lat) || isNaN(lng)) {
             return null;
         }
+
         return {
-          position: { lat: point.lat, lng: point.lng },
+          position: { lat, lng },
           icon: getIconForStatus(group.status),
           title: `Status: ${group.status} at ${point.time}`
         };
