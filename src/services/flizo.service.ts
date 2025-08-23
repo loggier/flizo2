@@ -269,7 +269,8 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
     const url = `${serverApi}send_gprs_command`;
     const body = {
         user_api_hash,
-        ...params
+        ...params,
+        devices: [params.device_id],
     };
 
     const response = await fetch(url, {
