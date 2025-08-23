@@ -287,43 +287,24 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
         body: body,
     });
 
-    if (!response.ok) {
-        let errorData;
-        try {
-            errorData = await response.json();
-        } catch (e) {
-            // Body is not JSON or empty
-        }
-        
-        if (errorData && errorData.message) {
-            throw new Error(errorData.message);
-        }
-
-        throw new Error('Failed to send command. Server responded with status ' + response.status);
-    }
-    
-    const responseText = await response.text();
-
-    // If response is empty but status is OK, consider it a success.
-    if (!responseText) {
+    if (response.ok) {
         return { status: 1, message: 'Comando enviado con éxito.' };
     }
 
+    // If not OK, try to parse error
+    let errorData;
     try {
-        const responseData = JSON.parse(responseText);
-        
-        if (responseData.status !== 1) {
-            console.error('Failed to send command:', responseData);
-            throw new Error(responseData.message || 'Failed to send command');
-        }
-
-        return responseData;
-
-    } catch (error) {
-        // If parsing fails but the response was OK, treat as success, as the server might send plain text "OK".
-        console.warn('Could not parse JSON response, but request was successful. Assuming success.');
-        return { status: 1, message: 'Comando enviado con éxito (respuesta no es JSON).' };
+        errorData = await response.json();
+    } catch (e) {
+        // Body is not JSON or empty
+        throw new Error('Failed to send command. Server responded with status ' + response.status);
     }
+    
+    if (errorData && errorData.message) {
+        throw new Error(errorData.message);
+    }
+
+    throw new Error('Failed to send command. Server responded with status ' + response.status);
 }
 
 export async function createSharingLink(user_api_hash: string, deviceId: number, expirationDate: string): Promise<{ hash: string }> {
@@ -361,4 +342,17 @@ export async function createSharingLink(user_api_hash: string, deviceId: number,
     }
 
     throw new Error('Invalid response from server when creating sharing link');
+}
+
+export async function changePassword(user_api_hash: string, current_password: string,password: string, password_confirmation: string): Promise<any> {
+    const url = `${serverApi}change_password?user_api_hash=${user_api_hash}&password_current=${current_password}&password=${password}&password_confirmation=${password_confirmation}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (!response.ok || data.status !== 1) {
+        throw new Error(data.message || "Failed to change password");
+    }
+
+    return data;
 }
