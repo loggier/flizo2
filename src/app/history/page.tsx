@@ -73,7 +73,7 @@ function HistoryPageContent() {
     // Playback effect
     useEffect(() => {
         if (isPlaying && routePath.length > 1 && map) {
-            const totalDuration = 30000; // 30 seconds
+            const totalDuration = 60000; // 60 seconds
             const intervalTime = totalDuration / routePath.length / playbackSpeed;
 
             const animate = () => {
