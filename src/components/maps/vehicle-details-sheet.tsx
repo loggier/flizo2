@@ -173,8 +173,10 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     };
   
     const commandTypePrefix = command.type.split('_')[0];
-    if (commandTypePrefix === 'template' || commandTypePrefix.startsWith('setdigout')) {
-      params.data = m.attributes[0].default
+    if (commandTypePrefix === 'template' && command.attributes && command.attributes.length > 0) {
+      params.data = command.attributes[0].default;
+    } else if (commandTypePrefix.startsWith('setdigout') && command.attributes && command.attributes.length > 0) {
+        params.data = command.attributes[0].default;
     }
   
     try {
