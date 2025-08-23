@@ -54,7 +54,7 @@ function HistoryMap({
     onCloseInfoWindow,
     playbackPosition,
     isPlaying,
-    mapRef
+    routePath,
  }: { 
     history: HistoryData, 
     onMapLoad: (map: google.maps.Map | null) => void,
@@ -62,21 +62,15 @@ function HistoryMap({
     onCloseInfoWindow: () => void,
     playbackPosition: { lat: number; lng: number } | null,
     isPlaying: boolean,
-    mapRef: google.maps.Map | null;
+    routePath: { lat: number; lng: number }[];
  }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
-  const { isLoaded } = useLoadScript({
+  const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
   });
 
-  useEffect(() => {
-    if (isPlaying && playbackPosition && mapRef) {
-      mapRef.panTo(playbackPosition);
-    }
-  }, [playbackPosition, isPlaying, mapRef]);
-
-  const routePath = useMemo(() => {
+  const allPoints = useMemo(() => {
     return history.items
       .flatMap(group => group.items)
       .map(point => {
@@ -108,8 +102,8 @@ function HistoryMap({
       }).filter(marker => marker && marker.icon);
   }, [history, isLoaded]);
 
-  const startPoint = routePath.length > 0 ? routePath[0] : null;
-  const endPoint = routePath.length > 0 ? routePath[routePath.length - 1] : null;
+  const startPoint = allPoints.length > 0 ? allPoints[0] : null;
+  const endPoint = allPoints.length > 0 ? allPoints[allPoints.length - 1] : null;
 
   const onLoad = useCallback((mapInstance: google.maps.Map) => {
     const osmMapType = new google.maps.ImageMapType({
@@ -130,12 +124,16 @@ function HistoryMap({
 
     onMapLoad(mapInstance);
     
-    if (routePath.length > 0) {
+    if (allPoints.length > 0) {
       const bounds = new google.maps.LatLngBounds();
-      routePath.forEach(point => bounds.extend(point));
-      mapInstance.fitBounds(bounds, 50);
+      allPoints.forEach(point => bounds.extend(point));
+      mapInstance.fitBounds(bounds);
+      const listener = google.maps.event.addListenerOnce(mapInstance, 'idle', () => {
+        if (mapInstance.getZoom()! > 16) mapInstance.setZoom(16);
+      });
+      return () => google.maps.event.removeListener(listener);
     }
-  }, [onMapLoad, routePath]);
+  }, [onMapLoad, allPoints]);
   
   if (!isLoaded) {
     return (
@@ -148,8 +146,8 @@ function HistoryMap({
     );
   }
   
-  if (!apiKey) {
-    return <div>API Key for Google Maps is missing.</div>;
+  if (loadError || !apiKey) {
+    return <div>Error al cargar el mapa. Por favor, revise la API Key de Google Maps.</div>;
   }
 
   const iconSize = new google.maps.Size(40, 40);
@@ -179,7 +177,7 @@ function HistoryMap({
       options={{ disableDefaultUI: true, scrollwheel: true }}
     >
       <Polyline
-        path={routePath}
+        path={allPoints}
         options={{
           strokeColor: '#4978d0',
           strokeOpacity: 1,
@@ -189,8 +187,8 @@ function HistoryMap({
       />
       {!isPlaying && (
           <>
-            {startPoint && <Marker position={startPoint} title="Inicio" icon={startIcon} />}
-            {endPoint && <Marker position={endPoint} title="Fin" icon={endIcon} />}
+            {startPoint && <Marker position={startPoint} title="Inicio" icon={startIcon} zIndex={10} />}
+            {endPoint && <Marker position={endPoint} title="Fin" icon={endIcon} zIndex={10}/>}
             {eventMarkers.map((marker, index) => (
                 marker ? <Marker key={index} position={marker.position} icon={marker.icon as google.maps.Icon} title={marker.title} /> : null
             ))}

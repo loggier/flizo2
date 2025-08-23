@@ -40,10 +40,8 @@ function HistoryPageContent() {
     const [currentPointIndex, setCurrentPointIndex] = useState(0);
     const animationRef = useRef<number | null>(null);
 
-    const routePath = historyData?.items.flatMap(group => group.items)
-      .map(p => ({ lat: parseFloat(p.lat as any), lng: parseFloat(p.lng as any) }))
-      .filter(p => !isNaN(p.lat) && !isNaN(p.lng)) || [];
-
+    const [routePath, setRoutePath] = useState<{lat: number, lng: number}[]>([]);
+     
     useEffect(() => {
         setIsLoading(true);
         const storedDevices = localStorage.getItem('devices');
@@ -74,9 +72,9 @@ function HistoryPageContent() {
 
     // Playback effect
     useEffect(() => {
-        if (isPlaying && routePath.length > 1) {
-            const totalDuration = 60000; // 1 minute in milliseconds
-            const interval = 100 / (routePath.length * playbackSpeed);
+        if (isPlaying && routePath.length > 1 && map) {
+            const totalDuration = 30000; // 30 seconds
+            const intervalTime = totalDuration / routePath.length / playbackSpeed;
 
             const animate = () => {
                 setCurrentPointIndex(prevIndex => {
@@ -86,11 +84,21 @@ function HistoryPageContent() {
                         return prevIndex;
                     }
                     setProgress((nextIndex / (routePath.length - 1)) * 100);
+
+                    // Center map on the new point during playback
+                    const nextPosition = routePath[nextIndex];
+                    if (nextPosition) {
+                        map.panTo(nextPosition);
+                        if (map.getZoom()! < 16) {
+                            map.setZoom(18);
+                        }
+                    }
+
                     return nextIndex;
                 });
             };
 
-            animationRef.current = window.setInterval(animate, interval);
+            animationRef.current = window.setInterval(animate, intervalTime);
         } else {
             if (animationRef.current) {
                 clearInterval(animationRef.current);
@@ -103,7 +111,7 @@ function HistoryPageContent() {
                 clearInterval(animationRef.current);
             }
         };
-    }, [isPlaying, playbackSpeed, routePath.length]);
+    }, [isPlaying, playbackSpeed, routePath, map]);
 
 
     const handleDayOptionChange = (value: string) => {
@@ -140,25 +148,26 @@ function HistoryPageContent() {
 
     const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
         const processedItems = await Promise.all(data.items.map(async (group) => {
-            // For events, coords are in items[0]
-            const pointToProcess = group.items[0];
-            
-            if (pointToProcess && !pointToProcess.address) {
-                const latStr = (pointToProcess as any).lat ?? (pointToProcess as any).latitude;
-                const lonStr = (pointToProcess as any).lng ?? (pointToProcess as any).longitude;
+            if (group.items && group.items.length > 0) {
+                const pointToProcess = group.items[0];
+                
+                if (pointToProcess && !pointToProcess.address) {
+                    const latStr = (pointToProcess as any).lat ?? (pointToProcess as any).latitude;
+                    const lonStr = (pointToProcess as any).lng ?? (pointToProcess as any).longitude;
+        
+                    const lat = parseFloat(latStr);
+                    const lon = parseFloat(lonStr);
     
-                const lat = parseFloat(latStr);
-                const lon = parseFloat(lonStr);
-
-                if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
-                    try {
-                        const address = await getAddress(lat, lon);
-                        pointToProcess.address = address || 'Dirección no disponible';
-                    } catch {
-                        pointToProcess.address = 'No se pudo obtener la dirección';
+                    if (!isNaN(lat) && !isNaN(lon) && lat !== 0 && lon !== 0) {
+                        try {
+                            const address = await getAddress(lat, lon);
+                            pointToProcess.address = address || 'Dirección no disponible';
+                        } catch {
+                            pointToProcess.address = 'No se pudo obtener la dirección';
+                        }
+                    } else {
+                         pointToProcess.address = 'Coordenadas no válidas';
                     }
-                } else {
-                     pointToProcess.address = 'Coordenadas no válidas';
                 }
             }
             return group;
@@ -210,6 +219,18 @@ function HistoryPageContent() {
             } else {
                 setHistoryData(result); // Set raw data first
                 processHistoryData(result); // Then process addresses in the background
+                
+                // Optimize and set route for playback
+                const allPoints = result.items.flatMap(group => group.items)
+                    .map(p => ({ lat: parseFloat(p.lat as any), lng: parseFloat(p.lng as any) }))
+                    .filter(p => !isNaN(p.lat) && !isNaN(p.lng));
+                
+                const uniqueConsecutivePoints = allPoints.filter((point, index, self) => 
+                    index === 0 || 
+                    point.lat !== self[index - 1].lat || 
+                    point.lng !== self[index - 1].lng
+                );
+                setRoutePath(uniqueConsecutivePoints);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
@@ -230,6 +251,7 @@ function HistoryPageContent() {
     const handleMapClose = () => {
         setHistoryData(null);
         setSelectedPoint(null);
+        setRoutePath([]);
         handleStop();
     }
     
@@ -251,6 +273,7 @@ function HistoryPageContent() {
     };
     
     const handleProgressChange = (newProgress: number[]) => {
+        if (routePath.length === 0) return;
         const progressValue = newProgress[0];
         setProgress(progressValue);
         const newIndex = Math.floor(((routePath.length - 1) * progressValue) / 100);
@@ -273,7 +296,7 @@ function HistoryPageContent() {
                         onCloseInfoWindow={() => setSelectedPoint(null)}
                         playbackPosition={routePath[currentPointIndex]}
                         isPlaying={isPlaying}
-                        mapRef={map}
+                        routePath={routePath}
                     />
                      <HistoryPlaybackControls
                         isPlaying={isPlaying}
