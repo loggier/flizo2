@@ -23,7 +23,6 @@ import { Button } from "@/components/ui/button";
 import type { Command } from "@/lib/types";
 import { ScrollArea } from "../ui/scroll-area";
 import { SendIcon } from "../icons/send-icon";
-import React from "react";
 
 interface CommandDialogProps {
   isOpen: boolean;
@@ -75,19 +74,20 @@ export default function CommandDialog({
             <div className="space-y-2 pr-4">
               {commands.length > 0 ? (
                 commands.map((command) => (
-                  <Button
-                    key={command.id}
-                    variant="outline"
-                    className="w-full justify-start text-left h-auto py-2"
-                    onClick={() => handleCommandClick(command)}
-                  >
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary rounded-md">
-                            <SendIcon className="w-5 h-5"/>
-                        </div>
-                        <span className="font-semibold">{command.title}</span>
-                    </div>
-                  </Button>
+                  <div key={command.id}>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left h-auto py-2"
+                      onClick={() => handleCommandClick(command)}
+                    >
+                      <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary rounded-md">
+                              <SendIcon className="w-5 h-5"/>
+                          </div>
+                          <span className="font-semibold">{command.title}</span>
+                      </div>
+                    </Button>
+                  </div>
                 ))
               ) : (
                 <p className="text-center text-muted-foreground py-8">No hay comandos disponibles para este dispositivo.</p>
