@@ -11,6 +11,7 @@ import { DistanceIcon } from "../icons/distance-icon";
 import { EngineIdleIcon } from "../icons/engine-idle-icon";
 import HistoryDetailRow from "./history-detail-row";
 import { ScrollArea } from "../ui/scroll-area";
+import { FuelIcon } from "../icons/fuel-icon";
 
 interface HistoryDetailsProps {
   history: HistoryData;
@@ -62,11 +63,13 @@ export default function HistoryDetails({ history, device, onClose, onPointSelect
           </TabsList>
           
             <TabsContent value="resume" className="pt-4 flex-1">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-4">
                   <SummaryItem icon={SpeedometerIcon} value={history.top_speed} label="Vel. Máxima" />
                   <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
                   <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
                   <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
+                  <SummaryItem icon={FuelIcon} value={history.fuel_consumption} label="Consumo Comb." />
+                  <SummaryItem icon={FuelIcon} value={history.fuel_cost} label="Costo Comb." />
               </div>
             </TabsContent>
 
