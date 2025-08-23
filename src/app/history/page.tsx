@@ -40,7 +40,7 @@ function HistoryPageContent() {
     const [currentPointIndex, setCurrentPointIndex] = useState(0);
     const animationRef = useRef<number | null>(null);
 
-    const [routePath, setRoutePath] = useState<{lat: number, lng: number}[]>([]);
+    const [routePath, setRoutePath] = useState<HistoryPoint[]>([]);
      
     useEffect(() => {
         setIsLoading(true);
@@ -84,11 +84,10 @@ function HistoryPageContent() {
                         return prevIndex;
                     }
                     setProgress((nextIndex / (routePath.length - 1)) * 100);
-
-                    // Center map on the new point during playback
+                    
                     const nextPosition = routePath[nextIndex];
                     if (nextPosition) {
-                        map.panTo(nextPosition);
+                        map.panTo({ lat: nextPosition.lat, lng: nextPosition.lng });
                     }
 
                     return nextIndex;
@@ -216,8 +215,13 @@ function HistoryPageContent() {
                 processHistoryData(result); // Then process addresses in the background
                 
                 // Optimize and set route for playback
-                const allPoints = result.items.flatMap(group => group.items)
-                    .map(p => ({ lat: parseFloat(p.lat as any), lng: parseFloat(p.lng as any) }))
+                const allPoints: HistoryPoint[] = result.items
+                    .flatMap(group => group.items)
+                    .map(p => ({ 
+                        ...p, 
+                        lat: parseFloat(p.lat as any), 
+                        lng: parseFloat(p.lng as any) 
+                    }))
                     .filter(p => !isNaN(p.lat) && !isNaN(p.lng));
                 
                 const uniqueConsecutivePoints = allPoints.filter((point, index, self) => 
@@ -289,9 +293,8 @@ function HistoryPageContent() {
                         onMapLoad={setMap} 
                         selectedPoint={selectedPoint}
                         onCloseInfoWindow={() => setSelectedPoint(null)}
-                        playbackPosition={routePath[currentPointIndex]}
+                        playbackPoint={routePath[currentPointIndex]}
                         isPlaying={isPlaying}
-                        routePath={routePath}
                     />
                      <HistoryPlaybackControls
                         isPlaying={isPlaying}

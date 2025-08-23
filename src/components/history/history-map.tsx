@@ -6,6 +6,8 @@ import { GoogleMap, useLoadScript, Polyline, Marker, InfoWindow } from '@react-g
 import type { HistoryData, HistoryItem, HistoryPoint } from '@/lib/types';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from '../maps/zoom-controls';
+import HistoryPlaybackInfo from './history-playback-info';
+
 
 const containerStyle = {
   width: '100%',
@@ -53,17 +55,15 @@ function HistoryMap({
     onMapLoad,
     selectedPoint,
     onCloseInfoWindow,
-    playbackPosition,
+    playbackPoint,
     isPlaying,
-    routePath,
  }: { 
     history: HistoryData, 
     onMapLoad: (map: google.maps.Map | null) => void,
     selectedPoint: HistoryPoint | null,
     onCloseInfoWindow: () => void,
-    playbackPosition: { lat: number; lng: number } | null,
+    playbackPoint: HistoryPoint | null,
     isPlaying: boolean,
-    routePath: { lat: number; lng: number }[];
  }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -182,7 +182,7 @@ function HistoryMap({
   const playbackIcon = {
     url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
     scaledSize: new google.maps.Size(32, 32),
-    anchor: new google.maps.Point(16, 16),
+    anchor: new google.maps.Point(16, 32), // Anchor at bottom-center
   };
 
   return (
@@ -213,8 +213,11 @@ function HistoryMap({
           </>
       )}
 
-      {isPlaying && playbackPosition && (
-          <Marker position={playbackPosition} icon={playbackIcon} title="Vehículo" zIndex={999} />
+      {isPlaying && playbackPoint && (
+        <>
+            <Marker position={{ lat: playbackPoint.lat, lng: playbackPoint.lng }} icon={playbackIcon} title="Vehículo" zIndex={999} />
+            <HistoryPlaybackInfo point={playbackPoint} />
+        </>
       )}
 
       {selectedPoint && (
