@@ -1,14 +1,14 @@
 
 "use client";
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { getHistory } from '@/services/flizo.service';
-import type { Device, HistoryData } from '@/lib/types';
+import { getHistory, getAddress } from '@/services/flizo.service';
+import type { Device, HistoryData, HistoryItem, HistoryPoint } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 import { DateTimePicker } from '@/components/ui/datetime-picker';
@@ -78,6 +78,32 @@ function HistoryPageContent() {
         return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
     };
 
+    const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
+        const processedItems = await Promise.all(data.items.map(async (group) => {
+            if (group.items && group.items.length > 0) {
+                const point = group.items[0];
+                if (!point.address) {
+                    const lat = 'latitude' in point ? (point as any).latitude : point.lat;
+                    const lon = 'longitude' in point ? (point as any).longitude : point.lng;
+                    if (typeof lat === 'number' && typeof lon === 'number') {
+                        try {
+                            const address = await getAddress(lat, lon);
+                            point.address = address || 'Dirección no disponible';
+                        } catch {
+                            point.address = 'No se pudo obtener la dirección';
+                        }
+                    } else {
+                         point.address = 'Coordenadas no válidas';
+                    }
+                }
+            }
+            return group;
+        }));
+
+        setHistoryData(prevData => prevData ? { ...prevData, items: processedItems } : { ...data, items: processedItems });
+        return { ...data, items: processedItems };
+    }, []);
+
     const handleShowHistory = async () => {
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
         if (!token || !selectedVehicle) {
@@ -116,7 +142,8 @@ function HistoryPageContent() {
                 });
                 setHistoryData(null);
             } else {
-                setHistoryData(result);
+                const processedData = await processHistoryData(result);
+                setHistoryData(processedData);
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
