@@ -40,6 +40,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
   };
 
   const events = history.items.filter(item => item.status === 5);
+  const details = history.items.filter(item => item.status !== 5);
 
   return (
     <Card className="rounded-t-2xl shadow-lg h-full flex flex-col">
@@ -51,44 +52,41 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col p-2 min-h-0 overflow-y-auto">
-        <Tabs defaultValue="details" className="w-full flex-1 flex flex-col">
+      <CardContent className="flex-1 flex flex-col p-2 min-h-0">
+        <Tabs defaultValue="details" className="w-full flex-1 flex flex-col min-h-0">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="resume">Resumen</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
             <TabsTrigger value="events">Eventos</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="resume" className="pt-4 flex-1">
-            <div className="grid grid-cols-2 gap-4">
-                <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
-                <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
-                <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
-                <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="details" className="flex-1 min-h-0 overflow-y-auto mt-2">
-              <ScrollArea className="h-full">
-                <div className="space-y-1 text-xs pr-2">
-                  {history.items.map((group, groupIndex) => (
-                    <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                  ))}
+          <div className="flex-1 min-h-0 overflow-y-auto mt-2">
+              <TabsContent value="resume" className="pt-4">
+                <div className="grid grid-cols-2 gap-4">
+                    <SummaryItem icon={SpeedIcon} value={history.top_speed} label="Vel. Máxima" />
+                    <SummaryItem icon={DistanceIcon} value={history.distance_sum} label="Distancia" />
+                    <SummaryItem icon={EngineIdleIcon} value={history.stop_duration} label="Motor inactivo" />
+                    <SummaryItem icon={EngineIdleIcon} value={history.move_duration} label="En movimiento" />
                 </div>
-              </ScrollArea>
-          </TabsContent>
+              </TabsContent>
 
-          <TabsContent value="events" className="flex-1 min-h-0 overflow-y-auto mt-2">
-              <ScrollArea className="h-full">
-                <div className="space-y-1 text-xs pr-2">
-                  {events.map((group, groupIndex) => (
-                    <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} />
-                  ))}
-                  {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
-                </div>
-              </ScrollArea>
-          </TabsContent>
-          
+              <TabsContent value="details">
+                  <div className="space-y-1 text-xs pr-2">
+                    {details.map((group, groupIndex) => (
+                      <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                    ))}
+                  </div>
+              </TabsContent>
+
+              <TabsContent value="events">
+                  <div className="space-y-1 text-xs pr-2">
+                    {events.map((group, groupIndex) => (
+                      <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} />
+                    ))}
+                    {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
+                  </div>
+              </TabsContent>
+          </div>
         </Tabs>
       </CardContent>
     </Card>

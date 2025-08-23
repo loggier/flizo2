@@ -80,34 +80,22 @@ function HistoryPageContent() {
 
     const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
         const processedItems = await Promise.all(data.items.map(async (group) => {
-            // Events (status 5) might have address directly or need fetching from lat/lng on the root object
-            if (group.status === 5) {
-                const event = group as any; // Treat as event type
-                if (!event.address && typeof event.latitude === 'number' && typeof event.longitude === 'number') {
+            const pointToProcess = group.items[0]; // Most groups have their primary point here
+            
+            // Check if address is missing and there are coordinates to use
+            if (pointToProcess && !pointToProcess.address) {
+                const lat = 'latitude' in pointToProcess ? (pointToProcess as any).latitude : pointToProcess.lat;
+                const lon = 'longitude' in pointToProcess ? (pointToProcess as any).longitude : pointToProcess.lng;
+
+                if (typeof lat === 'number' && typeof lon === 'number' && lat !== 0 && lon !== 0) {
                     try {
-                        const address = await getAddress(event.latitude, event.longitude);
-                        event.address = address || 'Dirección no disponible';
+                        const address = await getAddress(lat, lon);
+                        pointToProcess.address = address || 'Dirección no disponible';
                     } catch {
-                        event.address = 'No se pudo obtener la dirección';
+                        pointToProcess.address = 'No se pudo obtener la dirección';
                     }
-                }
-            } 
-            // Other statuses have points inside items array
-            else if (group.items && group.items.length > 0) {
-                const point = group.items[0];
-                if (!point.address) {
-                    const lat = 'latitude' in point ? (point as any).latitude : point.lat;
-                    const lon = 'longitude' in point ? (point as any).longitude : point.lng;
-                    if (typeof lat === 'number' && typeof lon === 'number') {
-                        try {
-                            const address = await getAddress(lat, lon);
-                            point.address = address || 'Dirección no disponible';
-                        } catch {
-                            point.address = 'No se pudo obtener la dirección';
-                        }
-                    } else {
-                         point.address = 'Coordenadas no válidas';
-                    }
+                } else {
+                     pointToProcess.address = 'Coordenadas no válidas';
                 }
             }
             return group;
