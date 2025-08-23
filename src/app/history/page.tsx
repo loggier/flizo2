@@ -89,8 +89,8 @@ function HistoryPageContent() {
                     const nextPosition = routePath[nextIndex];
                     if (nextPosition) {
                         map.panTo(nextPosition);
-                        if (map.getZoom()! < 16) {
-                            map.setZoom(18);
+                        if (map.getZoom()! < 15) {
+                            map.setZoom(16);
                         }
                     }
 
