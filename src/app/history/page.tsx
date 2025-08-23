@@ -90,7 +90,7 @@ function HistoryPageContent() {
                     if (nextPosition) {
                         map.panTo(nextPosition);
                         if (map.getZoom()! < 15) {
-                            map.setZoom(16);
+                            map.setZoom(18);
                         }
                     }
 

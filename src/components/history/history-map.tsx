@@ -5,6 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { GoogleMap, useLoadScript, Polyline, Marker, InfoWindow } from '@react-google-maps/api';
 import type { HistoryData, HistoryItem, HistoryPoint } from '@/lib/types';
 import { LoaderIcon } from '../icons/loader-icon';
+import ZoomControls from '../maps/zoom-controls';
 
 const containerStyle = {
   width: '100%',
@@ -65,6 +66,7 @@ function HistoryMap({
     routePath: { lat: number; lng: number }[];
  }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
+  const [map, setMap] = useState<google.maps.Map | null>(null);
 
   const { isLoaded, loadError } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -122,6 +124,7 @@ function HistoryMap({
       mapInstance.mapTypes.set("OSM", osmMapType);
       mapInstance.setMapTypeId("OSM");
 
+    setMap(mapInstance); // Store map instance
     onMapLoad(mapInstance);
     
     if (allPoints.length > 0) {
@@ -134,6 +137,20 @@ function HistoryMap({
       return () => google.maps.event.removeListener(listener);
     }
   }, [onMapLoad, allPoints]);
+
+  const handleZoomIn = () => {
+    if (map) {
+      const currentZoom = map.getZoom() || 0;
+      map.setZoom(currentZoom + 1);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (map) {
+      const currentZoom = map.getZoom() || 0;
+      map.setZoom(currentZoom - 1);
+    }
+  };
   
   if (!isLoaded) {
     return (
@@ -174,8 +191,9 @@ function HistoryMap({
       center={startPoint || { lat: 0, lng: 0 }}
       zoom={12}
       onLoad={onLoad}
-      options={{ disableDefaultUI: true, scrollwheel: true }}
+      options={{ disableDefaultUI: true, scrollwheel: true, zoomControl: false }}
     >
+      <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
       <Polyline
         path={allPoints}
         options={{
