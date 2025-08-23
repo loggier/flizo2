@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -24,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import type { Command } from "@/lib/types";
 import { ScrollArea } from "../ui/scroll-area";
 import { SendIcon } from "../icons/send-icon";
+import React from "react";
 
 interface CommandDialogProps {
   isOpen: boolean;
@@ -75,7 +75,7 @@ export default function CommandDialog({
             <div className="space-y-2 pr-4">
               {commands.length > 0 ? (
                 commands.map((command) => (
-                  <div key={command.id}>
+                  <React.Fragment key={command.id}>
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left h-auto py-2"
@@ -88,7 +88,7 @@ export default function CommandDialog({
                           <span className="font-semibold">{command.title}</span>
                       </div>
                     </Button>
-                  </div>
+                  </React.Fragment>
                 ))
               ) : (
                 <p className="text-center text-muted-foreground py-8">No hay comandos disponibles para este dispositivo.</p>
