@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,6 +14,7 @@ import { LoaderIcon } from '@/components/icons/loader-icon';
 import { DateTimePicker } from '@/components/ui/datetime-picker';
 import HistoryMap from '@/components/history/history-map';
 import HistoryDetails from '@/components/history/history-details';
+import HistoryPlaybackControls from '@/components/history/history-playback-controls';
 
 function HistoryPageContent() {
     const router = useRouter();
@@ -31,6 +32,17 @@ function HistoryPageContent() {
     const [historyData, setHistoryData] = useState<HistoryData | null>(null);
     const [map, setMap] = useState<google.maps.Map | null>(null);
     const [selectedPoint, setSelectedPoint] = useState<HistoryPoint | null>(null);
+
+    // Playback state
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [playbackSpeed, setPlaybackSpeed] = useState(1);
+    const [progress, setProgress] = useState(0);
+    const [currentPointIndex, setCurrentPointIndex] = useState(0);
+    const animationRef = useRef<number | null>(null);
+
+    const routePath = historyData?.items.flatMap(group => group.items)
+      .map(p => ({ lat: parseFloat(p.lat as any), lng: parseFloat(p.lng as any) }))
+      .filter(p => !isNaN(p.lat) && !isNaN(p.lng)) || [];
 
     useEffect(() => {
         setIsLoading(true);
@@ -59,6 +71,40 @@ function HistoryPageContent() {
             }
         }
     }, [map, selectedPoint]);
+
+    // Playback effect
+    useEffect(() => {
+        if (isPlaying && routePath.length > 1) {
+            const totalDuration = 60000; // 1 minute in milliseconds
+            const interval = 100 / (routePath.length * playbackSpeed);
+
+            const animate = () => {
+                setCurrentPointIndex(prevIndex => {
+                    const nextIndex = prevIndex + 1;
+                    if (nextIndex >= routePath.length) {
+                        setIsPlaying(false);
+                        return prevIndex;
+                    }
+                    setProgress((nextIndex / (routePath.length - 1)) * 100);
+                    return nextIndex;
+                });
+            };
+
+            animationRef.current = window.setInterval(animate, interval);
+        } else {
+            if (animationRef.current) {
+                clearInterval(animationRef.current);
+                animationRef.current = null;
+            }
+        }
+
+        return () => {
+            if (animationRef.current) {
+                clearInterval(animationRef.current);
+            }
+        };
+    }, [isPlaying, playbackSpeed, routePath.length]);
+
 
     const handleDayOptionChange = (value: string) => {
         setDayOption(value);
@@ -94,6 +140,7 @@ function HistoryPageContent() {
 
     const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
         const processedItems = await Promise.all(data.items.map(async (group) => {
+            // For events, coords are in items[0]
             const pointToProcess = group.items[0];
             
             if (pointToProcess && !pointToProcess.address) {
@@ -143,6 +190,7 @@ function HistoryPageContent() {
 
         setIsFetchingHistory(true);
         setHistoryData(null);
+        handleStop(); // Stop any previous playback
         try {
             const params = {
                 device_id: Number(selectedVehicle),
@@ -182,8 +230,37 @@ function HistoryPageContent() {
     const handleMapClose = () => {
         setHistoryData(null);
         setSelectedPoint(null);
+        handleStop();
     }
     
+    // Playback handlers
+    const handlePlayPause = () => {
+        if (routePath.length > 1) {
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const handleStop = () => {
+        setIsPlaying(false);
+        setProgress(0);
+        setCurrentPointIndex(0);
+    };
+
+    const handleSpeedChange = (speed: number) => {
+        setPlaybackSpeed(speed);
+    };
+    
+    const handleProgressChange = (newProgress: number[]) => {
+        const progressValue = newProgress[0];
+        setProgress(progressValue);
+        const newIndex = Math.floor(((routePath.length - 1) * progressValue) / 100);
+        setCurrentPointIndex(newIndex);
+        if (isPlaying) {
+            setIsPlaying(false); // Pause when user interacts with slider
+        }
+    };
+
+
     if (historyData) {
         const selectedDevice = devices.find(d => d.id === Number(selectedVehicle));
         return (
@@ -194,6 +271,18 @@ function HistoryPageContent() {
                         onMapLoad={setMap} 
                         selectedPoint={selectedPoint}
                         onCloseInfoWindow={() => setSelectedPoint(null)}
+                        playbackPosition={routePath[currentPointIndex]}
+                        isPlaying={isPlaying}
+                        mapRef={map}
+                    />
+                     <HistoryPlaybackControls
+                        isPlaying={isPlaying}
+                        progress={progress}
+                        playbackSpeed={playbackSpeed}
+                        onPlayPause={handlePlayPause}
+                        onStop={handleStop}
+                        onSpeedChange={handleSpeedChange}
+                        onProgressChange={handleProgressChange}
                     />
                 </div>
                 <div className="h-1/2 w-full">
@@ -277,3 +366,5 @@ export default function HistoryPage() {
         </Suspense>
     );
 }
+
+    

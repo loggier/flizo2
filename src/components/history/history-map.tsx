@@ -51,18 +51,30 @@ function HistoryMap({
     history, 
     onMapLoad,
     selectedPoint,
-    onCloseInfoWindow
+    onCloseInfoWindow,
+    playbackPosition,
+    isPlaying,
+    mapRef
  }: { 
     history: HistoryData, 
     onMapLoad: (map: google.maps.Map | null) => void,
     selectedPoint: HistoryPoint | null,
     onCloseInfoWindow: () => void,
+    playbackPosition: { lat: number; lng: number } | null,
+    isPlaying: boolean,
+    mapRef: google.maps.Map | null;
  }) {
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
   });
+
+  useEffect(() => {
+    if (isPlaying && playbackPosition && mapRef) {
+      mapRef.panTo(playbackPosition);
+    }
+  }, [playbackPosition, isPlaying, mapRef]);
 
   const routePath = useMemo(() => {
     return history.items
@@ -118,11 +130,10 @@ function HistoryMap({
 
     onMapLoad(mapInstance);
     
-    // Fit bounds only on initial load of the route
     if (routePath.length > 0) {
       const bounds = new google.maps.LatLngBounds();
       routePath.forEach(point => bounds.extend(point));
-      mapInstance.fitBounds(bounds, 50); // Add 50px padding
+      mapInstance.fitBounds(bounds, 50);
     }
   }, [onMapLoad, routePath]);
   
@@ -152,6 +163,12 @@ function HistoryMap({
     url: `${serverUrl}assets/images/route_end.png`,
     scaledSize: iconSize
   };
+  
+  const playbackIcon = {
+    url: 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png',
+    scaledSize: new google.maps.Size(32, 32),
+    anchor: new google.maps.Point(16, 16),
+  };
 
   return (
     <GoogleMap
@@ -170,11 +187,20 @@ function HistoryMap({
           geodesic: true,
         }}
       />
-      {startPoint && <Marker position={startPoint} title="Inicio" icon={startIcon} />}
-      {endPoint && <Marker position={endPoint} title="Fin" icon={endIcon} />}
-      {eventMarkers.map((marker, index) => (
-        marker ? <Marker key={index} position={marker.position} icon={marker.icon as google.maps.Icon} title={marker.title} /> : null
-      ))}
+      {!isPlaying && (
+          <>
+            {startPoint && <Marker position={startPoint} title="Inicio" icon={startIcon} />}
+            {endPoint && <Marker position={endPoint} title="Fin" icon={endIcon} />}
+            {eventMarkers.map((marker, index) => (
+                marker ? <Marker key={index} position={marker.position} icon={marker.icon as google.maps.Icon} title={marker.title} /> : null
+            ))}
+          </>
+      )}
+
+      {isPlaying && playbackPosition && (
+          <Marker position={playbackPosition} icon={playbackIcon} title="Vehículo" zIndex={999} />
+      )}
+
       {selectedPoint && (
           <InfoWindow
             position={{ lat: parseFloat(selectedPoint.lat as any), lng: parseFloat(selectedPoint.lng as any) }}
@@ -192,3 +218,5 @@ function HistoryMap({
 }
 
 export default React.memo(HistoryMap);
+
+    
