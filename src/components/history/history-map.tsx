@@ -185,6 +185,23 @@ function HistoryMap({
     anchor: new google.maps.Point(16, 32), // Anchor at bottom-center
   };
 
+  const polylineOptions = {
+    strokeColor: '#4978d0',
+    strokeOpacity: 1,
+    strokeWeight: 3,
+    geodesic: true,
+    icons: [{
+      icon: {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 2,
+        strokeColor: '#FFFFFF',
+        strokeWeight: 1,
+      },
+      offset: '0',
+      repeat: '35px'
+    }]
+  };
+
   return (
     <GoogleMap
       mapContainerStyle={containerStyle}
@@ -196,12 +213,7 @@ function HistoryMap({
       <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
       <Polyline
         path={allPoints}
-        options={{
-          strokeColor: '#4978d0',
-          strokeOpacity: 1,
-          strokeWeight: 3,
-          geodesic: true,
-        }}
+        options={polylineOptions}
       />
       {!isPlaying && (
           <>
