@@ -289,31 +289,24 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
         throw new Error('Unauthorized');
     }
 
-    try {
-        const textResponse = await response.text();
+    if (!response.ok) {
+        // Try to get a more specific error message from the body if possible
+        let errorData;
+        try {
+            errorData = await response.json();
+        } catch (e) {
+            // Body is not JSON or empty
+        }
         
-        // If response is OK and body is empty, it's a success.
-        if (response.ok && !textResponse) {
-            return { status: 1, message: 'Comando enviado con éxito.' };
+        if (errorData && errorData.message) {
+            throw new Error(errorData.message);
         }
 
-        const responseData = JSON.parse(textResponse);
-
-        if (!response.ok || responseData.status !== 1) {
-            console.error('Failed to send command:', responseData);
-            throw new Error(responseData.message || 'Failed to send command');
-        }
-
-        return responseData;
-    } catch (error) {
-        // This catches JSON parsing errors for non-JSON responses.
-        // If the original response was OK, we can consider it a success.
-        if (response.ok) {
-            return { status: 1, message: 'Comando procesado con éxito.' };
-        } else {
-            // If response was not OK and it's not JSON, throw a generic error.
-            console.error('Failed to send command. Non-JSON response:', await response.text().catch(() => ''));
-            throw new Error('Failed to send command due to a server error.');
-        }
+        // Fallback error
+        throw new Error('Failed to send command. Server responded with status ' + response.status);
     }
+
+    // If response.ok is true, we consider the command sent successfully,
+    // regardless of the body content. This matches the Ionic app behavior.
+    return { status: 1, message: 'Comando enviado con éxito.' };
 }
