@@ -100,8 +100,9 @@ function HistoryPageContent() {
             return group;
         }));
 
-        setHistoryData(prevData => prevData ? { ...prevData, items: processedItems } : { ...data, items: processedItems });
-        return { ...data, items: processedItems };
+        const updatedData = { ...data, items: processedItems };
+        setHistoryData(updatedData);
+        return updatedData;
     }, []);
 
     const handleShowHistory = async () => {
@@ -142,8 +143,8 @@ function HistoryPageContent() {
                 });
                 setHistoryData(null);
             } else {
-                const processedData = await processHistoryData(result);
-                setHistoryData(processedData);
+                setHistoryData(result); // Set raw data first
+                processHistoryData(result); // Then process addresses in the background
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';

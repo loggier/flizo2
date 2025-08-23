@@ -10,6 +10,7 @@ import { SpeedIcon } from "../icons/speed-icon";
 import { DistanceIcon } from "../icons/distance-icon";
 import { EngineIdleIcon } from "../icons/engine-idle-icon";
 import HistoryDetailRow from "./history-detail-row";
+import { ScrollArea } from "../ui/scroll-area";
 
 interface HistoryDetailsProps {
   history: HistoryData;
@@ -68,20 +69,24 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
           </TabsContent>
 
           <TabsContent value="details" className="flex-1 min-h-0 overflow-y-auto mt-2">
-              <div className="space-y-4 text-xs pr-4">
-                {history.items.map((group, groupIndex) => (
-                  <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                ))}
-              </div>
+              <ScrollArea className="h-full">
+                <div className="space-y-4 text-xs pr-4">
+                  {history.items.map((group, groupIndex) => (
+                    <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                  ))}
+                </div>
+              </ScrollArea>
           </TabsContent>
 
           <TabsContent value="events" className="flex-1 min-h-0 overflow-y-auto mt-2">
-              <div className="space-y-4 text-xs pr-4">
-                {events.map((group, groupIndex) => (
-                   <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
-                ))}
-                {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
-              </div>
+              <ScrollArea className="h-full">
+                <div className="space-y-4 text-xs pr-4">
+                  {events.map((group, groupIndex) => (
+                    <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                  ))}
+                  {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
+                </div>
+              </ScrollArea>
           </TabsContent>
           
         </Tabs>
