@@ -25,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { changePassword } from "@/services/flizo.service";
+import { changePassword, getUserData } from "@/services/flizo.service";
 import { Book, LogOut, RefreshCcw, Lock } from "lucide-react";
 import Link from "next/link";
 
@@ -46,16 +46,22 @@ export default function SettingsPage() {
 
     useEffect(() => {
         setIsClient(true);
-        const storedProfile = localStorage.getItem('profile') || sessionStorage.getItem('profile');
-        if(storedProfile){
-            try {
-                const profile = JSON.parse(storedProfile);
-                setUserEmail(profile?.email || "");
-            } catch (e) {
-                console.error("Failed to parse profile from localStorage", e);
-            }
+        const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+        if (token) {
+            getUserData(token)
+                .then(profile => {
+                    if (profile?.email) {
+                        setUserEmail(profile.email);
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to fetch user data", err);
+                    handleLogout(); // Logout if token is invalid
+                });
+        } else {
+            router.push('/');
         }
-    }, []);
+    }, [router]);
 
     const handleLogout = () => {
         const lng = localStorage.getItem('lng') || 'es';

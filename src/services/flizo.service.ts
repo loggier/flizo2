@@ -356,3 +356,23 @@ export async function changePassword(user_api_hash: string, current_password: st
 
     return data;
 }
+
+export async function getUserData(user_api_hash: string): Promise<{email: string} | null> {
+    const response = await fetch(`${serverApi}get_user_data?user_api_hash=${user_api_hash}`);
+  
+    if (response.status === 401) {
+      throw new Error('Unauthorized');
+    }
+  
+    if (!response.ok) {
+      throw new Error('Failed to fetch user data');
+    }
+  
+    const data = await response.json();
+    
+    if (data && data.email) {
+      return { email: data.email };
+    }
+    
+    return null;
+}
