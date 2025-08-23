@@ -14,7 +14,7 @@ const config: CapacitorConfig = {
       launchShowDuration: 0,
     },
   },
-};
+}; 
 
 export default config;
 
