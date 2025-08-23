@@ -70,7 +70,7 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
 
           <TabsContent value="details" className="flex-1 min-h-0 overflow-y-auto mt-2">
               <ScrollArea className="h-full">
-                <div className="space-y-4 text-xs pr-4">
+                <div className="space-y-1 text-xs pr-2">
                   {history.items.map((group, groupIndex) => (
                     <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
                   ))}
@@ -80,9 +80,9 @@ export default function HistoryDetails({ history, device, onClose }: HistoryDeta
 
           <TabsContent value="events" className="flex-1 min-h-0 overflow-y-auto mt-2">
               <ScrollArea className="h-full">
-                <div className="space-y-4 text-xs pr-4">
+                <div className="space-y-1 text-xs pr-2">
                   {events.map((group, groupIndex) => (
-                    <HistoryDetailRow key={groupIndex} group={group} getStatusText={getStatusText} />
+                    <HistoryDetailRow key={`event-${groupIndex}`} group={group} getStatusText={getStatusText} />
                   ))}
                   {events.length === 0 && <p className="text-center text-muted-foreground p-4">No hay eventos en este período.</p>}
                 </div>

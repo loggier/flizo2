@@ -80,7 +80,20 @@ function HistoryPageContent() {
 
     const processHistoryData = useCallback(async (data: HistoryData): Promise<HistoryData> => {
         const processedItems = await Promise.all(data.items.map(async (group) => {
-            if (group.items && group.items.length > 0) {
+            // Events (status 5) might have address directly or need fetching from lat/lng on the root object
+            if (group.status === 5) {
+                const event = group as any; // Treat as event type
+                if (!event.address && typeof event.latitude === 'number' && typeof event.longitude === 'number') {
+                    try {
+                        const address = await getAddress(event.latitude, event.longitude);
+                        event.address = address || 'Dirección no disponible';
+                    } catch {
+                        event.address = 'No se pudo obtener la dirección';
+                    }
+                }
+            } 
+            // Other statuses have points inside items array
+            else if (group.items && group.items.length > 0) {
                 const point = group.items[0];
                 if (!point.address) {
                     const lat = 'latitude' in point ? (point as any).latitude : point.lat;
