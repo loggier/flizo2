@@ -289,12 +289,28 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
         throw new Error('Unauthorized');
     }
 
-    const responseData = await response.json();
+    try {
+        const textResponse = await response.text();
+        // If response is empty, but status is OK, consider it a success.
+        if (response.ok && !textResponse) {
+            return { status: 1, message: 'Comando enviado con éxito.' };
+        }
 
-    if (!response.ok || responseData.status !== 1) {
-        console.error('Failed to send command:', responseData);
-        throw new Error(responseData.message || 'Failed to send command');
+        const responseData = JSON.parse(textResponse);
+
+        if (!response.ok || responseData.status !== 1) {
+            console.error('Failed to send command:', responseData);
+            throw new Error(responseData.message || 'Failed to send command');
+        }
+
+        return responseData;
+    } catch (error) {
+        // This catches JSON parsing errors for non-JSON responses
+        if (response.ok) {
+            return { status: 1, message: 'Comando procesado.' };
+        } else {
+            console.error('Failed to send command. Non-JSON response:', await response.text().catch(() => ''));
+            throw new Error('Failed to send command due to a server error.');
+        }
     }
-
-    return responseData;
 }
