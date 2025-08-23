@@ -186,7 +186,7 @@ function HistoryMap({
   };
 
   const polylineOptions = {
-    strokeColor: '#FF0000',
+    strokeColor: '#4285F4',
     strokeOpacity: 1,
     strokeWeight: 3,
     geodesic: true,
@@ -195,6 +195,8 @@ function HistoryMap({
         path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
         scale: 2,
         strokeColor: '#FF0000',
+        fillColor: '#FF0000',
+        fillOpacity: 1,
         strokeWeight: 1,
       },
       offset: '0',
@@ -251,3 +253,4 @@ function HistoryMap({
 export default React.memo(HistoryMap);
 
     
+
