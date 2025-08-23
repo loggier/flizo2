@@ -14,7 +14,7 @@ import {
   MapPin,
   Share2,
   Signal,
-  Star,
+  UserRound,
   Timer,
   WifiOff,
   X,
@@ -131,6 +131,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const hasSensors = device.sensors && device.sensors.length > 0;
   const hasImage = !!deviceImageUrl;
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${device.lat},${device.lng}`;
+  const streetViewUrl = `https://www.google.com/maps?q=&layer=c&cbll=${device.lat},${device.lng}&cbp=12,0,0,0,0`;
 
   const totalDistance = (typeof device.total_distance === 'number')
     ? `${device.total_distance.toFixed(2)} ${device.unit_of_distance}`
@@ -169,7 +170,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
       return;
     }
   
-    const params: { type: string; device_id: number; data?: any; index: number; } = {
+    const params = {
       type: command.type,
       device_id: device.id,
       index: index,
@@ -187,15 +188,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   };
 
   const handleShareClick = () => {
-    if (navigator.share) {
-        setIsShareDialogOpen(true);
-    } else {
-        toast({
-            variant: "destructive",
-            title: "No Soportado",
-            description: "Tu navegador no soporta la función de compartir.",
-        });
-    }
+    setIsShareDialogOpen(true);
   };
 
 
@@ -258,7 +251,9 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <Link href={mapsUrl} target="_blank" rel="noopener noreferrer">
                       <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
                     </Link>
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Star className="h-4 w-4 text-gray-600" /></Button>
+                    <Link href={streetViewUrl} target="_blank" rel="noopener noreferrer">
+                      <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><UserRound className="h-4 w-4 text-gray-600" /></Button>
+                    </Link>
                 </div>
             </div>
         </div>
