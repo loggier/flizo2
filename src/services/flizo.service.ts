@@ -265,7 +265,7 @@ export async function getDeviceCommands(user_api_hash: string, device_id: number
     return [];
 }
 
-export async function sendGPRSCommand(user_api_hash: string, params: { type: string; device_id: number; data?: any }): Promise<any> {
+export async function sendGPRSCommand(user_api_hash: string, params: { type: string; device_id: number; data?: any; index: number; }): Promise<any> {
     const url = `${serverApi}send_gprs_command`;
     
     const body = new URLSearchParams();
@@ -273,6 +273,8 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
     body.append('type', params.type);
     body.append('device_id', params.device_id.toString());
     body.append('devices[]', params.device_id.toString());
+    body.append('index', params.index.toString());
+    
     if (params.data) {
         body.append('data', params.data);
     }
@@ -285,12 +287,7 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
         body: body,
     });
 
-    if (response.status === 401) {
-        throw new Error('Unauthorized');
-    }
-
     if (!response.ok) {
-        // Try to get a more specific error message from the body if possible
         let errorData;
         try {
             errorData = await response.json();
@@ -302,11 +299,28 @@ export async function sendGPRSCommand(user_api_hash: string, params: { type: str
             throw new Error(errorData.message);
         }
 
-        // Fallback error
         throw new Error('Failed to send command. Server responded with status ' + response.status);
     }
 
-    // If response.ok is true, we consider the command sent successfully,
-    // regardless of the body content. This matches the Ionic app behavior.
-    return { status: 1, message: 'Comando enviado con éxito.' };
+    const responseText = await response.text();
+
+    if (!responseText) {
+        return { status: 1, message: 'Comando enviado con éxito.' };
+    }
+
+    try {
+        const responseData = JSON.parse(responseText);
+        
+        if (responseData.status !== 1) {
+            console.error('Failed to send command:', responseData);
+            throw new Error(responseData.message || 'Failed to send command');
+        }
+
+        return responseData;
+
+    } catch (error) {
+        // If parsing fails but the response was OK, treat as success.
+        console.warn('Could not parse JSON response, but request was successful.');
+        return { status: 1, message: 'Comando enviado con éxito (respuesta no es JSON).' };
+    }
 }

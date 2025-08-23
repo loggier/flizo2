@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -29,7 +30,7 @@ interface CommandDialogProps {
   onOpenChange: (open: boolean) => void;
   commands: Command[];
   deviceName: string;
-  onSendCommand: (command: Command) => void;
+  onSendCommand: (command: Command, index: number) => void;
 }
 
 export default function CommandDialog({
@@ -39,17 +40,17 @@ export default function CommandDialog({
   deviceName,
   onSendCommand,
 }: CommandDialogProps) {
-  const [selectedCommand, setSelectedCommand] = useState<Command | null>(null);
+  const [selectedCommand, setSelectedCommand] = useState<{ command: Command, index: number } | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
-  const handleCommandClick = (command: Command) => {
-    setSelectedCommand(command);
+  const handleCommandClick = (command: Command, index: number) => {
+    setSelectedCommand({ command, index });
     setIsConfirmOpen(true);
   };
 
   const handleConfirmSend = () => {
     if (selectedCommand) {
-      onSendCommand(selectedCommand);
+      onSendCommand(selectedCommand.command, selectedCommand.index);
     }
     setIsConfirmOpen(false);
     setSelectedCommand(null);
@@ -73,11 +74,11 @@ export default function CommandDialog({
           <ScrollArea className="h-[60vh] mt-4 pr-4">
             {commands.length > 0 ? (
               commands.map((command, index) => (
-                <div key={command.id || index} className="mb-2">
+                <div className="mb-2" key={command.id || index}>
                   <Button
                     variant="outline"
                     className="w-full justify-start text-left h-auto py-2"
-                    onClick={() => handleCommandClick(command)}
+                    onClick={() => handleCommandClick(command, index)}
                   >
                     <div className="flex items-center gap-3">
                         <div className="flex items-center justify-center w-10 h-10 bg-primary/10 text-primary rounded-md">
@@ -102,7 +103,7 @@ export default function CommandDialog({
               <AlertDialogTitle>Confirmar Envío</AlertDialogTitle>
               <AlertDialogDescription>
                 ¿Estás seguro de que deseas enviar el comando{" "}
-                <span className="font-bold">"{selectedCommand.title}"</span> al dispositivo{" "}
+                <span className="font-bold">"{selectedCommand.command.title}"</span> al dispositivo{" "}
                 <span className="font-bold">{deviceName}</span>?
               </AlertDialogDescription>
             </AlertDialogHeader>

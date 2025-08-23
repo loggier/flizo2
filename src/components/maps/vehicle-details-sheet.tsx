@@ -159,21 +159,22 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
     }
   };
 
-  const handleSendCommand = async (command: Command) => {
+  const handleSendCommand = async (command: Command, index: number) => {
     const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
     if (!token) {
       toast({ variant: 'destructive', title: 'Error', description: 'No se encontró el token de autenticación.' });
       return;
     }
   
-    const params: { type: string; device_id: number; data?: any } = {
+    const params: { type: string; device_id: number; data?: any; index: number } = {
       type: command.type,
       device_id: device.id,
+      index: index,
     };
   
     const commandTypePrefix = command.type.split('_')[0];
     if (commandTypePrefix === 'template' || commandTypePrefix.startsWith('setdigout')) {
-      params.data = command.attributes[0]?.default;
+      params.data = m.attributes[0].default
     }
   
     try {
