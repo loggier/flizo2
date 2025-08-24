@@ -376,3 +376,13 @@ export async function getUserData(user_api_hash: string): Promise<{email: string
     
     return null;
 }
+
+export async function sendFCMToken(user_api_hash: string, token: string): Promise<void> {
+  const url = `${serverApi}fcm_token?user_api_hash=${user_api_hash}&token=${token}`;
+  const response = await fetch(url, { method: 'GET' });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.message || 'Failed to send FCM token');
+  }
+}

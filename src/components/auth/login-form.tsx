@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/select";
 import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
+import { getFCMToken } from "@/lib/firebase";
+import { sendFCMToken } from "@/services/flizo.service";
 
 const formSchema = (t: any) => z.object({
   email: z.string().email({ message: t.emailInvalid }),
@@ -66,6 +68,22 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
+    
+    try {
+      // Request permission for notifications and get FCM token
+      const fcmToken = await getFCMToken();
+      if (fcmToken) {
+        localStorage.setItem("fcm_token", fcmToken);
+      }
+    } catch (error) {
+      console.error("FCM Token Error:", error);
+      toast({
+        variant: "destructive",
+        title: "Error de Notificaciones",
+        description: "No se pudo obtener el permiso para notificaciones.",
+      });
+    }
+
     const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
     
     const params = new URLSearchParams({
@@ -106,6 +124,22 @@ export function LoginForm() {
         }
         if (profile) {
             storage.setItem("profile", JSON.stringify(profile));
+        }
+
+        // Send FCM token to backend
+        const fcmToken = localStorage.getItem("fcm_token");
+        if (fcmToken) {
+          try {
+            await sendFCMToken(token, fcmToken);
+          } catch (fcmError) {
+            console.error("Failed to send FCM token:", fcmError);
+            // Non-critical error, so we don't block the login
+            toast({
+              variant: "destructive",
+              title: "Error de Sincronización",
+              description: "No se pudo registrar el dispositivo para notificaciones.",
+            });
+          }
         }
 
         window.location.href = "/maps";
