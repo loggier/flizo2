@@ -21,11 +21,17 @@ export const getFCMToken = async (): Promise<string | null> => {
     return null;
   }
 
+  const vapidKey = process.env.NEXT_PUBLIC_FCM_VAPID_KEY;
+  if (!vapidKey) {
+    console.error("VAPID key is not configured in .env.local");
+    return null;
+  }
+
   const permission = await Notification.requestPermission();
   if (permission === "granted") {
     try {
       const currentToken = await getToken(messaging, {
-        vapidKey: "BHUmW0NmrawEoVS8ge0i8NSRHWrkIgA0IR4B9l2rlqfj7MDfWFOfH_PmUm1tmT3S4x2pUGY5xKazPuQKQUI2mBc",
+        vapidKey: vapidKey,
       });
       if (currentToken) {
         return currentToken;
