@@ -39,3 +39,5 @@ next-env.d.ts
 /ios
 /build
 capacitor.config.json
+
+certificates
