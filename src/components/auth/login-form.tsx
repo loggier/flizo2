@@ -108,7 +108,7 @@ export function LoginForm() {
             storage.setItem("profile", JSON.stringify(profile));
         }
 
-        router.push("/maps");
+        window.location.href = "/maps";
       } else {
          throw new Error(data.message || loginTranslations.genericError);
       }
