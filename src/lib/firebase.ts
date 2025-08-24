@@ -25,7 +25,7 @@ export const getFCMToken = async (): Promise<string | null> => {
   if (permission === "granted") {
     try {
       const currentToken = await getToken(messaging, {
-        vapidKey: "YOUR_VAPID_KEY_HERE", // IMPORTANT: Replace with your VAPID key from Firebase console
+        vapidKey: "BHUmW0NmrawEoVS8ge0i8NSRHWrkIgA0IR4B9l2rlqfj7MDfWFOfH_PmUm1tmT3S4x2pUGY5xKazPuQKQUI2mBc",
       });
       if (currentToken) {
         return currentToken;
