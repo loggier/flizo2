@@ -30,6 +30,7 @@ import { Book, LogOut, RefreshCcw, Lock, Bell } from "lucide-react";
 import Link from "next/link";
 import { getFCMToken } from "@/lib/firebase";
 import { Capacitor } from "@capacitor/core";
+import { PushNotifications, Token } from "@capacitor/push-notifications";
 
 
 export default function SettingsPage() {
@@ -128,20 +129,45 @@ export default function SettingsPage() {
         }
 
         try {
-            const permission = await Notification.requestPermission();
-            setNotificationStatus(permission);
+            // Logic for native platforms
+            if (Capacitor.isNativePlatform()) {
+                let permStatus = await PushNotifications.checkPermissions();
 
-            if (permission === 'granted') {
-                const fcmToken = await getFCMToken();
-                if (fcmToken) {
-                    await sendFCMToken(user_api_hash, fcmToken);
-                    localStorage.setItem("fcm_token", fcmToken);
-                    toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
-                } else {
-                    throw new Error('No se pudo obtener el token FCM.');
+                if (permStatus.receive === 'prompt') {
+                    permStatus = await PushNotifications.requestPermissions();
                 }
+
+                if (permStatus.receive !== 'granted') {
+                    throw new Error('User denied permissions!');
+                }
+
+                await PushNotifications.register();
+                
+                PushNotifications.addListener('registration', async (token: Token) => {
+                    await sendFCMToken(user_api_hash, token.value);
+                });
+
+                PushNotifications.addListener('registrationError', (error: any) => {
+                    console.error('Error on registration: ' + JSON.stringify(error));
+                });
+                
             } else {
-                toast({ variant: 'destructive', title: 'Permiso denegado', description: 'No se podrán recibir notificaciones si no concedes el permiso.' });
+            // Logic for web
+                const permission = await Notification.requestPermission();
+                setNotificationStatus(permission);
+
+                if (permission === 'granted') {
+                    const fcmToken = await getFCMToken();
+                    if (fcmToken) {
+                        await sendFCMToken(user_api_hash, fcmToken);
+                        localStorage.setItem("fcm_token", fcmToken);
+                        toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
+                    } else {
+                        throw new Error('No se pudo obtener el token FCM.');
+                    }
+                } else {
+                    toast({ variant: 'destructive', title: 'Permiso denegado', description: 'No se podrán recibir notificaciones si no concedes el permiso.' });
+                }
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : "Ocurrió un error inesperado.";
@@ -212,37 +238,35 @@ export default function SettingsPage() {
                     </div>
                 </CardContent>
             </Card>
-
-            {isWebPlatform && (
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Notificaciones Push</CardTitle>
-                        <CardDescription>
-                            Administra el permiso para recibir notificaciones en este navegador.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Button 
-                            className="w-full"
-                            onClick={handleSubscribeToNotifications}
-                            disabled={isSubscribing || notificationStatus === 'granted'}
-                        >
-                            <Bell className="mr-2"/>
-                            {isSubscribing 
-                                ? 'Procesando...' 
-                                : notificationStatus === 'granted' 
-                                ? 'Suscrito a Notificaciones'
-                                : 'Activar Notificaciones'
-                            }
-                        </Button>
-                        {notificationStatus === 'denied' && (
-                            <p className="text-xs text-destructive mt-2 text-center">
-                                Has bloqueado las notificaciones. Debes cambiar los permisos desde la configuración de tu navegador.
-                            </p>
-                        )}
-                    </CardContent>
-                </Card>
-            )}
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Notificaciones Push</CardTitle>
+                    <CardDescription>
+                        Administra el permiso para recibir notificaciones en este dispositivo.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Button 
+                        className="w-full"
+                        onClick={handleSubscribeToNotifications}
+                        disabled={isSubscribing || notificationStatus === 'granted'}
+                    >
+                        <Bell className="mr-2"/>
+                        {isSubscribing 
+                            ? 'Procesando...' 
+                            : notificationStatus === 'granted' 
+                            ? 'Suscrito a Notificaciones'
+                            : 'Activar Notificaciones'
+                        }
+                    </Button>
+                    {notificationStatus === 'denied' && (
+                        <p className="text-xs text-destructive mt-2 text-center">
+                            Has bloqueado las notificaciones. Debes cambiar los permisos desde la configuración de tu navegador o de la app.
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
             
             <Button asChild variant="outline" className="w-full justify-start bg-card">
                  <Link href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">
@@ -256,3 +280,5 @@ export default function SettingsPage() {
         </div>
     );
 }
+
+    
