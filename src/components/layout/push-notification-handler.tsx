@@ -3,62 +3,92 @@
 
 import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications, PushNotificationSchema, ActionPerformed } from "@capacitor/push-notifications";
+import { PushNotifications, PushNotificationSchema, ActionPerformed, Token } from "@capacitor/push-notifications";
 import { useToast } from "@/hooks/use-toast";
+import { getFCMToken } from "@/lib/firebase";
 
 const PushNotificationHandler = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        if (Capacitor.getPlatform() !== "web") {
-            // Register with Apple / Google to receive push notifications
-            PushNotifications.register();
+        const platform = Capacitor.getPlatform();
 
-            // On success, we should be able to receive notifications
-            PushNotifications.addListener('registration', (token) => {
-                console.info('Registration token: ', token.value);
-            });
-
-            // Some issue with our setup and push will not work
-            PushNotifications.addListener('registrationError', (error) => {
-                console.error('Error on registration: ' + JSON.stringify(error));
-            });
-
-            // Show an alert when a notification is received
-            PushNotifications.addListener(
-                'pushNotificationReceived',
-                (notification: PushNotificationSchema) => {
-                    console.log('Push notification received: ', notification);
-                    if (notification.title && notification.body) {
-                        toast({
-                            title: notification.title,
-                            description: notification.body,
-                        });
+        if (platform === "web") {
+            // Web-specific logic to get FCM token via Firebase SDK
+            const initWebPush = async () => {
+                try {
+                    const fcmToken = await getFCMToken();
+                    if (fcmToken) {
+                        console.log("FCM Token:", fcmToken);
+                        localStorage.setItem("fcm_token", fcmToken);
                     }
-                },
-            );
-
-            // Method called when tapping on a notification
-            PushNotifications.addListener(
-                'pushNotificationActionPerformed',
-                (notification: ActionPerformed) => {
-                    console.log('Push notification action performed', notification.actionId, notification.inputValue);
-                    // You can add navigation logic here based on the notification data
-                },
-            );
+                } catch (error) {
+                    console.error("FCM Token Error:", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Error de Notificaciones",
+                        description: "No se pudo obtener el permiso para notificaciones web.",
+                    });
+                }
+            };
+            initWebPush();
+        } else {
+            // Native mobile logic (Android/iOS) via Capacitor
+            const initMobilePush = async () => {
+                try {
+                    await PushNotifications.requestPermissions();
+                    await PushNotifications.register();
+    
+                    PushNotifications.addListener('registration', (token: Token) => {
+                        console.log('Push registration success, token: ', token.value);
+                        localStorage.setItem("fcm_token", token.value);
+                    });
+    
+                    PushNotifications.addListener('registrationError', (error: any) => {
+                        console.error('Error on registration: ' + JSON.stringify(error));
+                        toast({
+                            variant: "destructive",
+                            title: "Error de Registro",
+                            description: "No se pudo registrar para notificaciones push.",
+                        });
+                    });
+                } catch (e) {
+                    console.error("Error initializing mobile push", e);
+                }
+            }
+            initMobilePush();
         }
+
+        // Common listeners for received notifications
+        const notificationReceivedListener = PushNotifications.addListener(
+            'pushNotificationReceived',
+            (notification: PushNotificationSchema) => {
+                console.log('Push notification received: ', notification);
+                if (notification.title && notification.body) {
+                    toast({
+                        title: notification.title,
+                        description: notification.body,
+                    });
+                }
+            },
+        );
+
+        const notificationActionPerformedListener = PushNotifications.addListener(
+            'pushNotificationActionPerformed',
+            (notification: ActionPerformed) => {
+                console.log('Push notification action performed', notification.actionId, notification.inputValue);
+            },
+        );
 
         // Cleanup on component unmount
         return () => {
-            if (Capacitor.getPlatform() !== 'web') {
-                PushNotifications.removeAllListeners();
-            }
+            notificationReceivedListener.remove();
+            notificationActionPerformedListener.remove();
         };
 
     }, [toast]);
 
-    return null; // This component does not render anything
+    return null;
 };
 
 export default PushNotificationHandler;
-
