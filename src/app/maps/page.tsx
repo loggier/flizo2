@@ -102,7 +102,7 @@ export default function MapsPage() {
                 console.error('Error al enviar el token FCM al servidor', e);
               }
             });
-
+ 
             PushNotifications.addListener('registrationError', (error: any) => {
                 const errorMessage = JSON.stringify(error);
                 console.error('Error en el registro: ', errorMessage);
