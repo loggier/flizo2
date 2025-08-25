@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect } from "react";
@@ -13,6 +14,25 @@ const PushNotificationHandler = () => {
         const platform = Capacitor.getPlatform();
 
         const registerAndListen = async () => {
+            if (platform === "web") {
+                try {
+                    const fcmToken = await getFCMToken();
+                    if (fcmToken) {
+                        console.log("FCM Token:", fcmToken);
+                        localStorage.setItem("fcm_token", fcmToken);
+                    }
+                } catch (error) {
+                    console.error("FCM Token Error:", error);
+                    toast({
+                        variant: "destructive",
+                        title: "Error de Notificaciones",
+                        description: "No se pudo obtener el permiso para notificaciones web.",
+                    });
+                }
+                return; // Stop execution for web after handling FCM
+            }
+            
+            // Mobile-only logic starts here
             try {
                 let permStatus = await PushNotifications.checkPermissions();
 
@@ -29,7 +49,7 @@ const PushNotificationHandler = () => {
                     throw new Error('User denied permissions!');
                 }
                 
-                // Add all listeners
+                // Add all listeners *before* registering
                 await PushNotifications.addListener('registration', (token: Token) => {
                     console.log('Push registration success, token: ', token.value);
                     localStorage.setItem("fcm_token", token.value);
@@ -40,7 +60,7 @@ const PushNotificationHandler = () => {
                     toast({
                         variant: "destructive",
                         title: "Error de Registro de Push",
-                        description: `No se pudo registrar para notificaciones: ${error.message || 'Error desconocido'}`,
+                        description: `Detalles del error: ${JSON.stringify(error)}`,
                     });
                 });
 
@@ -79,28 +99,7 @@ const PushNotificationHandler = () => {
             }
         };
 
-        const initWebPush = async () => {
-            try {
-                const fcmToken = await getFCMToken();
-                if (fcmToken) {
-                    console.log("FCM Token:", fcmToken);
-                    localStorage.setItem("fcm_token", fcmToken);
-                }
-            } catch (error) {
-                console.error("FCM Token Error:", error);
-                toast({
-                    variant: "destructive",
-                    title: "Error de Notificaciones",
-                    description: "No se pudo obtener el permiso para notificaciones web.",
-                });
-            }
-        };
-
-        if (platform === "web") {
-            initWebPush();
-        } else {
-            registerAndListen();
-        }
+        registerAndListen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); 
 
