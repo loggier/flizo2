@@ -14,14 +14,13 @@ const PushNotificationHandler = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        const platform = Capacitor.getPlatform();
-
         const registerAndListen = async () => {
-            // If registration has already been attempted, do nothing.
             if (hasRegisteredForPush) {
                 return;
             }
-            hasRegisteredForPush = true; // Set flag immediately to prevent race conditions.
+            hasRegisteredForPush = true;
+
+            const platform = Capacitor.getPlatform();
 
             if (platform === "web") {
                 try {
@@ -53,9 +52,9 @@ const PushNotificationHandler = () => {
                     toast({
                         variant: "destructive",
                         title: "Permiso denegado",
-                        description: "No se concedió permiso para recibir notificaciones.",
+                        description: "No se concedió permiso, por lo que no podrá recibir notificaciones.",
                     });
-                    throw new Error('User denied permissions!');
+                    return; // Stop execution if permission is not granted
                 }
                 
                 // Add all listeners *before* registering
@@ -98,7 +97,6 @@ const PushNotificationHandler = () => {
                 
             } catch (e) {
                 console.error("Error initializing mobile push", e);
-                hasRegisteredForPush = false; // Reset flag on catastrophic failure to allow retry.
                 if (e instanceof Error) {
                     toast({
                         variant: "destructive",
