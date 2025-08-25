@@ -36,25 +36,22 @@ const PushNotificationHandler = () => {
             // Native mobile logic (Android/iOS) via Capacitor
             const initMobilePush = async () => {
                 try {
-                    await PushNotifications.requestPermissions();
-                    await PushNotifications.register();
-    
-                    PushNotifications.addListener('registration', (token: Token) => {
+                    // Add all listeners
+                    await PushNotifications.addListener('registration', (token: Token) => {
                         console.log('Push registration success, token: ', token.value);
                         localStorage.setItem("fcm_token", token.value);
                     });
     
-                    PushNotifications.addListener('registrationError', (error: any) => {
-                        console.error('Error on registration: ' + JSON.stringify(error));
+                    await PushNotifications.addListener('registrationError', (error: any) => {
+                        console.error('Error on registration: ', JSON.stringify(error));
                         toast({
                             variant: "destructive",
-                            title: "Error de Registro",
-                            description: "No se pudo registrar para notificaciones push.",
+                            title: "Error de Registro de Push",
+                            description: `No se pudo registrar para notificaciones: ${error.error || 'Error desconocido'}`,
                         });
                     });
 
-                    // These listeners should only be active on mobile
-                    PushNotifications.addListener(
+                    await PushNotifications.addListener(
                         'pushNotificationReceived',
                         (notification: PushNotificationSchema) => {
                             console.log('Push notification received: ', notification);
@@ -67,13 +64,15 @@ const PushNotificationHandler = () => {
                         },
                     );
             
-                    PushNotifications.addListener(
+                    await PushNotifications.addListener(
                         'pushNotificationActionPerformed',
                         (notification: ActionPerformed) => {
                             console.log('Push notification action performed', notification.actionId, notification.inputValue);
                         },
                     );
 
+                    // Register the device with the push notification service
+                    await PushNotifications.register();
                 } catch (e) {
                     console.error("Error initializing mobile push", e);
                 }
