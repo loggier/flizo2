@@ -593,7 +593,7 @@ export default function MapsPage() {
         routes={routes}
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
-        onSelectRoute={onSelectRoute}
+        onSelectRoute={handleSelectRoute}
         pois={pois}
         visiblePoiIds={visiblePoiIds}
         togglePoiVisibility={togglePoiVisibility}
@@ -626,4 +626,3 @@ export default function MapsPage() {
     </div>
   );
 }
-
