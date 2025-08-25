@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
+import { Capacitor } from "@capacitor/core";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -69,22 +70,22 @@ export function LoginForm() {
     setIsSubmitting(true);
     
     const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
-    
+    const url = `${serverApi}login`;
     const params = new URLSearchParams({
         email: values.email,
         password: values.password,
     });
 
     try {
-      const response = await fetch(`${serverApi}login?${params.toString()}`, {
-        method: "GET",
+      const response = await fetch(`${url}?${params.toString()}`, {
+        method: 'GET'
       });
-
+      
       const data = await response.json();
+
       console.log('Login API Response:', data);
 
-      if (!response.ok || data.status !== 1) {
-        // Use the message from the API if available, otherwise show a generic error
+      if (data.status !== 1) {
         const errorMessage = data?.errors?.[0] || data?.message || loginTranslations.genericError;
         throw new Error(errorMessage);
       }
@@ -104,7 +105,6 @@ export function LoginForm() {
             storage.setItem("profile", JSON.stringify(profile));
         }
 
-        // Send FCM token to backend
         const fcmToken = localStorage.getItem("fcm_token");
         console.log('Retrieved FCM token for sending:', fcmToken);
 
@@ -114,7 +114,6 @@ export function LoginForm() {
             console.log('FCM Token sent successfully');
           } catch (fcmError) {
             console.error("Failed to send FCM token:", fcmError);
-            // Non-critical error, so we don't block the login
             toast({
               variant: "destructive",
               title: "Error de Sincronización",
@@ -122,8 +121,9 @@ export function LoginForm() {
             });
           }
         }
-
+        
         router.push("/maps");
+
       } else {
          throw new Error(data.message || loginTranslations.genericError);
       }
