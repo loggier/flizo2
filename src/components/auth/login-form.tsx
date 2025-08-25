@@ -80,19 +80,13 @@ export function LoginForm() {
         method: "GET",
       });
 
-      if (!response.ok) {
-        throw new Error(loginTranslations.genericError);
-      }
-      
-      let data;
-      try {
-        data = await response.json();
-      } catch (e) {
-        throw new Error("Received invalid JSON from server.");
-      }
+      const data = await response.json();
+      console.log('Login API Response:', data);
 
-      if (data.status !== 1) {
-        throw new Error(data.message || loginTranslations.genericError);
+      if (!response.ok || data.status !== 1) {
+        // Use the message from the API if available, otherwise show a generic error
+        const errorMessage = data?.errors?.[0] || data?.message || loginTranslations.genericError;
+        throw new Error(errorMessage);
       }
 
       const token = data.user_api_hash;
@@ -112,9 +106,12 @@ export function LoginForm() {
 
         // Send FCM token to backend
         const fcmToken = localStorage.getItem("fcm_token");
+        console.log('Retrieved FCM token for sending:', fcmToken);
+
         if (fcmToken) {
           try {
             await sendFCMToken(token, fcmToken);
+            console.log('FCM Token sent successfully');
           } catch (fcmError) {
             console.error("Failed to send FCM token:", fcmError);
             // Non-critical error, so we don't block the login
@@ -126,12 +123,13 @@ export function LoginForm() {
           }
         }
 
-        window.location.href = "/maps";
+        router.push("/maps");
       } else {
          throw new Error(data.message || loginTranslations.genericError);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : loginTranslations.unexpectedError;
+      console.error('Login error details:', error);
       toast({
         variant: "destructive",
         title: loginTranslations.loginFailedTitle,
