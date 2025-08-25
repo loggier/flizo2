@@ -13,7 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices, getGeofences, getRoutes, getPOIs, sendFCMToken } from "@/services/flizo.service";
+import { getDevices, getGeofences, getRoutes, getPOIs } from "@/services/flizo.service";
 import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";

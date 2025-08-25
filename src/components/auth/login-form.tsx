@@ -7,8 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import { Capacitor } from '@capacitor/core';
-import { PushNotifications, Token } from '@capacitor/push-notifications';
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
-import { sendFCMToken } from "@/services/flizo.service";
 
 
 const formSchema = (t: any) => z.object({
@@ -49,43 +46,6 @@ const formSchema = (t: any) => z.object({
   rememberMe: z.boolean().default(false).optional(),
 });
 
-
-const initPushNotifications = async () => {
-    if (Capacitor.getPlatform() === 'web') {
-      console.log("Push notifications for web are handled in settings.");
-      return;
-    }
-
-    try {
-      await PushNotifications.removeAllListeners();
-
-      PushNotifications.addListener('registration', async (token: Token) => {
-        const userApiHash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-        if (userApiHash) {
-          await sendFCMToken(userApiHash, token.value);
-          localStorage.setItem("fcm_token", token.value);
-        }
-      });
-
-      PushNotifications.addListener('registrationError', (error: any) => {
-        console.error('Error on registration: ' + JSON.stringify(error));
-      });
-
-      let permStatus = await PushNotifications.checkPermissions();
-      if (permStatus.receive === 'prompt') {
-        permStatus = await PushNotifications.requestPermissions();
-      }
-
-      if (permStatus.receive === 'granted') {
-        await PushNotifications.register();
-      } else {
-        console.log('User denied push permissions!');
-      }
-
-    } catch (e) {
-      console.error("Error initializing push notifications", e);
-    }
-};
 
 export function LoginForm() {
   const router = useRouter();
@@ -144,8 +104,6 @@ export function LoginForm() {
         
         window.dispatchEvent(new Event("storage"));
         
-        await initPushNotifications();
-
         router.push("/maps");
 
       } else {
