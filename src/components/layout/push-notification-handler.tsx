@@ -14,7 +14,6 @@ const PushNotificationHandler = () => {
         const platform = Capacitor.getPlatform();
 
         if (platform === "web") {
-            // Web-specific logic to get FCM token via Firebase SDK
             const initWebPush = async () => {
                 try {
                     const fcmToken = await getFCMToken();
@@ -33,10 +32,8 @@ const PushNotificationHandler = () => {
             };
             initWebPush();
         } else {
-            // Native mobile logic (Android/iOS) via Capacitor
             const initMobilePush = async () => {
                 try {
-                    // Add all listeners
                     await PushNotifications.addListener('registration', (token: Token) => {
                         console.log('Push registration success, token: ', token.value);
                         localStorage.setItem("fcm_token", token.value);
@@ -47,7 +44,7 @@ const PushNotificationHandler = () => {
                         toast({
                             variant: "destructive",
                             title: "Error de Registro de Push",
-                            description: `No se pudo registrar para notificaciones: ${error.error || 'Error desconocido'}`,
+                            description: `No se pudo registrar para notificaciones: ${error.message || 'Error desconocido'}`,
                         });
                     });
 
@@ -70,8 +67,7 @@ const PushNotificationHandler = () => {
                             console.log('Push notification action performed', notification.actionId, notification.inputValue);
                         },
                     );
-
-                    // Register the device with the push notification service
+                    
                     await PushNotifications.register();
                 } catch (e) {
                     console.error("Error initializing mobile push", e);
@@ -79,7 +75,8 @@ const PushNotificationHandler = () => {
             }
             initMobilePush();
         }
-    }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     return null;
 };
