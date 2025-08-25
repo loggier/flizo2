@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
   server: {
     hostname: 'app.flizo.com',
     androidScheme: 'https',
-  },
+  }, 
   plugins: {
     SplashScreen: {
       launchShowDuration: 0,
