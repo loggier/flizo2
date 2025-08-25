@@ -13,18 +13,23 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices, getGeofences, getRoutes, getPOIs } from "@/services/flizo.service";
+import { getDevices, getGeofences, getRoutes, getPOIs, sendFCMToken } from "@/services/flizo.service";
 import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
 import VehicleDetailsSheet from "@/components/maps/vehicle-details-sheet";
+import { getFCMToken } from "@/lib/firebase";
+import { Capacitor } from "@capacitor/core";
+import { ActionPerformed, PushNotificationSchema, PushNotifications, Token } from "@capacitor/push-notifications";
+import { useToast } from "@/hooks/use-toast";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
 export default function MapsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isLayerSheetOpen, setIsLayerSheetOpen] = useState(false);
@@ -54,6 +59,87 @@ export default function MapsPage() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+
+  // Effect for handling FCM token registration after login
+  useEffect(() => {
+    const registerAndSyncToken = async () => {
+      console.log('Attempting to register and sync FCM token...');
+      const platform = Capacitor.getPlatform();
+      const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+
+      if (!user_api_hash) {
+          console.log("No user_api_hash found, skipping FCM token sync.");
+          return;
+      }
+      
+      let fcmToken: string | null = null;
+      
+      try {
+        if (platform === 'web') {
+          fcmToken = await getFCMToken();
+        } else {
+          // For native platforms, add listeners and register
+          const permStatus = await PushNotifications.checkPermissions();
+          if (permStatus.receive === 'granted') {
+             // Add all listeners *before* registering
+            await PushNotifications.removeAllListeners();
+
+            await PushNotifications.addListener('registration', (token: Token) => {
+              console.log('Native Push registration success, token: ', token.value);
+              localStorage.setItem("fcm_token", token.value);
+              sendFCMToken(user_api_hash, token.value)
+                .then(() => console.log('FCM Token sent successfully to server.'))
+                .catch(e => console.error('Failed to send FCM token to server', e));
+            });
+
+            await PushNotifications.addListener('registrationError', (error: any) => {
+                const errorMessage = JSON.stringify(error);
+                console.error('Error on registration: ', errorMessage);
+                toast({
+                    variant: "destructive",
+                    title: "Error de Registro de Push",
+                    description: `Detalles del error: ${errorMessage}`,
+                });
+            });
+
+            await PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
+              console.log('Push notification received: ', notification);
+              if (notification.title && notification.body) {
+                  toast({ title: notification.title, description: notification.body });
+              }
+            });
+    
+            await PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
+              console.log('Push notification action performed', notification.actionId, notification.inputValue);
+            });
+
+            await PushNotifications.register();
+
+          } else {
+            console.log('Push permission not granted.');
+          }
+        }
+
+        if (fcmToken) {
+            console.log('FCM Token obtained:', fcmToken);
+            localStorage.setItem("fcm_token", fcmToken);
+            await sendFCMToken(user_api_hash, fcmToken);
+            console.log('FCM Token sent successfully to server.');
+        } else if (platform === 'web') {
+            console.log("Could not get FCM token for web.");
+        }
+      } catch (error) {
+        console.error("An error occurred during FCM token handling:", error);
+        toast({
+            variant: "destructive",
+            title: "Error de Notificaciones",
+            description: "No se pudo registrar el dispositivo para notificaciones.",
+        });
+      }
+    };
+    registerAndSyncToken();
+  }, [toast]);
+
 
   useEffect(() => {
     // Load preferences from localStorage

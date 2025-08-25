@@ -3,111 +3,49 @@
 
 import { useEffect } from "react";
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications, PushNotificationSchema, ActionPerformed, Token } from "@capacitor/push-notifications";
+import { PushNotifications } from "@capacitor/push-notifications";
 import { useToast } from "@/hooks/use-toast";
-import { getFCMToken } from "@/lib/firebase";
 
-// Global flag to ensure registration happens only once.
-let hasRegisteredForPush = false;
+// Global flag to ensure registration happens only once per app session.
+let permissionRequested = false;
 
 const PushNotificationHandler = () => {
     const { toast } = useToast();
 
     useEffect(() => {
-        const registerAndListen = async () => {
-            if (hasRegisteredForPush) {
+        const requestPermission = async () => {
+            if (permissionRequested || Capacitor.getPlatform() === 'web') {
                 return;
             }
-            hasRegisteredForPush = true;
-
-            const platform = Capacitor.getPlatform();
-
-            if (platform === "web") {
-                try {
-                    const fcmToken = await getFCMToken();
-                    if (fcmToken) {
-                        console.log("FCM Token:", fcmToken);
-                        localStorage.setItem("fcm_token", fcmToken);
-                    }
-                } catch (error) {
-                    console.error("FCM Token Error:", error);
-                    toast({
-                        variant: "destructive",
-                        title: "Error de Notificaciones",
-                        description: "No se pudo obtener el permiso para notificaciones web.",
-                    });
-                }
-                return;
-            }
-
-            // --- Mobile-only logic ---
+            permissionRequested = true;
+            
             try {
                 let permStatus = await PushNotifications.checkPermissions();
 
                 if (permStatus.receive === 'prompt') {
                     permStatus = await PushNotifications.requestPermissions();
                 }
-
+                
                 if (permStatus.receive !== 'granted') {
                     toast({
                         variant: "destructive",
                         title: "Permiso denegado",
                         description: "No se concedió permiso, por lo que no podrá recibir notificaciones.",
                     });
-                    return; // Stop execution if permission is not granted
                 }
-                
-                // Add all listeners *before* registering
-                await PushNotifications.addListener('registration', (token: Token) => {
-                    console.log('Push registration success, token: ', token.value);
-                    localStorage.setItem("fcm_token", token.value);
-                });
-
-                await PushNotifications.addListener('registrationError', (error: any) => {
-                    console.error('Error on registration: ', JSON.stringify(error));
-                    toast({
-                        variant: "destructive",
-                        title: "Error de Registro de Push",
-                        description: `Detalles del error: ${JSON.stringify(error)}`,
-                    });
-                });
-
-                await PushNotifications.addListener(
-                    'pushNotificationReceived',
-                    (notification: PushNotificationSchema) => {
-                        console.log('Push notification received: ', notification);
-                        if (notification.title && notification.body) {
-                            toast({
-                                title: notification.title,
-                                description: notification.body,
-                            });
-                        }
-                    },
-                );
-        
-                await PushNotifications.addListener(
-                    'pushNotificationActionPerformed',
-                    (notification: ActionPerformed) => {
-                        console.log('Push notification action performed', notification.actionId, notification.inputValue);
-                    },
-                );
-
-                // Now, register for push notifications
-                await PushNotifications.register();
-                
             } catch (e) {
-                console.error("Error initializing mobile push", e);
-                if (e instanceof Error) {
+                console.error("Error requesting push permission", e);
+                 if (e instanceof Error) {
                     toast({
                         variant: "destructive",
                         title: "Error de Notificaciones",
-                        description: e.message,
+                        description: `Error al solicitar permisos: ${e.message}`,
                     });
                 }
             }
         };
 
-        registerAndListen();
+        requestPermission();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []); 
 
