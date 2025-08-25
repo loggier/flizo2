@@ -63,42 +63,44 @@ export default function MapsPage() {
   // Effect for handling FCM token registration after login
   useEffect(() => {
     const registerAndSyncToken = async () => {
-      console.log('Attempting to register and sync FCM token...');
-      const platform = Capacitor.getPlatform();
-      const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-
-      if (!user_api_hash) {
-          console.log("No user_api_hash found, skipping FCM token sync.");
+      console.log('Verificando el estado del token FCM...');
+      const existingToken = localStorage.getItem("fcm_token");
+      if (existingToken) {
+          console.log("El token FCM ya existe, no se necesita registro.");
           return;
       }
       
-      let fcmToken: string | null = null;
+      console.log('No se encontró un token FCM. Intentando registrar...');
+      const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+
+      if (!user_api_hash) {
+          console.log("No se encontró user_api_hash, omitiendo la sincronización del token FCM.");
+          return;
+      }
       
       try {
-        if (platform === 'web') {
-          fcmToken = await getFCMToken();
-        } else {
-          // For native platforms, add listeners and register
-          const permStatus = await PushNotifications.checkPermissions();
-          if (permStatus.receive === 'granted') {
+        if (Capacitor.getPlatform() !== 'web') {
              // Add all listeners *before* registering
             await PushNotifications.removeAllListeners();
 
-            await PushNotifications.addListener('registration', (token: Token) => {
-              console.log('Native Push registration success, token: ', token.value);
+            await PushNotifications.addListener('registration', async (token: Token) => {
+              console.log('Push registration success, token: ', token.value);
               localStorage.setItem("fcm_token", token.value);
-              sendFCMToken(user_api_hash, token.value)
-                .then(() => console.log('FCM Token sent successfully to server.'))
-                .catch(e => console.error('Failed to send FCM token to server', e));
+              try {
+                await sendFCMToken(user_api_hash, token.value);
+                console.log('FCM Token enviado con éxito al servidor.');
+              } catch (e) {
+                console.error('Error al enviar el token FCM al servidor', e);
+              }
             });
 
             await PushNotifications.addListener('registrationError', (error: any) => {
                 const errorMessage = JSON.stringify(error);
-                console.error('Error on registration: ', errorMessage);
+                console.error('Error en el registro: ', errorMessage);
                 toast({
                     variant: "destructive",
-                    title: "Error de Registro de Push",
-                    description: `Detalles del error: ${errorMessage}`,
+                    title: "Error de Registro de Notificaciones",
+                    description: "No se pudo registrar el dispositivo. Por favor, habilite los permisos para recibir alertas.",
                 });
             });
 
@@ -112,24 +114,37 @@ export default function MapsPage() {
             await PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
               console.log('Push notification action performed', notification.actionId, notification.inputValue);
             });
+            
+            const permStatus = await PushNotifications.checkPermissions();
+            if (permStatus.receive === 'granted') {
+                await PushNotifications.register();
+            } else {
+                 console.log('El permiso de notificación no fue otorgado.');
+                 toast({
+                    variant: "destructive",
+                    title: "Permiso Requerido",
+                    description: "No se pudo registrar el dispositivo para notificaciones. Por favor, habilite los permisos para recibir alertas.",
+                });
+            }
 
-            await PushNotifications.register();
-
-          } else {
-            console.log('Push permission not granted.');
-          }
-        }
-
-        if (fcmToken) {
-            console.log('FCM Token obtained:', fcmToken);
-            localStorage.setItem("fcm_token", fcmToken);
-            await sendFCMToken(user_api_hash, fcmToken);
-            console.log('FCM Token sent successfully to server.');
-        } else if (platform === 'web') {
-            console.log("Could not get FCM token for web.");
+        } else { // Web platform
+            const fcmToken = await getFCMToken();
+            if (fcmToken) {
+                console.log('FCM Token obtenido:', fcmToken);
+                localStorage.setItem("fcm_token", fcmToken);
+                await sendFCMToken(user_api_hash, fcmToken);
+                console.log('FCM Token enviado con éxito al servidor.');
+            } else {
+                console.log("No se pudo obtener el token FCM para la web. Puede que los permisos fueran denegados.");
+                toast({
+                    variant: "destructive",
+                    title: "Permiso Requerido",
+                    description: "No se pudo registrar el dispositivo para notificaciones. Por favor, habilite los permisos para recibir alertas.",
+                });
+            }
         }
       } catch (error) {
-        console.error("An error occurred during FCM token handling:", error);
+        console.error("Ocurrió un error durante el manejo del token FCM:", error);
         toast({
             variant: "destructive",
             title: "Error de Notificaciones",
@@ -578,7 +593,7 @@ export default function MapsPage() {
         routes={routes}
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
-        onSelectRoute={handleSelectRoute}
+        onSelectRoute={onSelectRoute}
         pois={pois}
         visiblePoiIds={visiblePoiIds}
         togglePoiVisibility={togglePoiVisibility}
@@ -611,3 +626,4 @@ export default function MapsPage() {
     </div>
   );
 }
+
