@@ -13,26 +13,18 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices, getGeofences, getRoutes, getPOIs, sendFCMToken } from "@/services/flizo.service";
+import { getDevices, getGeofences, getRoutes, getPOIs } from "@/services/flizo.service";
 import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
 import VehicleDetailsSheet from "@/components/maps/vehicle-details-sheet";
-import { getFCMToken } from "@/lib/firebase";
-import { Capacitor } from "@capacitor/core";
-import { ActionPerformed, PushNotificationSchema, PushNotifications, Token } from "@capacitor/push-notifications";
-import { useToast } from "@/hooks/use-toast";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
-// Global flag to ensure registration is only attempted once per app session.
-let pushNotificationRegistrationAttempted = false;
-
 export default function MapsPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isLayerSheetOpen, setIsLayerSheetOpen] = useState(false);
@@ -62,108 +54,6 @@ export default function MapsPage() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  // Effect for handling FCM token registration after login
-  useEffect(() => {
-    const registerAndSyncToken = async () => {
-      if (pushNotificationRegistrationAttempted) {
-        console.log("Push notification registration already attempted this session.");
-        return;
-      }
-      pushNotificationRegistrationAttempted = true;
-
-      console.log('Verificando el estado del token FCM...');
-      const existingToken = localStorage.getItem("fcm_token");
-      if (existingToken) {
-          console.log("El token FCM ya existe, no se necesita registro.");
-          return;
-      }
-      
-      console.log('No se encontró un token FCM. Intentando registrar...');
-      const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-
-      if (!user_api_hash) {
-          console.log("No se encontró user_api_hash, omitiendo la sincronización del token FCM.");
-          return;
-      }
-      
-      try {
-        if (Capacitor.getPlatform() !== 'web') {
-            await PushNotifications.removeAllListeners();
-
-            PushNotifications.addListener('registration', async (token: Token) => {
-              console.log('Push registration success, token: ', token.value);
-              toast({ title: "Token Obtenido", description: token.value || 'Token vacío' });
-              localStorage.setItem("fcm_token", token.value);
-              try {
-                await sendFCMToken(user_api_hash, token.value);
-                console.log('FCM Token enviado con éxito al servidor.');
-              } catch (e) {
-                console.error('Error al enviar el token FCM al servidor', e);
-              }
-            });
- 
-            PushNotifications.addListener('registrationError', (error: any) => {
-                const errorMessage = JSON.stringify(error);
-                console.error('Error en el registro: ', errorMessage);
-                toast({
-                    variant: "destructive",
-                    title: "Error de Registro",
-                    description: errorMessage,
-                });
-            });
-
-            PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-              console.log('Push notification received: ', notification);
-              if (notification.title && notification.body) {
-                  toast({ title: notification.title, description: notification.body });
-              }
-            });
-    
-            PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
-              console.log('Push notification action performed', notification.actionId, notification.inputValue);
-            });
-            
-            const permStatus = await PushNotifications.checkPermissions();
-            if (permStatus.receive === 'granted') {
-                await PushNotifications.register();
-            } else {
-                 console.log('El permiso de notificación no fue otorgado.');
-                 toast({
-                    variant: "destructive",
-                    title: "Permiso Requerido",
-                    description: "No se pudo registrar el dispositivo para notificaciones. Por favor, habilite los permisos para recibir alertas.",
-                });
-            }
-
-        } else { // Web platform
-            const fcmToken = await getFCMToken();
-            if (fcmToken) {
-                console.log('FCM Token obtenido:', fcmToken);
-                localStorage.setItem("fcm_token", fcmToken);
-                await sendFCMToken(user_api_hash, fcmToken);
-                console.log('FCM Token enviado con éxito al servidor.');
-            } else {
-                console.log("No se pudo obtener el token FCM para la web. Puede que los permisos fueran denegados.");
-                toast({
-                    variant: "destructive",
-                    title: "Permiso Requerido",
-                    description: "No se pudo registrar el dispositivo para notificaciones. Por favor, habilite los permisos para recibir alertas.",
-                });
-            }
-        }
-      } catch (error) {
-        console.error("Ocurrió un error durante el manejo del token FCM:", error);
-        toast({
-            variant: "destructive",
-            title: "Error de Notificaciones",
-            description: "No se pudo registrar el dispositivo para notificaciones.",
-        });
-      }
-    };
-    registerAndSyncToken();
-  }, [toast]);
-
 
   useEffect(() => {
     // Load preferences from localStorage
