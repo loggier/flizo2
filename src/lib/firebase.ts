@@ -13,10 +13,16 @@ const firebaseConfig = {
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const messaging = typeof window !== "undefined" ? getMessaging(app) : null;
+const messaging = () => {
+    if (typeof window !== 'undefined') {
+        return getMessaging(app);
+    }
+    return null;
+}
 
 export const getFCMToken = async (): Promise<string | null> => {
-  if (!messaging || !("Notification" in window)) {
+  const msg = messaging();
+  if (!msg || !("Notification" in window)) {
     console.log("Firebase Messaging is not supported in this browser.");
     return null;
   }
@@ -27,24 +33,24 @@ export const getFCMToken = async (): Promise<string | null> => {
     return null;
   }
 
-  const permission = await Notification.requestPermission();
-  if (permission === "granted") {
-    try {
-      const currentToken = await getToken(messaging, {
-        vapidKey: vapidKey,
-      });
-      if (currentToken) {
-        return currentToken;
-      } else {
-        console.log("No registration token available. Request permission to generate one.");
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+        const currentToken = await getToken(msg, {
+            vapidKey: vapidKey,
+        });
+        if (currentToken) {
+            return currentToken;
+        } else {
+            console.log("No registration token available. Request permission to generate one.");
+            return null;
+        }
+    } else {
+        console.log("Unable to get permission to notify.");
         return null;
-      }
-    } catch (err) {
-      console.error("An error occurred while retrieving token. ", err);
-      return null;
     }
-  } else {
-    console.log("Unable to get permission to notify.");
+  } catch (err) {
+    console.error("An error occurred while retrieving token. ", err);
     return null;
   }
 };

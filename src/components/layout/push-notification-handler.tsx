@@ -96,7 +96,7 @@ const PushNotificationHandler = () => {
                     if (permStatus.receive === 'granted') {
                         await PushNotifications.register();
                     } else {
-                        throw new Error("Permission not granted for push notifications.");
+                        console.error("Permission not granted for push notifications.");
                     }
 
                 } else {
@@ -111,7 +111,7 @@ const PushNotificationHandler = () => {
                            console.log('Web FCM Token sent successfully.');
                         }
                     } else {
-                        throw new Error("Failed to get web FCM Token. Permissions might be denied.");
+                       console.error("Failed to get web FCM Token. Permissions might be denied.");
                     }
                 }
             } catch (error) {
