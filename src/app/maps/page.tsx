@@ -27,6 +27,9 @@ import { useToast } from "@/hooks/use-toast";
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
+// Global flag to ensure registration is only attempted once per app session.
+let pushNotificationRegistrationAttempted = false;
+
 export default function MapsPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -63,6 +66,12 @@ export default function MapsPage() {
   // Effect for handling FCM token registration after login
   useEffect(() => {
     const registerAndSyncToken = async () => {
+      if (pushNotificationRegistrationAttempted) {
+        console.log("Push notification registration already attempted this session.");
+        return;
+      }
+      pushNotificationRegistrationAttempted = true;
+
       console.log('Verificando el estado del token FCM...');
       const existingToken = localStorage.getItem("fcm_token");
       if (existingToken) {
@@ -626,5 +635,3 @@ export default function MapsPage() {
     </div>
   );
 }
-
-    
