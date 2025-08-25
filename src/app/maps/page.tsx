@@ -84,6 +84,7 @@ export default function MapsPage() {
 
             await PushNotifications.addListener('registration', async (token: Token) => {
               console.log('Push registration success, token: ', token.value);
+              toast({ title: "Token Obtenido", description: token.value || 'Token vacío' });
               localStorage.setItem("fcm_token", token.value);
               try {
                 await sendFCMToken(user_api_hash, token.value);
@@ -98,8 +99,8 @@ export default function MapsPage() {
                 console.error('Error en el registro: ', errorMessage);
                 toast({
                     variant: "destructive",
-                    title: "Error de Registro de Notificaciones",
-                    description: "No se pudo registrar el dispositivo. Por favor, habilite los permisos para recibir alertas.",
+                    title: "Error de Registro",
+                    description: errorMessage,
                 });
             });
 
