@@ -13,8 +13,9 @@ const firebaseConfig = {
 };
 
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
 const messaging = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && "serviceWorker" in navigator) {
         return getMessaging(app);
     }
     return null;
@@ -22,8 +23,8 @@ const messaging = () => {
 
 export const getFCMToken = async (): Promise<string | null> => {
   const msg = messaging();
-  if (!msg || !("Notification" in window)) {
-    console.log("Firebase Messaging is not supported in this browser.");
+  if (!msg || !("Notification" in window) || Notification.permission !== 'granted') {
+    console.log("Firebase Messaging not supported or permission not granted.");
     return null;
   }
 
@@ -34,19 +35,13 @@ export const getFCMToken = async (): Promise<string | null> => {
   }
 
   try {
-    const permission = await Notification.requestPermission();
-    if (permission === "granted") {
-        const currentToken = await getToken(msg, {
-            vapidKey: vapidKey,
-        });
-        if (currentToken) {
-            return currentToken;
-        } else {
-            console.log("No registration token available. Request permission to generate one.");
-            return null;
-        }
+    const currentToken = await getToken(msg, {
+        vapidKey: vapidKey,
+    });
+    if (currentToken) {
+        return currentToken;
     } else {
-        console.log("Unable to get permission to notify.");
+        console.log("No registration token available.");
         return null;
     }
   } catch (err) {

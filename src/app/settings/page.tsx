@@ -25,9 +25,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { changePassword, getUserData } from "@/services/flizo.service";
-import { Book, LogOut, RefreshCcw, Lock } from "lucide-react";
+import { changePassword, getUserData, sendFCMToken } from "@/services/flizo.service";
+import { Book, LogOut, RefreshCcw, Lock, Bell } from "lucide-react";
 import Link from "next/link";
+import { getFCMToken } from "@/lib/firebase";
+import { Capacitor } from "@capacitor/core";
 
 
 export default function SettingsPage() {
@@ -35,6 +37,9 @@ export default function SettingsPage() {
     const { toast } = useToast();
     const [userEmail, setUserEmail] = useState("");
     const [isClient, setIsClient] = useState(false);
+    const [isSubscribing, setIsSubscribing] = useState(false);
+    const [notificationStatus, setNotificationStatus] = useState("default");
+
 
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -46,6 +51,9 @@ export default function SettingsPage() {
 
     useEffect(() => {
         setIsClient(true);
+        if (typeof window !== 'undefined' && "Notification" in window) {
+            setNotificationStatus(Notification.permission);
+        }
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
         if (token) {
             getUserData(token)
@@ -109,9 +117,47 @@ export default function SettingsPage() {
         }
     }
 
+    const handleSubscribeToNotifications = async () => {
+        setIsSubscribing(true);
+        const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+
+        if (!user_api_hash) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Debes iniciar sesión para activar las notificaciones.' });
+            setIsSubscribing(false);
+            return;
+        }
+
+        try {
+            const permission = await Notification.requestPermission();
+            setNotificationStatus(permission);
+
+            if (permission === 'granted') {
+                const fcmToken = await getFCMToken();
+                if (fcmToken) {
+                    await sendFCMToken(user_api_hash, fcmToken);
+                    localStorage.setItem("fcm_token", fcmToken);
+                    toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
+                } else {
+                    throw new Error('No se pudo obtener el token FCM.');
+                }
+            } else {
+                toast({ variant: 'destructive', title: 'Permiso denegado', description: 'No se podrán recibir notificaciones si no concedes el permiso.' });
+            }
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : "Ocurrió un error inesperado.";
+            toast({ variant: 'destructive', title: 'Error de suscripción', description: errorMessage });
+        } finally {
+            setIsSubscribing(false);
+        }
+    };
+
+
     if (!isClient) {
         return null;
     }
+
+    const isWebPlatform = Capacitor.getPlatform() === 'web';
+
 
     return (
         <div className="p-4 space-y-4">
@@ -166,6 +212,37 @@ export default function SettingsPage() {
                     </div>
                 </CardContent>
             </Card>
+
+            {isWebPlatform && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Notificaciones Push</CardTitle>
+                        <CardDescription>
+                            Administra el permiso para recibir notificaciones en este navegador.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button 
+                            className="w-full"
+                            onClick={handleSubscribeToNotifications}
+                            disabled={isSubscribing || notificationStatus === 'granted'}
+                        >
+                            <Bell className="mr-2"/>
+                            {isSubscribing 
+                                ? 'Procesando...' 
+                                : notificationStatus === 'granted' 
+                                ? 'Suscrito a Notificaciones'
+                                : 'Activar Notificaciones'
+                            }
+                        </Button>
+                        {notificationStatus === 'denied' && (
+                            <p className="text-xs text-destructive mt-2 text-center">
+                                Has bloqueado las notificaciones. Debes cambiar los permisos desde la configuración de tu navegador.
+                            </p>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
             
             <Button asChild variant="outline" className="w-full justify-start bg-card">
                  <Link href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer">
