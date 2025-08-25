@@ -13,22 +13,18 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet"
 import { useLanguage } from "@/hooks/use-language";
-import { getDevices, getGeofences, getRoutes, getPOIs, sendFCMToken } from "@/services/flizo.service";
+import { getDevices, getGeofences, getRoutes, getPOIs } from "@/services/flizo.service";
 import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
 import VehicleDetailsSheet from "@/components/maps/vehicle-details-sheet";
-import { Capacitor } from '@capacitor/core';
-import { PushNotifications, Token } from '@capacitor/push-notifications';
-import { useToast } from "@/hooks/use-toast";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
 export default function MapsPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isLayerSheetOpen, setIsLayerSheetOpen] = useState(false);
@@ -58,48 +54,6 @@ export default function MapsPage() {
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  useEffect(() => {
-    const initPushNotifications = async () => {
-      if (Capacitor.getPlatform() === 'web') {
-        console.log("Push notifications for web are handled in settings.");
-        return;
-      }
-
-      try {
-        await PushNotifications.removeAllListeners();
-
-        PushNotifications.addListener('registration', async (token: Token) => {
-          const userApiHash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-          if (userApiHash) {
-            await sendFCMToken(userApiHash, token.value);
-            localStorage.setItem("fcm_token", token.value);
-          }
-        });
-
-        PushNotifications.addListener('registrationError', (error: any) => {
-          console.error('Error on registration: ' + JSON.stringify(error));
-        });
-
-        let permStatus = await PushNotifications.checkPermissions();
-        if (permStatus.receive === 'prompt') {
-          permStatus = await PushNotifications.requestPermissions();
-        }
-
-        if (permStatus.receive !== 'granted') {
-          console.log('User denied permissions!');
-        } else {
-          await PushNotifications.register();
-        }
-
-      } catch (e) {
-        console.error("Error initializing push notifications", e);
-      }
-    };
-    
-    initPushNotifications();
-  }, [toast]);
-
 
   useEffect(() => {
     // Load preferences from localStorage
