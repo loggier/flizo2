@@ -7,6 +7,9 @@ import { PushNotifications, PushNotificationSchema, ActionPerformed, Token } fro
 import { useToast } from "@/hooks/use-toast";
 import { getFCMToken } from "@/lib/firebase";
 
+// Global flag to ensure registration happens only once.
+let hasRegisteredForPush = false;
+
 const PushNotificationHandler = () => {
     const { toast } = useToast();
 
@@ -14,6 +17,12 @@ const PushNotificationHandler = () => {
         const platform = Capacitor.getPlatform();
 
         const registerAndListen = async () => {
+            // If registration has already been attempted, do nothing.
+            if (hasRegisteredForPush) {
+                return;
+            }
+            hasRegisteredForPush = true; // Set flag immediately to prevent race conditions.
+
             if (platform === "web") {
                 try {
                     const fcmToken = await getFCMToken();
@@ -29,10 +38,10 @@ const PushNotificationHandler = () => {
                         description: "No se pudo obtener el permiso para notificaciones web.",
                     });
                 }
-                return; // Stop execution for web after handling FCM
+                return;
             }
-            
-            // Mobile-only logic starts here
+
+            // --- Mobile-only logic ---
             try {
                 let permStatus = await PushNotifications.checkPermissions();
 
@@ -89,6 +98,7 @@ const PushNotificationHandler = () => {
                 
             } catch (e) {
                 console.error("Error initializing mobile push", e);
+                hasRegisteredForPush = false; // Reset flag on catastrophic failure to allow retry.
                 if (e instanceof Error) {
                     toast({
                         variant: "destructive",
