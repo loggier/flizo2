@@ -91,7 +91,7 @@ export default function MapsPage() {
         if (Capacitor.getPlatform() !== 'web') {
             await PushNotifications.removeAllListeners();
 
-            await PushNotifications.addListener('registration', async (token: Token) => {
+            PushNotifications.addListener('registration', async (token: Token) => {
               console.log('Push registration success, token: ', token.value);
               toast({ title: "Token Obtenido", description: token.value || 'Token vacío' });
               localStorage.setItem("fcm_token", token.value);
@@ -103,7 +103,7 @@ export default function MapsPage() {
               }
             });
 
-            await PushNotifications.addListener('registrationError', (error: any) => {
+            PushNotifications.addListener('registrationError', (error: any) => {
                 const errorMessage = JSON.stringify(error);
                 console.error('Error en el registro: ', errorMessage);
                 toast({
@@ -113,14 +113,14 @@ export default function MapsPage() {
                 });
             });
 
-            await PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
+            PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
               console.log('Push notification received: ', notification);
               if (notification.title && notification.body) {
                   toast({ title: notification.title, description: notification.body });
               }
             });
     
-            await PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
+            PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
               console.log('Push notification action performed', notification.actionId, notification.inputValue);
             });
             
@@ -635,3 +635,5 @@ export default function MapsPage() {
     </div>
   );
 }
+
+    
