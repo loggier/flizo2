@@ -80,7 +80,6 @@ export default function MapsPage() {
       
       try {
         if (Capacitor.getPlatform() !== 'web') {
-             // Add all listeners *before* registering
             await PushNotifications.removeAllListeners();
 
             await PushNotifications.addListener('registration', async (token: Token) => {
