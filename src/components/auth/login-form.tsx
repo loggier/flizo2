@@ -7,8 +7,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import Link from "next/link";
-import { Capacitor } from "@capacitor/core";
-import { PushNotifications, Token } from "@capacitor/push-notifications";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -40,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
-import { sendFCMToken } from "@/services/flizo.service";
 
 const formSchema = (t: any) => z.object({
   email: z.string().email({ message: t.emailInvalid }),
@@ -66,65 +63,7 @@ export function LoginForm() {
       rememberMe: false,
     },
   });
-
-  const registerPushNotifications = async (user_api_hash: string) => {
-    if (Capacitor.getPlatform() === 'web') {
-      // Web push logic is handled via user interaction in settings page
-      return;
-    }
   
-    try {
-      let permStatus = await PushNotifications.checkPermissions();
-  
-      if (permStatus.receive === 'prompt') {
-        permStatus = await PushNotifications.requestPermissions();
-      }
-  
-      if (permStatus.receive !== 'granted') {
-        toast({
-          variant: "destructive",
-          title: 'Permiso Denegado',
-          description: 'No se podrán recibir notificaciones si no concedes el permiso.',
-        });
-        return;
-      }
-  
-      // All listeners should be removed here to avoid duplicates
-      await PushNotifications.removeAllListeners();
-  
-      PushNotifications.addListener('registration', async (token: Token) => {
-        try {
-          await sendFCMToken(user_api_hash, token.value);
-          localStorage.setItem("fcm_token", token.value);
-          console.log('Native FCM Token sent successfully.');
-        } catch (e) {
-          console.error('Failed to send native FCM token', e);
-          toast({
-            variant: "destructive",
-            title: "Error de Sincronización",
-            description: "No se pudo registrar el dispositivo para notificaciones.",
-          });
-        }
-      });
-  
-      PushNotifications.addListener('registrationError', (error: any) => {
-        console.error('Error on registration: ' + JSON.stringify(error));
-        toast({
-          variant: "destructive",
-          title: 'Error de Registro Push',
-          description: `Error: ${JSON.stringify(error)}`,
-        });
-      });
-  
-      // Now, register for notifications
-      await PushNotifications.register();
-  
-    } catch (error) {
-      console.error("Error setting up push notifications", error);
-    }
-  };
-  
-
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
     
@@ -162,9 +101,8 @@ export function LoginForm() {
             storage.setItem("profile", JSON.stringify(profile));
         }
         
-        // --- Register for push notifications after successful login ---
-        await registerPushNotifications(token);
-        
+        window.dispatchEvent(new Event("storage"));
+
         router.push("/maps");
 
       } else {
