@@ -52,40 +52,34 @@ const PushNotificationHandler = () => {
                             description: "No se pudo registrar para notificaciones push.",
                         });
                     });
+
+                    // These listeners should only be active on mobile
+                    PushNotifications.addListener(
+                        'pushNotificationReceived',
+                        (notification: PushNotificationSchema) => {
+                            console.log('Push notification received: ', notification);
+                            if (notification.title && notification.body) {
+                                toast({
+                                    title: notification.title,
+                                    description: notification.body,
+                                });
+                            }
+                        },
+                    );
+            
+                    PushNotifications.addListener(
+                        'pushNotificationActionPerformed',
+                        (notification: ActionPerformed) => {
+                            console.log('Push notification action performed', notification.actionId, notification.inputValue);
+                        },
+                    );
+
                 } catch (e) {
                     console.error("Error initializing mobile push", e);
                 }
             }
             initMobilePush();
         }
-
-        // Common listeners for received notifications
-        const notificationReceivedListener = PushNotifications.addListener(
-            'pushNotificationReceived',
-            (notification: PushNotificationSchema) => {
-                console.log('Push notification received: ', notification);
-                if (notification.title && notification.body) {
-                    toast({
-                        title: notification.title,
-                        description: notification.body,
-                    });
-                }
-            },
-        );
-
-        const notificationActionPerformedListener = PushNotifications.addListener(
-            'pushNotificationActionPerformed',
-            (notification: ActionPerformed) => {
-                console.log('Push notification action performed', notification.actionId, notification.inputValue);
-            },
-        );
-
-        // Cleanup on component unmount
-        return () => {
-            notificationReceivedListener.remove();
-            notificationActionPerformedListener.remove();
-        };
-
     }, [toast]);
 
     return null;
