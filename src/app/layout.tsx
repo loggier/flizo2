@@ -4,7 +4,6 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
 import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
-import PushNotificationHandler from '@/components/layout/push-notification-handler';
 
 export const metadata: Metadata = {
   title: 'Flizo Copilot',
@@ -26,7 +25,6 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <LanguageProvider>
           <VehicleFilterProvider>
-            <PushNotificationHandler />
             {children}
           </VehicleFilterProvider>
         </LanguageProvider>
