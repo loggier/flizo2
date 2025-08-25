@@ -70,23 +70,15 @@ export default function MapsPage() {
         await PushNotifications.removeAllListeners();
 
         PushNotifications.addListener('registration', async (token: Token) => {
-          console.log('Push registration success, token: ' + token.value);
-          toast({ title: 'Token Obtenido', description: token.value });
           const userApiHash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
           if (userApiHash) {
             await sendFCMToken(userApiHash, token.value);
             localStorage.setItem("fcm_token", token.value);
-            toast({ title: 'Éxito', description: 'Dispositivo registrado para notificaciones.' });
           }
         });
 
         PushNotifications.addListener('registrationError', (error: any) => {
           console.error('Error on registration: ' + JSON.stringify(error));
-          toast({
-            variant: "destructive",
-            title: 'Error de Registro Push',
-            description: `No se pudo registrar para notificaciones. ${JSON.stringify(error)}`,
-          });
         });
 
         let permStatus = await PushNotifications.checkPermissions();
@@ -546,7 +538,7 @@ export default function MapsPage() {
         routes={routes}
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
-        onSelectRoute={handleSelectRoute}
+        onSelectRoute={onSelectRoute}
         pois={pois}
         visiblePoiIds={visiblePoiIds}
         togglePoiVisibility={togglePoiVisibility}
