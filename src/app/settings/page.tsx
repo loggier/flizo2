@@ -54,20 +54,21 @@ export default function SettingsPage() {
     useEffect(() => {
         setIsClient(true);
         
-        if (Capacitor.isNativePlatform()) {
-             PushNotifications.checkPermissions().then(status => {
+        const checkStatus = async () => {
+            if (Capacitor.isNativePlatform()) {
+                const status = await PushNotifications.checkPermissions();
                 setNotificationStatus(status.receive);
-             });
+            } else if (typeof window !== 'undefined' && "Notification" in window) {
+                setNotificationStatus(Notification.permission);
+            }
+        };
+        checkStatus();
 
-             // Add listeners once when the component mounts
-             PushNotifications.removeAllListeners().then(() => {
-                PushNotifications.addListener('registration', handleTokenRegistration);
-                PushNotifications.addListener('registrationError', handleTokenError);
-             });
-
-        } else if (typeof window !== 'undefined' && "Notification" in window) {
-            setNotificationStatus(Notification.permission);
-        }
+        // Add listeners once when the component mounts
+        PushNotifications.removeAllListeners().then(() => {
+            PushNotifications.addListener('registration', handleTokenRegistration);
+            PushNotifications.addListener('registrationError', handleTokenError);
+        });
         
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
         if (token) {
@@ -87,9 +88,7 @@ export default function SettingsPage() {
 
         // Cleanup listeners on component unmount
         return () => {
-            if (Capacitor.isNativePlatform()) {
-                PushNotifications.removeAllListeners();
-            }
+            PushNotifications.removeAllListeners();
         }
     }, [router]);
 
@@ -164,13 +163,6 @@ export default function SettingsPage() {
 
     const handleSubscribeToNotifications = async () => {
         setIsSubscribing(true);
-        const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-
-        if (!user_api_hash) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Debes iniciar sesión para activar las notificaciones.' });
-            setIsSubscribing(false);
-            return;
-        }
 
         try {
             if (Capacitor.isNativePlatform()) {
@@ -183,6 +175,7 @@ export default function SettingsPage() {
                     throw new Error('Permiso de notificaciones denegado.');
                 }
                 setNotificationStatus('granted');
+                // The registration will be picked up by the listener
                 await PushNotifications.register();
                 
             } else { // Logic for web

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -39,6 +39,8 @@ import {
 import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
 import { sendFCMToken } from "@/services/flizo.service";
+import { Capacitor } from "@capacitor/core";
+import { PushNotifications, Token } from "@capacitor/push-notifications";
 
 
 const formSchema = (t: any) => z.object({
@@ -65,6 +67,34 @@ export function LoginForm() {
       rememberMe: false,
     },
   });
+
+  // This useEffect will run once when the component mounts
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      // Clear old listeners
+      PushNotifications.removeAllListeners().then(() => {
+        // Add new listeners
+        PushNotifications.addListener('registration', (token: Token) => {
+          // Just save the token. We will send it after login.
+          localStorage.setItem("fcm_token_pending", token.value);
+        });
+
+        PushNotifications.addListener('registrationError', (error: any) => {
+          console.error('FCM Registration Error:', JSON.stringify(error));
+        });
+      });
+      
+      // Request permissions and register
+      PushNotifications.checkPermissions().then(permStatus => {
+        if (permStatus.receive === 'prompt') {
+          PushNotifications.requestPermissions();
+        }
+        if(permStatus.receive !== 'denied') {
+            PushNotifications.register();
+        }
+      });
+    }
+  }, []);
   
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
@@ -103,13 +133,8 @@ export function LoginForm() {
             storage.setItem("profile", JSON.stringify(profile));
         }
         
-        // After successful login, check for a pending FCM token
+        // After successful login, check for a pending FCM token and send it
         const pendingToken = localStorage.getItem("fcm_token_pending");
-        toast({
-          variant: "destructive",
-          title: loginTranslations.loginFailedTitle,
-          description: pendingToken,
-        });
         if (pendingToken) {
             try {
                 await sendFCMToken(token, pendingToken);
