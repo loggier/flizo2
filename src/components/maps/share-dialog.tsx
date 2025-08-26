@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import { LoaderIcon } from "../icons/loader-icon";
 import { Input } from "../ui/input";
 import { Copy, Share2 } from "lucide-react";
+import { Share } from "@capacitor/share";
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -77,29 +78,24 @@ export default function ShareDialog({
     }
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     if (!generatedUrl) return;
 
-    if (!navigator.share) {
-      toast({
-        variant: "destructive",
-        title: "No Soportado",
-        description: "La API para compartir no está disponible en este navegador.",
-      });
-      return;
+    try {
+        await Share.share({
+            title: `Compartir Ubicación de ${device.name}`,
+            text: `Hola, te quiero compartir la ubicación del dispositivo ${device.name}`,
+            url: generatedUrl,
+            dialogTitle: 'Compartir ubicación',
+        });
+    } catch (error) {
+        // Fallback to clipboard if share fails or is unavailable
+        handleCopyToClipboard();
+        toast({
+            title: 'No se pudo compartir',
+            description: 'El enlace se ha copiado al portapapeles.',
+        });
     }
-
-    navigator.share({
-      title: `Compartir Ubicación de ${device.name}`,
-      text: `Hola, te quiero compartir la ubicación del dispositivo ${device.name}`,
-      url: generatedUrl,
-    }).catch((error) => {
-        // We only care about errors that are not AbortError
-        if (error.name !== 'AbortError') {
-            const errorMessage = error instanceof Error ? error.message : 'No se pudo compartir el enlace.';
-            toast({ variant: "destructive", title: "Error al compartir", description: errorMessage });
-        }
-    });
   };
 
   const handleCopyToClipboard = () => {
