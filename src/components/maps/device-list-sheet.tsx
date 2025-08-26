@@ -20,7 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Search } from "lucide-react";
 import type { Device, DeviceGroup, Geofence, Route, POI } from "@/lib/types";
 import DeviceListItem from "./device-list-item";
-import { ScrollArea } from "../ui/scroll-area";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { DeviceListSkeleton } from "./device-list-skeleton";
 import GeofenceListItem from "./geofence-list-item";
 import RouteListItem from "./route-list-item";
@@ -135,12 +135,15 @@ export default function DeviceListSheet({
         </SheetHeader>
         <Tabs defaultValue="dispositivos" className="w-full flex flex-col flex-1 min-h-0">
           <div className="bg-primary p-2">
-              <TabsList className="grid w-full grid-cols-4 bg-primary-foreground/20">
-                  <TabsTrigger value="dispositivos" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Dispositivos</TabsTrigger>
-                  <TabsTrigger value="geozonas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Geozonas</TabsTrigger>
-                  <TabsTrigger value="rutas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Rutas</TabsTrigger>
-                  <TabsTrigger value="poi" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">POI</TabsTrigger>
-              </TabsList>
+              <ScrollArea className="w-full whitespace-nowrap">
+                <TabsList className="inline-flex w-auto bg-primary-foreground/20">
+                    <TabsTrigger value="dispositivos" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Dispositivos</TabsTrigger>
+                    <TabsTrigger value="geozonas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Geozonas</TabsTrigger>
+                    <TabsTrigger value="rutas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Rutas</TabsTrigger>
+                    <TabsTrigger value="poi" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">POI</TabsTrigger>
+                </TabsList>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
               <div className="relative mt-2">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <Input
