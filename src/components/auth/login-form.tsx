@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select";
 import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
+import { sendFCMToken } from "@/services/flizo.service";
 
 
 const formSchema = (t: any) => z.object({
@@ -102,8 +103,19 @@ export function LoginForm() {
             storage.setItem("profile", JSON.stringify(profile));
         }
         
-        window.dispatchEvent(new Event("storage"));
+        // After successful login, check for a pending FCM token
+        const pendingToken = localStorage.getItem("fcm_token_pending");
+        if (pendingToken) {
+            try {
+                await sendFCMToken(token, pendingToken);
+                localStorage.setItem("fcm_token", pendingToken);
+                localStorage.removeItem("fcm_token_pending");
+            } catch (e) {
+                console.error("Failed to send pending FCM token:", e);
+            }
+        }
         
+        window.dispatchEvent(new Event("storage"));
         router.push("/maps");
 
       } else {

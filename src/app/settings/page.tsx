@@ -30,7 +30,7 @@ import { Book, LogOut, RefreshCcw, Lock, Bell } from "lucide-react";
 import Link from "next/link";
 import { getFCMToken } from "@/lib/firebase";
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications, Token } from "@capacitor/push-notifications";
+import { PushNotifications, Token, PermissionState } from "@capacitor/push-notifications";
 
 
 export default function SettingsPage() {
@@ -39,7 +39,7 @@ export default function SettingsPage() {
     const [userEmail, setUserEmail] = useState("");
     const [isClient, setIsClient] = useState(false);
     const [isSubscribing, setIsSubscribing] = useState(false);
-    const [notificationStatus, setNotificationStatus] = useState("default");
+    const [notificationStatus, setNotificationStatus] = useState<PermissionState | NotificationPermission>("default");
 
 
     const [currentPassword, setCurrentPassword] = useState("");
@@ -50,15 +50,25 @@ export default function SettingsPage() {
     const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
     const privacyPolicyUrl = `${serverUrl}page/privacy_policy_new`;
 
+    // Initialize notification status and listeners
     useEffect(() => {
         setIsClient(true);
+        
         if (Capacitor.isNativePlatform()) {
              PushNotifications.checkPermissions().then(status => {
                 setNotificationStatus(status.receive);
              });
+
+             // Add listeners once when the component mounts
+             PushNotifications.removeAllListeners().then(() => {
+                PushNotifications.addListener('registration', handleTokenRegistration);
+                PushNotifications.addListener('registrationError', handleTokenError);
+             });
+
         } else if (typeof window !== 'undefined' && "Notification" in window) {
             setNotificationStatus(Notification.permission);
         }
+        
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
         if (token) {
             getUserData(token)
@@ -74,7 +84,37 @@ export default function SettingsPage() {
         } else {
             router.push('/');
         }
+
+        // Cleanup listeners on component unmount
+        return () => {
+            if (Capacitor.isNativePlatform()) {
+                PushNotifications.removeAllListeners();
+            }
+        }
     }, [router]);
+
+    const handleTokenRegistration = async (token: Token) => {
+        const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+        if (!user_api_hash) {
+            console.warn("User not logged in, skipping FCM token send.");
+            localStorage.setItem("fcm_token_pending", token.value);
+            return;
+        }
+        try {
+            await sendFCMToken(user_api_hash, token.value);
+            localStorage.setItem("fcm_token", token.value);
+            localStorage.removeItem("fcm_token_pending");
+            toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
+        } catch (error) {
+            handleTokenError(error);
+        }
+    }
+
+    const handleTokenError = (error: any) => {
+        const errorMessage = error instanceof Error ? error.message : JSON.stringify(error);
+        console.error('FCM Registration Error:', errorMessage);
+        toast({ variant: 'destructive', title: 'Error de suscripción', description: 'No se pudo registrar para notificaciones.' });
+    }
 
     const handleLogout = () => {
         const lng = localStorage.getItem('lng') || 'es';
@@ -143,18 +183,7 @@ export default function SettingsPage() {
                     throw new Error('Permiso de notificaciones denegado.');
                 }
                 setNotificationStatus('granted');
-
                 await PushNotifications.register();
-                
-                PushNotifications.addListener('registration', async (token: Token) => {
-                    await sendFCMToken(user_api_hash, token.value);
-                    localStorage.setItem("fcm_token", token.value);
-                    toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
-                });
-
-                PushNotifications.addListener('registrationError', (error: any) => {
-                     throw new Error('Error en el registro de notificaciones: ' + JSON.stringify(error));
-                });
                 
             } else { // Logic for web
                 const permission = await Notification.requestPermission();
@@ -163,9 +192,7 @@ export default function SettingsPage() {
                 if (permission === 'granted') {
                     const fcmToken = await getFCMToken();
                     if (fcmToken) {
-                        await sendFCMToken(user_api_hash, fcmToken);
-                        localStorage.setItem("fcm_token", fcmToken);
-                        toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
+                        await handleTokenRegistration({ value: fcmToken });
                     } else {
                         throw new Error('No se pudo obtener el token FCM.');
                     }
