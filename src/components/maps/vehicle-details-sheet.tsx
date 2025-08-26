@@ -12,6 +12,7 @@ import {
   FileText,
   History,
   MapPin,
+  Pin,
   Share2,
   Signal,
   Timer,
@@ -41,6 +42,7 @@ import { StreetViewIcon } from "../icons/street-view-icon";
 interface VehicleDetailsSheetProps {
   device: Device | null;
   onClose: () => void;
+  onFollow: (device: Device) => void;
 }
 
 const getStatusInfo = (device: Device): { text: string; colorClass: string; icon: React.ReactNode } => {
@@ -70,7 +72,7 @@ const InfoRow = ({ icon: Icon, label, value, isAddress = false }: { icon: React.
 );
 
 
-export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsSheetProps) {
+export default function VehicleDetailsSheet({ device, onClose, onFollow }: VehicleDetailsSheetProps) {
   const router = useRouter();
   const { toast } = useToast();
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
@@ -190,6 +192,10 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
   const handleShareClick = () => {
     setIsShareDialogOpen(true);
   };
+  
+  const handleFollowClick = () => {
+    onFollow(device);
+  }
 
 
   return (
@@ -238,6 +244,7 @@ export default function VehicleDetailsSheet({ device, onClose }: VehicleDetailsS
                     <span>{status.text}</span>
                 </div>
                 <div className="flex items-center gap-1">
+                    <Button size="icon" variant="ghost" onClick={handleFollowClick} className="rounded-full hover:bg-gray-200 h-8 w-8"><Pin className="h-4 w-4 text-gray-600" /></Button>
                     <Button size="icon" variant="ghost" onClick={handleHistoryClick} className="rounded-full hover:bg-gray-200 h-8 w-8"><History className="h-4 w-4 text-gray-600" /></Button>
                     <Button asChild size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8">
                       <Link href={`/reports?deviceId=${device.id}`}>

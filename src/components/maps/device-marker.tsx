@@ -2,9 +2,10 @@
 "use client";
 
 import React from 'react';
-import { MarkerF, Polyline } from '@react-google-maps/api';
+import { MarkerF, Polyline, OverlayView } from '@react-google-maps/api';
 import type { Device } from '@/lib/types';
 import DeviceLabel from './device-label';
+import { Pin } from 'lucide-react';
 
 interface DeviceMarkerProps {
   device: Device;
@@ -13,6 +14,7 @@ interface DeviceMarkerProps {
   userCircleIcon?: google.maps.Symbol;
   showLabel: boolean;
   onSelect: (device: Device) => void;
+  isFollowed?: boolean;
 }
 
 const DeviceMarker = ({ 
@@ -22,6 +24,7 @@ const DeviceMarker = ({
   userCircleIcon,
   showLabel,
   onSelect,
+  isFollowed = false,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
@@ -57,6 +60,19 @@ const DeviceMarker = ({
     );
   }
 
+  const pinLabelStyle: React.CSSProperties = {
+    position: 'absolute',
+    transform: 'translate(-50%, -100%)',
+    background: 'rgba(255, 255, 255, 0.9)',
+    padding: '2px 5px',
+    borderRadius: '12px',
+    boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+    display: 'flex',
+    alignItems: 'center',
+    whiteSpace: 'nowrap',
+    border: '1px solid #ccc',
+  };
+
   return (
     <React.Fragment>
       <MarkerF
@@ -67,6 +83,18 @@ const DeviceMarker = ({
         onClick={() => onSelect(device)}
       />
       {showLabel && <DeviceLabel device={device} />}
+      {isFollowed && (
+        <OverlayView
+          position={position}
+          mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+          getPixelPositionOffset={(width, height) => ({
+            x: 0,
+            y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
+          })}
+        >
+          <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
+        </OverlayView>
+      )}
       {device.tail && device.tail.length > 0 && (
         <Polyline
           path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
@@ -83,3 +111,5 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
+
+    

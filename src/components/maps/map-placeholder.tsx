@@ -10,6 +10,7 @@ import GeofenceMarker from './geofence-marker';
 import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
+import { Pin } from 'lucide-react';
 
 const containerStyle = {
   width: '100%',
@@ -35,6 +36,7 @@ interface MapComponentProps {
     onDeselectDevice: () => void;
     selectedAlert?: AlertEvent | null;
     selectedDeviceForAlert?: Device | null;
+    followedDevice?: Device | null;
 }
 
 function MapComponent({ 
@@ -51,6 +53,7 @@ function MapComponent({
     onDeselectDevice,
     selectedAlert,
     selectedDeviceForAlert,
+    followedDevice,
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = "AQUÍ_VA_TU_API_KEY_DE_GOOGLE_MAPS";
@@ -199,6 +202,7 @@ function MapComponent({
               isUserLocation={false} 
               showLabel={showLabels}
               onSelect={onSelectDevice}
+              isFollowed={followedDevice?.id === device.id}
             />
         ))}
         {geofences.map(geofence => (

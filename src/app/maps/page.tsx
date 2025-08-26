@@ -22,7 +22,7 @@ import VehicleDetailsSheet from "@/components/maps/vehicle-details-sheet";
 import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import { useToast } from "@/hooks/use-toast";
-import { Car } from "lucide-react";
+import { Car, Pin, PinOff } from "lucide-react";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
@@ -57,6 +57,7 @@ export default function MapsPage() {
 
 
   const [selectedDeviceId, setSelectedDeviceId] = useState<number | null>(null);
+  const [followedDeviceId, setFollowedDeviceId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
@@ -173,9 +174,13 @@ export default function MapsPage() {
   useEffect(() => {
     if (!map || isInitialLoad) return;
   
+    const followedDevice = allDevices.find(d => d.id === followedDeviceId);
     const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
   
-    if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
+    if (followedDevice && followedDevice.lat && followedDevice.lng) {
+        map.panTo({ lat: followedDevice.lat, lng: followedDevice.lng });
+        if (map.getZoom()! < 16) map.setZoom(16);
+    } else if (selectedDevice && selectedDevice.lat && selectedDevice.lng) {
       map.panTo({ lat: selectedDevice.lat, lng: selectedDevice.lng });
       map.setZoom(18);
       map.panBy(0, -100);
@@ -194,7 +199,7 @@ export default function MapsPage() {
         }
       }
     }
-  }, [map, allDevices, selectedDeviceId, visibleDeviceIds, isInitialLoad, autoCenter]);
+  }, [map, allDevices, selectedDeviceId, followedDeviceId, visibleDeviceIds, isInitialLoad, autoCenter]);
 
   useEffect(() => {
     if (!isInitialLoad) {
@@ -301,12 +306,22 @@ export default function MapsPage() {
   const handleSelectDevice = (device: Device) => {
     if (device.lat && device.lng) {
       setSelectedDeviceId(device.id);
+      setFollowedDeviceId(null); // Unfollow when selecting a new device
       setIsDeviceListOpen(false); // Close list if open
     }
   };
 
   const handleDeselectDevice = () => {
     setSelectedDeviceId(null);
+  };
+  
+  const handleFollowDevice = (device: Device) => {
+    setFollowedDeviceId(device.id);
+    setSelectedDeviceId(null); // Close details sheet
+  };
+
+  const handleStopFollowing = () => {
+    setFollowedDeviceId(null);
   };
   
   const handleSelectGeofence = (geofence: Geofence) => {
@@ -381,6 +396,7 @@ export default function MapsPage() {
         };
         setUserPosition(userCoords);
         setSelectedDeviceId(null); // Deselect device when locating user
+        setFollowedDeviceId(null);
         map.panTo(userCoords);
         map.setZoom(18);
       } catch (error) {
@@ -400,6 +416,7 @@ export default function MapsPage() {
             const userCoords = { lat: latitude, lng: longitude };
             setUserPosition(userCoords);
             setSelectedDeviceId(null);
+            setFollowedDeviceId(null);
             map.panTo(userCoords);
             map.setZoom(18);
           },
@@ -484,6 +501,7 @@ export default function MapsPage() {
   const poisToRender = showPOIs ? pois.filter(p => visiblePoiIds.has(p.id)) : [];
 
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
+  const followedDevice = allDevices.find(d => d.id === followedDeviceId) || null;
 
   return (
     <div className="relative h-full w-full">
@@ -499,6 +517,7 @@ export default function MapsPage() {
         showLabels={showLabels}
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
+        followedDevice={followedDevice}
       />
       {isLoading && isInitialLoad && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -511,9 +530,9 @@ export default function MapsPage() {
             variant="default" 
             size="icon" 
             className="bg-primary text-primary-foreground rounded-full shadow-md hover:bg-primary/90"
-            onClick={() => setIsDeviceListOpen(true)}
+            onClick={followedDeviceId ? handleStopFollowing : () => setIsDeviceListOpen(true)}
         >
-            <Car className="h-6 w-6" />
+            {followedDeviceId ? <PinOff className="h-6 w-6" /> : <Car className="h-6 w-6" />}
         </Button>
       </div>
       <DeviceStatusSummary devices={allDevices} />
@@ -547,12 +566,13 @@ export default function MapsPage() {
         pois={pois}
         visiblePoiIds={visiblePoiIds}
         togglePoiVisibility={togglePoiVisibility}
-        onSelectPOI={handleSelectPOI}
+        onSelectPOI={onSelectPOI}
         isLoading={isLoading}
       />
        <VehicleDetailsSheet
         device={selectedDevice}
         onClose={handleDeselectDevice}
+        onFollow={handleFollowDevice}
       />
       <Sheet open={isLayerSheetOpen} onOpenChange={setIsLayerSheetOpen}>
         <SheetContent side="bottom" className="rounded-t-2xl">
@@ -576,3 +596,5 @@ export default function MapsPage() {
     </div>
   );
 }
+
+    
