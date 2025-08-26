@@ -52,7 +52,11 @@ export default function SettingsPage() {
 
     useEffect(() => {
         setIsClient(true);
-        if (typeof window !== 'undefined' && "Notification" in window) {
+        if (Capacitor.isNativePlatform()) {
+             PushNotifications.checkPermissions().then(status => {
+                setNotificationStatus(status.receive);
+             });
+        } else if (typeof window !== 'undefined' && "Notification" in window) {
             setNotificationStatus(Notification.permission);
         }
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
@@ -129,30 +133,30 @@ export default function SettingsPage() {
         }
 
         try {
-            // Logic for native platforms
             if (Capacitor.isNativePlatform()) {
                 let permStatus = await PushNotifications.checkPermissions();
-
                 if (permStatus.receive === 'prompt') {
                     permStatus = await PushNotifications.requestPermissions();
                 }
 
                 if (permStatus.receive !== 'granted') {
-                    throw new Error('User denied permissions!');
+                    throw new Error('Permiso de notificaciones denegado.');
                 }
+                setNotificationStatus('granted');
 
                 await PushNotifications.register();
                 
                 PushNotifications.addListener('registration', async (token: Token) => {
                     await sendFCMToken(user_api_hash, token.value);
+                    localStorage.setItem("fcm_token", token.value);
+                    toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
                 });
 
                 PushNotifications.addListener('registrationError', (error: any) => {
-                    console.error('Error on registration: ' + JSON.stringify(error));
+                     throw new Error('Error en el registro de notificaciones: ' + JSON.stringify(error));
                 });
                 
-            } else {
-            // Logic for web
+            } else { // Logic for web
                 const permission = await Notification.requestPermission();
                 setNotificationStatus(permission);
 
@@ -181,8 +185,6 @@ export default function SettingsPage() {
     if (!isClient) {
         return null;
     }
-
-    const isWebPlatform = Capacitor.getPlatform() === 'web';
 
 
     return (
@@ -280,5 +282,3 @@ export default function SettingsPage() {
         </div>
     );
 }
-
-    
