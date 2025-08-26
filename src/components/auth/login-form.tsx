@@ -105,6 +105,11 @@ export function LoginForm() {
         
         // After successful login, check for a pending FCM token
         const pendingToken = localStorage.getItem("fcm_token_pending");
+        toast({
+          variant: "destructive",
+          title: loginTranslations.loginFailedTitle,
+          description: pendingToken,
+        });
         if (pendingToken) {
             try {
                 await sendFCMToken(token, pendingToken);
