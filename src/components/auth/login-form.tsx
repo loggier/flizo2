@@ -40,7 +40,7 @@ import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
 import { sendFCMToken } from "@/services/flizo.service";
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications, Token } from "@capacitor/push-notifications";
+import { PushNotifications, Token, PushNotificationSchema } from "@capacitor/push-notifications";
 
 
 const formSchema = (t: any) => z.object({
@@ -82,6 +82,18 @@ export function LoginForm() {
         PushNotifications.addListener('registrationError', (error: any) => {
           console.error('FCM Registration Error:', JSON.stringify(error));
         });
+
+        PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
+          console.log('Push notification received: ', notification);
+          if (notification.data) {
+            toast({
+              variant: 'destructive',
+              title: notification.title || 'Alerta',
+              description: notification.body || 'Ha recibido una nueva notificación',
+            });
+          }
+        });
+
       });
       
       // Request permissions and register
