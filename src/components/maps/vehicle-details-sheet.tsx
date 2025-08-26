@@ -37,6 +37,7 @@ import CommandDialog from "./command-dialog";
 import { LoaderIcon } from "../icons/loader-icon";
 import ShareDialog from "./share-dialog";
 import { StreetViewIcon } from "../icons/street-view-icon";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 
 
 interface VehicleDetailsSheetProps {
@@ -238,30 +239,33 @@ export default function VehicleDetailsSheet({ device, onClose, onFollow }: Vehic
                 </div>
             </div>
 
-            <div className="mt-3 flex items-center justify-between border-t pt-2">
+            <div className="mt-3 flex items-center justify-between border-t pt-2 gap-2">
                  <div className={cn("flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-full text-white", status.colorClass)}>
                     {status.icon}
                     <span>{status.text}</span>
                 </div>
-                <div className="flex items-center gap-1">
-                    <Button size="icon" variant="ghost" onClick={handleFollowClick} className="rounded-full hover:bg-gray-200 h-8 w-8"><Pin className="h-4 w-4 text-gray-600" /></Button>
-                    <Button size="icon" variant="ghost" onClick={handleHistoryClick} className="rounded-full hover:bg-gray-200 h-8 w-8"><History className="h-4 w-4 text-gray-600" /></Button>
-                    <Button asChild size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8">
-                      <Link href={`/reports?deviceId=${device.id}`}>
-                        <FileText className="h-4 w-4 text-gray-600" />
-                      </Link>
-                    </Button>
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8" onClick={handleCommandClick} disabled={isFetchingCommands}>
-                        {isFetchingCommands ? <LoaderIcon className="h-4 w-4 text-gray-600" /> : <SendIcon className="h-4 w-4 text-gray-600" />}
-                    </Button>
-                    <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8" onClick={handleShareClick}><Share2 className="h-4 w-4 text-gray-600" /></Button>
-                    <Link href={mapsUrl} target="_blank" rel="noopener noreferrer">
-                      <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><Compass className="h-4 w-4 text-gray-600" /></Button>
-                    </Link>
-                    <Link href={streetViewUrl} target="_blank" rel="noopener noreferrer">
-                      <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8"><StreetViewIcon className="h-4 w-4 text-gray-600" /></Button>
-                    </Link>
-                </div>
+                <ScrollArea className="flex-1 whitespace-nowrap">
+                    <div className="flex items-center gap-1">
+                        <Button size="icon" variant="ghost" onClick={handleFollowClick} className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0"><Pin className="h-4 w-4 text-gray-600" /></Button>
+                        <Button size="icon" variant="ghost" onClick={handleHistoryClick} className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0"><History className="h-4 w-4 text-gray-600" /></Button>
+                        <Button asChild size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0">
+                          <Link href={`/reports?deviceId=${device.id}`}>
+                            <FileText className="h-4 w-4 text-gray-600" />
+                          </Link>
+                        </Button>
+                        <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0" onClick={handleCommandClick} disabled={isFetchingCommands}>
+                            {isFetchingCommands ? <LoaderIcon className="h-4 w-4 text-gray-600" /> : <SendIcon className="h-4 w-4 text-gray-600" />}
+                        </Button>
+                        <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0" onClick={handleShareClick}><Share2 className="h-4 w-4 text-gray-600" /></Button>
+                        <Link href={mapsUrl} target="_blank" rel="noopener noreferrer">
+                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0"><Compass className="h-4 w-4 text-gray-600" /></Button>
+                        </Link>
+                        <Link href={streetViewUrl} target="_blank" rel="noopener noreferrer">
+                          <Button size="icon" variant="ghost" className="rounded-full hover:bg-gray-200 h-8 w-8 flex-shrink-0"><StreetViewIcon className="h-4 w-4 text-gray-600" /></Button>
+                        </Link>
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </div>
         </div>
         
@@ -343,5 +347,3 @@ export default function VehicleDetailsSheet({ device, onClose, onFollow }: Vehic
     </>
   );
 }
-
-    
