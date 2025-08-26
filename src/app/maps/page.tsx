@@ -19,12 +19,16 @@ import DeviceStatusSummary from "@/components/maps/device-status-summary";
 import DeviceListSheet from "@/components/maps/device-list-sheet";
 import { LoaderIcon } from "@/components/icons/loader-icon";
 import VehicleDetailsSheet from "@/components/maps/vehicle-details-sheet";
+import { Capacitor } from "@capacitor/core";
+import { Geolocation } from "@capacitor/geolocation";
+import { useToast } from "@/hooks/use-toast";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
 export default function MapsPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const [isLayerSheetOpen, setIsLayerSheetOpen] = useState(false);
@@ -350,24 +354,70 @@ export default function MapsPage() {
     setIsDeviceListOpen(false);
   };
 
-  const handleLocateUser = () => {
-    if (navigator.geolocation && map) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const userCoords = { lat: latitude, lng: longitude };
-          setUserPosition(userCoords);
-          setSelectedDeviceId(null); // Deselect device when locating user
-          map.panTo(userCoords);
-          map.setZoom(18);
-        },
-        (error) => {
-          console.error("Error getting user location:", error);
-          alert("Could not get your location.");
+  const handleLocateUser = async () => {
+    if (!map) return;
+  
+    if (Capacitor.isNativePlatform()) {
+      try {
+        let permissions = await Geolocation.checkPermissions();
+        if (permissions.location !== 'granted' && permissions.coarseLocation !== 'granted') {
+          permissions = await Geolocation.requestPermissions();
         }
-      );
+  
+        if (permissions.location !== 'granted' && permissions.coarseLocation !== 'granted') {
+          toast({
+            variant: "destructive",
+            title: "Permiso de ubicación denegado",
+            description: "Por favor, habilita los permisos de ubicación para usar esta función.",
+          });
+          return;
+        }
+  
+        const position = await Geolocation.getCurrentPosition();
+        const userCoords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        setUserPosition(userCoords);
+        setSelectedDeviceId(null); // Deselect device when locating user
+        map.panTo(userCoords);
+        map.setZoom(18);
+      } catch (error) {
+        console.error("Error getting user location with Capacitor:", error);
+        toast({
+            variant: "destructive",
+            title: "Error de ubicación",
+            description: "No se pudo obtener tu ubicación.",
+        });
+      }
     } else {
-      alert("Geolocation is not supported by this browser.");
+      // Fallback for web
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            const userCoords = { lat: latitude, lng: longitude };
+            setUserPosition(userCoords);
+            setSelectedDeviceId(null);
+            map.panTo(userCoords);
+            map.setZoom(18);
+          },
+          (error) => {
+            console.error("Error getting user location with browser API:", error);
+            toast({
+                variant: "destructive",
+                title: "Error de ubicación",
+                description: "No se pudo obtener tu ubicación.",
+            });
+          }
+        );
+      } else {
+        toast({
+            variant: "destructive",
+            title: "Función no soportada",
+            description: "La geolocalización no está soportada en este navegador.",
+        });
+      }
     }
   };
 
