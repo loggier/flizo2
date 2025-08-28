@@ -17,6 +17,7 @@ interface DeviceMarkerProps {
   onSelect: (device: Device) => void;
   isFollowed?: boolean;
   clusterer?: MarkerClusterer;
+  mapZoom: number;
 }
 
 const DeviceMarker = ({ 
@@ -27,7 +28,8 @@ const DeviceMarker = ({
   showLabel,
   onSelect,
   isFollowed = false,
-  clusterer
+  clusterer,
+  mapZoom,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
@@ -76,6 +78,8 @@ const DeviceMarker = ({
     border: '1px solid #ccc',
   };
 
+  const shouldShowLabel = showLabel && mapZoom >= 17;
+
   return (
     <React.Fragment>
       <MarkerF
@@ -85,8 +89,9 @@ const DeviceMarker = ({
         zIndex={101}
         onClick={() => onSelect(device)}
         clusterer={clusterer}
+        label={shouldShowLabel ? undefined : ' '} // Trick to prevent default label but keep marker clickable
       />
-      {showLabel && <DeviceLabel device={device} />}
+      {shouldShowLabel && <DeviceLabel device={device} />}
       {isFollowed && (
         <OverlayView
           position={position}
@@ -115,3 +120,5 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
+
+    

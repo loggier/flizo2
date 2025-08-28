@@ -11,6 +11,7 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import { Pin } from 'lucide-react';
+import type { ClustererOptions, Cluster } from '@googlemaps/markerclusterer';
 
 const containerStyle = {
   width: '100%',
@@ -20,6 +21,55 @@ const containerStyle = {
 const center = {
   lat: -3.745,
   lng: -38.523
+};
+
+const clustererOptions: ClustererOptions = {
+    styles: [
+        {
+            url: 'data:image/svg+xml;charset=UTF-8,' +
+                 '<svg width="53" height="53" viewBox="0 0 53 53" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                 '<circle cx="26.5" cy="26.5" r="26.5" fill="%23FF007A" fill-opacity="0.8"/>' +
+                 '</svg>',
+            height: 53,
+            width: 53,
+            textColor: '#FFFFFF',
+            textSize: 14,
+        },
+        {
+            url: 'data:image/svg+xml;charset=UTF-8,' +
+                 '<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                 '<circle cx="28" cy="28" r="28" fill="%23FF007A" fill-opacity="0.8"/>' +
+                 '</svg>',
+            height: 56,
+            width: 56,
+            textColor: '#FFFFFF',
+            textSize: 16,
+        },
+        {
+            url: 'data:image/svg+xml;charset=UTF-8,' +
+                 '<svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                 '<circle cx="33" cy="33" r="33" fill="%23FF007A" fill-opacity="0.8"/>' +
+                 '</svg>',
+            height: 66,
+            width: 66,
+            textColor: '#FFFFFF',
+            textSize: 18,
+        },
+    ],
+    calculator: (markers: google.maps.Marker[], numStyles: number): { text: string; index: number } => {
+        const count = markers.length;
+        let index = 0;
+        if (count > 10) {
+            index = 1;
+        }
+        if (count > 100) {
+            index = 2;
+        }
+        return {
+            text: count.toString(),
+            index: index + 1, // ClusterIconStyle index is 1-based
+        };
+    },
 };
 
 interface MapComponentProps {
@@ -56,11 +106,18 @@ function MapComponent({
     followedDevice,
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
-  const apiKey = "AQUÍ_VA_TU_API_KEY_DE_GOOGLE_MAPS";
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
+  const [zoom, setZoom] = useState(10);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
   });
+
+  const handleZoomChanged = () => {
+    if (map) {
+        setZoom(map.getZoom() || 10);
+    }
+  };
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -163,10 +220,11 @@ function MapComponent({
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={10}
+        zoom={zoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
         onClick={onDeselectDevice}
+        onZoomChanged={handleZoomChanged}
         options={{
             disableDefaultUI: true,
             scrollwheel: true,
@@ -193,9 +251,10 @@ function MapComponent({
             userCircleIcon={userCircleIcon}
             showLabel={false}
             onSelect={() => {}}
+            mapZoom={zoom}
           />
         )}
-        <MarkerClustererF>
+        <MarkerClustererF options={clustererOptions}>
             {(clusterer) =>
               devices.map((device) => (
                 device && <DeviceMarker 
@@ -206,6 +265,7 @@ function MapComponent({
                   onSelect={onSelectDevice}
                   isFollowed={followedDevice?.id === device.id}
                   clusterer={clusterer}
+                  mapZoom={zoom}
                 />
               ))
             }
@@ -242,3 +302,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
