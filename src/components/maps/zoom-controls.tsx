@@ -33,5 +33,3 @@ export default function ZoomControls({ onZoomIn, onZoomOut }: ZoomControlsProps)
     </div>
   );
 }
-
-    

@@ -11,7 +11,8 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import { Pin } from 'lucide-react';
-import type { ClustererOptions, Cluster } from '@googlemaps/markerclusterer';
+import type { Cluster, ClustererOptions } from '@googlemaps/markerclusterer';
+
 
 const containerStyle = {
   width: '100%',
@@ -21,64 +22,6 @@ const containerStyle = {
 const center = {
   lat: -3.745,
   lng: -38.523
-};
-
-const clustererOptions: ClustererOptions = {
-    styles: [
-        {
-            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-                '<svg width="53" height="53" viewBox="0 0 53 53" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<circle cx="26.5" cy="26.5" r="24" stroke="hsl(var(--primary))" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="5 5" fill="none"/>' +
-                '<circle cx="26.5" cy="26.5" r="20" fill="hsl(var(--primary))" fill-opacity="0.9"/>' +
-                '</svg>'
-            )}`,
-            height: 53,
-            width: 53,
-            textColor: '#FFFFFF',
-            textSize: 14,
-            anchorText: [0, 0],
-        },
-        {
-            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-                '<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                 '<circle cx="28" cy="28" r="27" stroke="hsl(var(--primary))" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="6 6" fill="none"/>' +
-                 '<circle cx="28" cy="28" r="21" fill="hsl(var(--primary))" fill-opacity="0.9"/>' +
-                '</svg>'
-            )}`,
-            height: 56,
-            width: 56,
-            textColor: '#FFFFFF',
-            textSize: 16,
-            anchorText: [0, 0],
-        },
-        {
-            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-                '<svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                '<circle cx="33" cy="33" r="32" stroke="hsl(var(--primary))" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="7 7" fill="none"/>' +
-                '<circle cx="33" cy="33" r="25" fill="hsl(var(--primary))" fill-opacity="0.9"/>' +
-                '</svg>'
-            )}`,
-            height: 66,
-            width: 66,
-            textColor: '#FFFFFF',
-            textSize: 18,
-            anchorText: [0, 0],
-        },
-    ],
-    calculator: (markers: google.maps.Marker[], numStyles: number): { text: string; index: number } => {
-        const count = markers.length;
-        let index = 0;
-        if (count > 10) {
-            index = 1;
-        }
-        if (count > 100) {
-            index = 2;
-        }
-        return {
-            text: count.toString(),
-            index: index + 1, // ClusterIconStyle index is 1-based
-        };
-    },
 };
 
 interface MapComponentProps {
@@ -128,7 +71,7 @@ function MapComponent({
     }
   }, [map]);
 
-  const clusterClickHandler = (cluster: Cluster, map: google.maps.Map) => {
+  const clusterClickHandler = useCallback((cluster: Cluster, map: google.maps.Map) => {
     const bounds = new google.maps.LatLngBounds();
     cluster.markers?.forEach(marker => {
       if (marker.getPosition()) {
@@ -136,7 +79,7 @@ function MapComponent({
       }
     });
     map.fitBounds(bounds);
-  };
+  }, []);
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -273,7 +216,7 @@ function MapComponent({
             mapZoom={zoom}
           />
         )}
-        <MarkerClustererF options={clustererOptions} onClick={(c) => map && clusterClickHandler(c, map)}>
+        <MarkerClustererF onClick={(c) => map && clusterClickHandler(c, map)}>
             {(clusterer) =>
               devices.map((device) => (
                 device && <DeviceMarker 
@@ -321,5 +264,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
