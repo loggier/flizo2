@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow, MarkerClustererF } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
 import DeviceMarker from './device-marker';
@@ -195,16 +195,21 @@ function MapComponent({
             onSelect={() => {}}
           />
         )}
-        {devices.map((device) => (
-            device && <DeviceMarker 
-              key={device.id} 
-              device={device} 
-              isUserLocation={false} 
-              showLabel={showLabels}
-              onSelect={onSelectDevice}
-              isFollowed={followedDevice?.id === device.id}
-            />
-        ))}
+        <MarkerClustererF>
+            {(clusterer) =>
+              devices.map((device) => (
+                device && <DeviceMarker 
+                  key={device.id} 
+                  device={device} 
+                  isUserLocation={false} 
+                  showLabel={showLabels}
+                  onSelect={onSelectDevice}
+                  isFollowed={followedDevice?.id === device.id}
+                  clusterer={clusterer}
+                />
+              ))
+            }
+        </MarkerClustererF>
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
         ))}
@@ -237,5 +242,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    

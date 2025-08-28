@@ -6,6 +6,7 @@ import { MarkerF, Polyline, OverlayView } from '@react-google-maps/api';
 import type { Device } from '@/lib/types';
 import DeviceLabel from './device-label';
 import { Pin } from 'lucide-react';
+import type { MarkerClusterer } from '@googlemaps/markerclusterer';
 
 interface DeviceMarkerProps {
   device: Device;
@@ -15,6 +16,7 @@ interface DeviceMarkerProps {
   showLabel: boolean;
   onSelect: (device: Device) => void;
   isFollowed?: boolean;
+  clusterer?: MarkerClusterer;
 }
 
 const DeviceMarker = ({ 
@@ -25,6 +27,7 @@ const DeviceMarker = ({
   showLabel,
   onSelect,
   isFollowed = false,
+  clusterer
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
@@ -81,6 +84,7 @@ const DeviceMarker = ({
         icon={deviceIcon}
         zIndex={101}
         onClick={() => onSelect(device)}
+        clusterer={clusterer}
       />
       {showLabel && <DeviceLabel device={device} />}
       {isFollowed && (
@@ -111,5 +115,3 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
-
-    
