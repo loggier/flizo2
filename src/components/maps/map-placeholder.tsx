@@ -26,14 +26,12 @@ const center = {
 const clustererOptions: ClustererOptions = {
     styles: [
         {
-            url: 'data:image/svg+xml;charset=UTF-8,' +
-                encodeURIComponent(
-                    '<svg width="53" height="53" viewBox="0 0 53 53" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path d="M26.5 48C38.3741 48 48 38.3741 48 26.5C48 14.6259 38.3741 5 26.5 5C14.6259 5 5 14.6259 5 26.5C5 38.3741 14.6259 48 26.5 48Z" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 10" transform="rotate(45 26.5 26.5)"/>' +
-                    '<path d="M26.5 53C41.1223 53 53 41.1223 53 26.5C53 11.8777 41.1223 0 26.5 0C11.8777 0 0 11.8777 0 26.5C0 41.1223 11.8777 53 26.5 53Z" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 10" transform="rotate(45 26.5 26.5)"/>' +
-                    '<circle cx="26.5" cy="26.5" r="20" fill="#F472B6" fill-opacity="0.9"/>' +
-                    '</svg>'
-                ),
+            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+                '<svg width="53" height="53" viewBox="0 0 53 53" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle cx="26.5" cy="26.5" r="24" stroke="hsl(var(--primary))" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="5 5" fill="none"/>' +
+                '<circle cx="26.5" cy="26.5" r="20" fill="hsl(var(--primary))" fill-opacity="0.9"/>' +
+                '</svg>'
+            )}`,
             height: 53,
             width: 53,
             textColor: '#FFFFFF',
@@ -41,14 +39,12 @@ const clustererOptions: ClustererOptions = {
             anchorText: [0, 0],
         },
         {
-            url: 'data:image/svg+xml;charset=UTF-8,' +
-                encodeURIComponent(
-                    '<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path d="M28 50C40.1503 50 50 40.1503 50 28C50 15.8497 40.1503 6 28 6C15.8497 6 6 15.8497 6 28C6 40.1503 15.8497 50 28 50Z" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 10" transform="rotate(45 28 28)"/>' +
-                    '<path d="M28 56C43.464 56 56 43.464 56 28C56 12.536 43.464 0 28 0C12.536 0 0 12.536 0 28C0 43.464 12.536 56 28 56Z" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 10" transform="rotate(45 28 28)"/>' +
-                    '<circle cx="28" cy="28" r="21" fill="#F472B6" fill-opacity="0.9"/>' +
-                    '</svg>'
-                ),
+            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+                '<svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                 '<circle cx="28" cy="28" r="27" stroke="hsl(var(--primary))" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="6 6" fill="none"/>' +
+                 '<circle cx="28" cy="28" r="21" fill="hsl(var(--primary))" fill-opacity="0.9"/>' +
+                '</svg>'
+            )}`,
             height: 56,
             width: 56,
             textColor: '#FFFFFF',
@@ -56,14 +52,12 @@ const clustererOptions: ClustererOptions = {
             anchorText: [0, 0],
         },
         {
-            url: 'data:image/svg+xml;charset=UTF-8,' +
-                encodeURIComponent(
-                    '<svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-                    '<path d="M33 59C47.3594 59 59 47.3594 59 33C59 18.6406 47.3594 7 33 7C18.6406 7 7 18.6406 7 33C7 47.3594 18.6406 59 33 59Z" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 10" transform="rotate(45 33 33)"/>' +
-                    '<path d="M33 66C51.2254 66 66 51.2254 66 33C66 14.7746 51.2254 0 33 0C14.7746 0 0 14.7746 0 33C0 51.2254 14.7746 66 33 66Z" stroke="#34D399" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 10" transform="rotate(45 33 33)"/>' +
-                    '<circle cx="33" cy="33" r="25" fill="#F472B6" fill-opacity="0.9"/>' +
-                    '</svg>'
-                ),
+            url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+                '<svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                '<circle cx="33" cy="33" r="32" stroke="hsl(var(--primary))" stroke-opacity="0.5" stroke-width="3" stroke-dasharray="7 7" fill="none"/>' +
+                '<circle cx="33" cy="33" r="25" fill="hsl(var(--primary))" fill-opacity="0.9"/>' +
+                '</svg>'
+            )}`,
             height: 66,
             width: 66,
             textColor: '#FFFFFF',
@@ -133,6 +127,16 @@ function MapComponent({
         setZoom(map.getZoom() || 10);
     }
   }, [map]);
+
+  const clusterClickHandler = (cluster: Cluster, map: google.maps.Map) => {
+    const bounds = new google.maps.LatLngBounds();
+    cluster.markers?.forEach(marker => {
+      if (marker.getPosition()) {
+        bounds.extend(marker.getPosition()!);
+      }
+    });
+    map.fitBounds(bounds);
+  };
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -269,7 +273,7 @@ function MapComponent({
             mapZoom={zoom}
           />
         )}
-        <MarkerClustererF options={clustererOptions}>
+        <MarkerClustererF options={clustererOptions} onClick={(c) => map && clusterClickHandler(c, map)}>
             {(clusterer) =>
               devices.map((device) => (
                 device && <DeviceMarker 
@@ -317,3 +321,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
