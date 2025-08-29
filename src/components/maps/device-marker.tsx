@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from 'react';
@@ -15,7 +16,7 @@ interface DeviceMarkerProps {
   showLabel: boolean;
   onSelect: (device: Device) => void;
   isFollowed?: boolean;
-  clusterer?: MarkerClusterer;
+  clusterer: MarkerClusterer | undefined;
   mapZoom: number;
 }
 
@@ -31,19 +32,7 @@ const DeviceMarker = ({
   mapZoom,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
-  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
-
-  useEffect(() => {
-    if (marker && clusterer) {
-      clusterer.addMarker(marker);
-    }
-    return () => {
-      if (marker && clusterer) {
-        clusterer.removeMarker(marker);
-      }
-    };
-  }, [marker, clusterer]);
-
+  
   if (!device.lat || !device.lng) {
     return null;
   }
@@ -99,7 +88,7 @@ const DeviceMarker = ({
         icon={deviceIcon}
         zIndex={101}
         onClick={() => onSelect(device)}
-        onLoad={setMarker}
+        clusterer={clusterer}
       />
       {shouldShowLabel && <DeviceLabel device={device} />}
       {isFollowed && (
@@ -130,3 +119,5 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
+
+    
