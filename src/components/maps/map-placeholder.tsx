@@ -10,7 +10,7 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
-import type { Cluster, Clusterer } from '@googlemaps/markerclusterer';
+import type { Clusterer } from '@googlemaps/markerclusterer';
 import DeviceLabel from './device-label';
 import { Pin } from 'lucide-react';
 import { OverlayView } from '@react-google-maps/api';
@@ -185,16 +185,6 @@ function MapComponent({
       map.setMapTypeId(mapType);
     }
   }, [map, mapType]);
-  
-  const clusterClickHandler = (cluster: Cluster) => {
-    if (!map) return;
-    const center = cluster.getCenter();
-    if (center) {
-        map.panTo(center);
-        const currentZoom = map.getZoom() || 0;
-        map.setZoom(currentZoom + 2);
-    }
-  }
 
   if (!isLoaded) {
     return (
@@ -277,7 +267,7 @@ function MapComponent({
           />
         )}
         
-        <MarkerClustererF options={{ styles: clustererStyles }} onClick={clusterClickHandler}>
+        <MarkerClustererF options={{ styles: clustererStyles }}>
           {(clusterer) => (
              <React.Fragment>
               {devices.map((device) => {
@@ -316,23 +306,28 @@ function MapComponent({
                         <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
                       </OverlayView>
                     )}
-                    {device.tail && device.tail.length > 0 && (
-                      <Polyline
-                        path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
-                        options={{
-                          strokeColor: device.device_data.tail_color,
-                          strokeWeight: 2,
-                          strokeOpacity: 0.8,
-                          zIndex: 100,
-                        }}
-                      />
-                    )}
                   </React.Fragment>
                 )
               })}
             </React.Fragment>
           )}
         </MarkerClustererF>
+
+        {devices.map((device) => {
+          if (!device.tail || device.tail.length === 0) return null;
+          return (
+            <Polyline
+              key={`tail-${device.id}`}
+              path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
+              options={{
+                strokeColor: device.device_data.tail_color,
+                strokeWeight: 2,
+                strokeOpacity: 0.8,
+                zIndex: 100,
+              }}
+            />
+          );
+        })}
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -366,3 +361,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
