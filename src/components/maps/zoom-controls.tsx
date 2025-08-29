@@ -11,7 +11,7 @@ interface ZoomControlsProps {
 
 export default function ZoomControls({ onZoomIn, onZoomOut }: ZoomControlsProps) {
   return (
-    <div className="absolute bottom-4 right-4 flex flex-col gap-1 z-10">
+    <div className="absolute bottom-20 right-4 flex flex-col gap-1 z-10">
       <Button 
         variant="outline" 
         size="icon" 
