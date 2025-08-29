@@ -1,9 +1,9 @@
 
 "use client";
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow, MarkerF } from '@react-google-maps/api';
-import { MarkerClustererF } from '@react-google-maps/api';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
 import GeofenceMarker from './geofence-marker';
@@ -11,10 +11,8 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
-import DeviceLabel from './device-label';
-import { Pin } from 'lucide-react';
-import { OverlayView } from '@react-google-maps/api';
 import { Polyline } from '@react-google-maps/api';
+import DeviceMarker from './device-marker';
 
 
 const containerStyle = {
@@ -26,55 +24,6 @@ const center = {
   lat: -3.745,
   lng: -38.523
 };
-
-const clustererStyles: any = [
-    {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="30" cy="30" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
-                <circle cx="30" cy="30" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
-                <circle cx="30" cy="30" r="16" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
-                <circle cx="30" cy="30" r="10" fill="hsl(var(--primary))"/>
-            </svg>
-        `),
-        width: 60,
-        height: 60,
-        textColor: 'white',
-        textSize: 14,
-        fontWeight: 'bold',
-    },
-    {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="40" cy="40" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
-                <circle cx="40" cy="40" r="30" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
-                <circle cx="40" cy="40" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
-                <circle cx="40" cy="40" r="14" fill="hsl(var(--primary))"/>
-            </svg>
-        `),
-        width: 80,
-        height: 80,
-        textColor: 'white',
-        textSize: 16,
-        fontWeight: 'bold',
-    },
-    {
-        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-            <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="50" cy="50" r="48" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
-                <circle cx="50" cy="50" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
-                <circle cx="50" cy="50" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
-                <circle cx="50" cy="50" r="18" fill="hsl(var(--primary))"/>
-            </svg>
-        `),
-        width: 100,
-        height: 100,
-        textColor: 'white',
-        textSize: 18,
-        fontWeight: 'bold',
-    }
-];
-
 
 interface MapComponentProps {
     mapType: MapType;
@@ -111,19 +60,36 @@ function MapComponent({
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
-  const [zoom, setZoom] = useState(10);
-  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+  
+  const [markers, setMarkers] = useState<{ [key: string]: google.maps.Marker }>({});
+  const clusterer = useMemo(() => {
+    if (!map) return null;
+    return new MarkerClusterer({ map });
+  }, [map]);
+
+
+  useEffect(() => {
+    if (!clusterer) return;
+    clusterer.clearMarkers();
+    clusterer.addMarkers(Object.values(markers));
+  }, [clusterer, markers]);
+
+
+  const setMarkerRef = useCallback((marker: google.maps.Marker | null, key: string) => {
+    setMarkers(prevMarkers => {
+      if (marker) {
+        return { ...prevMarkers, [key]: marker };
+      } else {
+        const { [key]: _, ...newMarkers } = prevMarkers;
+        return newMarkers;
+      }
+    });
+  }, []);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
     libraries: ['marker'],
   });
-
-  const handleZoomChanged = useCallback(() => {
-    if (map) {
-        setZoom(map.getZoom() || 10);
-    }
-  }, [map]);
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -217,24 +183,14 @@ function MapComponent({
     }
   };
 
-  const clusterClickHandler = (cluster: any) => {
-    if (!map) return;
-    const newZoom = map.getZoom()! + 2;
-    map.setZoom(newZoom);
-    map.panTo(cluster.position);
-  }
-
-  const shouldShowLabel = (device: Device) => showLabels && (map?.getZoom() || 10) >= 17;
-
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center}
-        zoom={zoom}
+        zoom={10}
         onLoad={onLoad}
         onUnmount={onUnmount}
         onClick={onDeselectDevice}
-        onZoomChanged={handleZoomChanged}
         options={{
             disableDefaultUI: true,
             scrollwheel: true,
@@ -243,75 +199,17 @@ function MapComponent({
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
-        <MarkerClustererF options={{ styles: clustererStyles }} onClick={clusterClickHandler}>
-          {(clusterer) => (
-            <>
-              {devices
-                .filter(device => device.lat && device.lng)
-                .map((device) => {
-                    const deviceIcon = device.icon ? {
-                        url: `${serverUrl}${device.icon.path}`,
-                        scaledSize: new window.google.maps.Size(
-                          device.icon.width,
-                          device.icon.height
-                        ),
-                        anchor: new window.google.maps.Point(
-                          device.icon.width / 2,
-                          device.icon.height / 2
-                        ),
-                      } : undefined;
-
-                    return (
-                        <MarkerF
-                            key={device.id}
-                            position={{ lat: device.lat, lng: device.lng }}
-                            title={device.name}
-                            icon={deviceIcon}
-                            zIndex={101}
-                            onClick={() => onSelectDevice(device)}
-                            clusterer={clusterer}
-                        />
-                    );
-                })
-              }
-            </>
-          )}
-        </MarkerClustererF>
-        
-        {/* Render labels and tails outside the clusterer */}
-        {devices.map(device => {
-            if (!device.lat || !device.lng) return null;
-            const position = { lat: device.lat, lng: device.lng };
-            return (
-                <React.Fragment key={`details-${device.id}`}>
-                    {shouldShowLabel(device) && <DeviceLabel device={device} />}
-                    {followedDevice?.id === device.id && (
-                        <OverlayView
-                            position={position}
-                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                            getPixelPositionOffset={(width, height) => ({
-                                x: 0,
-                                y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
-                            })}
-                        >
-                            <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
-                        </OverlayView>
-                    )}
-                    {device.tail && device.tail.length > 0 && (
-                        <Polyline
-                            path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
-                            options={{
-                                strokeColor: device.device_data.tail_color,
-                                strokeWeight: 2,
-                                strokeOpacity: 0.8,
-                                zIndex: 100,
-                            }}
-                        />
-                    )}
-                </React.Fragment>
-            )
-        })}
-
+        {devices.map(device => (
+          <DeviceMarker
+            key={device.id}
+            map={map}
+            device={device}
+            setMarkerRef={setMarkerRef}
+            onSelectDevice={onSelectDevice}
+            showLabels={showLabels}
+            followedDevice={followedDevice}
+          />
+        ))}
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -322,6 +220,7 @@ function MapComponent({
         {pois.map(poi => (
           <PoiMarker key={`poi-${poi.id}`} poi={poi} />
         ))}
+
         {selectedAlert && selectedDeviceForAlert && (
           <InfoWindow
             position={{ lat: selectedAlert.latitude, lng: selectedAlert.longitude }}

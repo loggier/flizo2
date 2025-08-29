@@ -1,8 +1,8 @@
 
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { MarkerF, OverlayView, Polyline } from "@react-google-maps/api";
+import React, { useEffect, useState, useCallback } from "react";
+import { MarkerF, Polyline, OverlayView } from "@react-google-maps/api";
 import type { Device } from "@/lib/types";
 import DeviceLabel from "./device-label";
 import { Pin } from "lucide-react";
@@ -10,9 +10,8 @@ import { Pin } from "lucide-react";
 interface DeviceMarkerProps {
   map: google.maps.Map | null;
   device: Device;
-  onLoad: (marker: google.maps.Marker) => void;
-  onUnload: () => void;
   onSelectDevice: (device: Device) => void;
+  setMarkerRef: (marker: google.maps.Marker | null, key: string) => void;
   showLabels: boolean;
   followedDevice: Device | null;
 }
@@ -20,14 +19,21 @@ interface DeviceMarkerProps {
 const DeviceMarker = ({
   map,
   device,
-  onLoad,
-  onUnload,
   onSelectDevice,
+  setMarkerRef,
   showLabels,
   followedDevice,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const [zoom, setZoom] = useState(map?.getZoom() || 10);
+  
+  const ref = useCallback(
+    (marker: google.maps.Marker | null) => {
+        setMarkerRef(marker, device.id.toString());
+    },
+    [setMarkerRef, device.id]
+  );
+
 
   useEffect(() => {
     if (!map) return;
@@ -66,8 +72,8 @@ const DeviceMarker = ({
         icon={deviceIcon}
         zIndex={101}
         onClick={() => onSelectDevice(device)}
-        onLoad={onLoad}
-        onUnmount={onUnload}
+        onLoad={ref}
+        onUnmount={() => setMarkerRef(null, device.id.toString())}
       />
       {shouldShowLabel && <DeviceLabel device={device} />}
       {followedDevice?.id === device.id && (
@@ -98,3 +104,6 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
+
+
+    
