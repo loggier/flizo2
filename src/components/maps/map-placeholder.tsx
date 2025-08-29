@@ -27,47 +27,53 @@ const center = {
 
 const clustererStyles: any = [
     {
-      url: 'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(
-          '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<circle cx="20" cy="20" r="18" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 4" fill="none"/>' +
-          '<circle cx="20" cy="20" r="12" fill="#F43F5E"/>' +
-          '</svg>'
-        ),
-      height: 40,
-      width: 40,
-      textColor: 'white',
-      textSize: 12,
-      fontWeight: 'bold',
-    },
-    {
-      url: 'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(
-          '<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<circle cx="25" cy="25" r="23" stroke="#F43F5E" stroke-width="2" stroke-dasharray="5 5" fill="none"/>' +
-          '<circle cx="25" cy="25" r="16" fill="#F43F5E"/>' +
-          '</svg>'
-        ),
-      height: 50,
-      width: 50,
-      textColor: 'white',
-      textSize: 14,
-      fontWeight: 'bold',
-    },
-    {
-      url: 'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(
-          '<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<circle cx="30" cy="30" r="28" stroke="#F43F5E" stroke-width="2" stroke-dasharray="6 6" fill="none"/>' +
-          '<circle cx="30" cy="30" r="20" fill="#F43F5E"/>' +
-          '</svg>'
-        ),
-      height: 60,
-      width: 60,
-      textColor: 'white',
-      textSize: 16,
-      fontWeight: 'bold',
-    },
+        url: 'data:image/svg+xml;charset=UTF-8,' +
+          encodeURIComponent(
+            '<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="25" cy="25" r="25" fill="#F43F5E" fill-opacity="0.2"/>' +
+            '<circle cx="25" cy="25" r="20" fill="#F43F5E" fill-opacity="0.4"/>' +
+            '<circle cx="25" cy="25" r="15" fill="#F43F5E" fill-opacity="0.6"/>' +
+            '<circle cx="25" cy="25" r="10" fill="#F43F5E"/>' +
+            '</svg>'
+          ),
+        height: 50,
+        width: 50,
+        textColor: 'white',
+        textSize: 12,
+        fontWeight: 'bold',
+      },
+      {
+        url: 'data:image/svg+xml;charset=UTF-8,' +
+          encodeURIComponent(
+            '<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="30" cy="30" r="30" fill="#F43F5E" fill-opacity="0.2"/>' +
+            '<circle cx="30" cy="30" r="25" fill="#F43F5E" fill-opacity="0.4"/>' +
+            '<circle cx="30" cy="30" r="20" fill="#F43F5E" fill-opacity="0.6"/>' +
+            '<circle cx="30" cy="30" r="15" fill="#F43F5E"/>' +
+            '</svg>'
+          ),
+        height: 60,
+        width: 60,
+        textColor: 'white',
+        textSize: 14,
+        fontWeight: 'bold',
+      },
+      {
+        url: 'data:image/svg+xml;charset=UTF-8,' +
+          encodeURIComponent(
+            '<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+            '<circle cx="35" cy="35" r="35" fill="#F43F5E" fill-opacity="0.2"/>' +
+            '<circle cx="35" cy="35" r="30" fill="#F43F5E" fill-opacity="0.4"/>' +
+            '<circle cx="35" cy="35" r="25" fill="#F43F5E" fill-opacity="0.6"/>' +
+            '<circle cx="35" cy="35" r="20" fill="#F43F5E"/>' +
+            '</svg>'
+          ),
+        height: 70,
+        width: 70,
+        textColor: 'white',
+        textSize: 16,
+        fontWeight: 'bold',
+      },
   ];
 
   const clusterCalculator = (markers: any[], numStyles: number) => {
@@ -191,7 +197,7 @@ function MapComponent({
   const clusterClickHandler = useCallback((cluster: Cluster) => {
     if (!map) return;
     const bounds = new google.maps.LatLngBounds();
-    cluster.getMarkers().forEach(marker => {
+    cluster.markers?.forEach(marker => {
       if(marker.getPosition()){
         bounds.extend(marker.getPosition()!);
       }
@@ -243,6 +249,20 @@ function MapComponent({
       strokeWeight: 2,
   } : undefined;
   
+  const handleZoomIn = () => {
+    if (map) {
+      const currentZoom = map.getZoom() || 0;
+      map.setZoom(currentZoom + 1);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (map) {
+      const currentZoom = map.getZoom() || 0;
+      map.setZoom(currentZoom - 1);
+    }
+  };
+
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -258,6 +278,7 @@ function MapComponent({
             streetViewControl: false,
         }}
       >
+        <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         {userPosition && userLocationIcon && userCircleIcon && (
           <DeviceMarker
             device={{
@@ -329,5 +350,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
