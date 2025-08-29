@@ -109,6 +109,8 @@ interface MapComponentProps {
     followedDevice?: Device | null;
 }
 
+const MAX_ZOOM_FOR_CLUSTERING = 16;
+
 function MapComponent({ 
     mapType, 
     onMapLoad, 
@@ -198,12 +200,10 @@ function MapComponent({
     if (!map || !cluster) return;
   
     const center = cluster.getCenter();
-    if (!center) return;
-  
-    map.panTo(center);
-    const currentZoom = map.getZoom() || 10;
-    map.setZoom(currentZoom + 2);
-  
+    if (center) {
+        map.panTo(center);
+        map.setZoom((map.getZoom() || 10) + 2);
+    }
   }, [map]);
   
 
@@ -263,6 +263,18 @@ function MapComponent({
     }
   };
 
+  const renderMarkers = () => devices.map((device) => (
+    device && <DeviceMarker 
+      key={device.id} 
+      device={device} 
+      isUserLocation={false} 
+      showLabel={showLabels}
+      onSelect={onSelectDevice}
+      isFollowed={followedDevice?.id === device.id}
+      mapZoom={zoom}
+    />
+  ));
+
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -302,22 +314,30 @@ function MapComponent({
             mapZoom={zoom}
           />
         )}
-        <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator} onClick={clusterClickHandler}>
-            {(clusterer) =>
-              devices.map((device) => (
-                device && <DeviceMarker 
-                  key={device.id} 
-                  device={device} 
-                  isUserLocation={false} 
-                  showLabel={showLabels}
-                  onSelect={onSelectDevice}
-                  isFollowed={followedDevice?.id === device.id}
-                  clusterer={clusterer}
-                  mapZoom={zoom}
-                />
-              ))
-            }
-        </MarkerClustererF>
+        
+        {zoom <= MAX_ZOOM_FOR_CLUSTERING ? (
+            <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator} onClick={clusterClickHandler}>
+                {(clusterer) => (
+                    <>
+                        {devices.map((device) => (
+                            device && <DeviceMarker 
+                            key={device.id} 
+                            device={device} 
+                            isUserLocation={false} 
+                            showLabel={showLabels}
+                            onSelect={onSelectDevice}
+                            isFollowed={followedDevice?.id === device.id}
+                            clusterer={clusterer}
+                            mapZoom={zoom}
+                            />
+                        ))}
+                    </>
+                )}
+            </MarkerClustererF>
+        ) : (
+            renderMarkers()
+        )}
+
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
         ))}
@@ -350,3 +370,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
