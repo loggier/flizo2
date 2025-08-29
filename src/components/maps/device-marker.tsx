@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -89,7 +88,7 @@ const DeviceMarker = ({
         zIndex={101}
         onClick={() => onSelect(device)}
         clusterer={clusterer}
-        label={shouldShowLabel ? undefined : ' '} // Trick to prevent default label but keep marker clickable
+        noClustererRedraw={true}
       />
       {shouldShowLabel && <DeviceLabel device={device} />}
       {isFollowed && (
@@ -120,5 +119,3 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
-
-    

@@ -305,22 +305,22 @@ function MapComponent({
         
         {zoom <= MAX_ZOOM_FOR_CLUSTERING ? (
             <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator}>
-                {(clusterer) => (
-                    <>
-                        {devices.map((device) => (
-                            device && <DeviceMarker 
-                            key={device.id} 
-                            device={device} 
-                            isUserLocation={false} 
-                            showLabel={showLabels}
-                            onSelect={onSelectDevice}
-                            isFollowed={followedDevice?.id === device.id}
-                            clusterer={clusterer}
-                            mapZoom={zoom}
-                            />
-                        ))}
-                    </>
-                )}
+              {(clusterer) => (
+                <>
+                  {devices.map((device) => (
+                    device && <DeviceMarker
+                      key={device.id}
+                      device={device}
+                      isUserLocation={false}
+                      showLabel={showLabels}
+                      onSelect={onSelectDevice}
+                      isFollowed={followedDevice?.id === device.id}
+                      clusterer={clusterer}
+                      mapZoom={zoom}
+                    />
+                  ))}
+                </>
+              )}
             </MarkerClustererF>
         ) : (
             renderMarkers()
