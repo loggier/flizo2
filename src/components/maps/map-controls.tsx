@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { GeofenceIcon } from "../icons/geofence-icon";
 import { RouteIcon } from "../icons/route-icon";
 import { AutocenterIcon } from "../icons/autocenter-icon";
+import { ClusterIcon } from "../icons/cluster-icon";
 
 interface MapControlsProps {
   isFollowing?: boolean;
@@ -20,6 +21,8 @@ interface MapControlsProps {
   autoCenter: boolean;
   onTogglePOIs: () => void;
   showPOIs: boolean;
+  onToggleCluster: () => void;
+  showCluster: boolean;
 }
 
 export default function MapControls({ 
@@ -34,6 +37,8 @@ export default function MapControls({
   autoCenter,
   onTogglePOIs,
   showPOIs,
+  onToggleCluster,
+  showCluster,
 }: MapControlsProps) {
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-2">
@@ -99,10 +104,19 @@ export default function MapControls({
           >
             <MapPin className="h-6 w-6" />
           </Button>
+          <Button 
+            variant={showCluster ? "default" : "outline"}
+            size="icon" 
+            className={cn(
+              "bg-background rounded-full shadow-md",
+              showCluster ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+            )}
+            onClick={onToggleCluster}
+          >
+            <ClusterIcon className="h-6 w-6" />
+          </Button>
         </>
       )}
     </div>
   );
 }
-
-    

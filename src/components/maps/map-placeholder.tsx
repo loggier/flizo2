@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -75,6 +76,7 @@ interface MapComponentProps {
     selectedAlert?: AlertEvent | null;
     selectedDeviceForAlert?: Device | null;
     followedDevice?: Device | null;
+    showCluster: boolean;
 }
 
 const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
@@ -95,6 +97,7 @@ function MapComponent({
     selectedAlert,
     selectedDeviceForAlert,
     followedDevice,
+    showCluster,
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
@@ -207,6 +210,54 @@ function MapComponent({
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
   
+  const deviceMarkers = devicesToRender.map((device) => {
+    if (!device.lat || !device.lng) return null;
+
+    const position = { lat: device.lat, lng: device.lng };
+    const isFollowed = followedDevice?.id === device.id;
+    const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
+
+    const deviceIcon =
+      typeof window !== 'undefined' && window.google && device.icon
+        ? {
+            url: deviceIconUrl,
+            scaledSize: new window.google.maps.Size(
+              device.icon.width,
+              device.icon.height
+            ),
+            anchor: new window.google.maps.Point(
+              device.icon.width / 2,
+              device.icon.height / 2
+            ),
+            rotation: device.course,
+          }
+        : undefined;
+    
+    return (
+      <React.Fragment key={device.id}>
+          <MarkerF
+            position={position}
+            onClick={() => onSelectDevice(device)}
+            icon={deviceIcon}
+            title={device.name}
+            zIndex={isFollowed ? 1001 : 100}
+          />
+           {isFollowed && (
+              <OverlayView
+                  position={position}
+                  mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                  getPixelPositionOffset={(width, height) => ({
+                      x: 0,
+                      y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
+                  })}
+              >
+                  <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
+              </OverlayView>
+          )}
+      </React.Fragment>
+    )
+  });
+
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -224,58 +275,62 @@ function MapComponent({
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         {followedDevice && <FollowedVehicleInfo device={followedDevice} />}
         
-        <MarkerClustererF options={{ styles: clustererStyles, maxZoom: 16 }}>
-          {(clusterer) =>
-            devicesToRender.map((device) => {
-              if (!device.lat || !device.lng) return null;
+        {showCluster ? (
+          <MarkerClustererF options={{ styles: clustererStyles, maxZoom: 16 }}>
+            {(clusterer) =>
+              devicesToRender.map((device) => {
+                if (!device.lat || !device.lng) return null;
 
-              const position = { lat: device.lat, lng: device.lng };
-              const isFollowed = followedDevice?.id === device.id;
-              const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
+                const position = { lat: device.lat, lng: device.lng };
+                const isFollowed = followedDevice?.id === device.id;
+                const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
 
-              const deviceIcon =
-                typeof window !== 'undefined' && window.google && device.icon
-                  ? {
-                      url: deviceIconUrl,
-                      scaledSize: new window.google.maps.Size(
-                        device.icon.width,
-                        device.icon.height
-                      ),
-                      anchor: new window.google.maps.Point(
-                        device.icon.width / 2,
-                        device.icon.height / 2
-                      ),
-                      rotation: device.course,
-                    }
-                  : undefined;
-              
-              return (
-                <React.Fragment key={device.id}>
-                    <MarkerF
-                      position={position}
-                      clusterer={clusterer}
-                      onClick={() => onSelectDevice(device)}
-                      icon={deviceIcon}
-                      title={device.name}
-                      zIndex={isFollowed ? 1001 : 100}
-                    />
-                     {isFollowed && (
-                        <OverlayView
-                            position={position}
-                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                            getPixelPositionOffset={(width, height) => ({
-                                x: 0,
-                                y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
-                            })}
-                        >
-                            <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
-                        </OverlayView>
-                    )}
-                </React.Fragment>
-              )
-            })
-          }
-        </MarkerClustererF>
+                const deviceIcon =
+                  typeof window !== 'undefined' && window.google && device.icon
+                    ? {
+                        url: deviceIconUrl,
+                        scaledSize: new window.google.maps.Size(
+                          device.icon.width,
+                          device.icon.height
+                        ),
+                        anchor: new window.google.maps.Point(
+                          device.icon.width / 2,
+                          device.icon.height / 2
+                        ),
+                        rotation: device.course,
+                      }
+                    : undefined;
+                
+                return (
+                  <React.Fragment key={device.id}>
+                      <MarkerF
+                        position={position}
+                        clusterer={clusterer}
+                        onClick={() => onSelectDevice(device)}
+                        icon={deviceIcon}
+                        title={device.name}
+                        zIndex={isFollowed ? 1001 : 100}
+                      />
+                       {isFollowed && (
+                          <OverlayView
+                              position={position}
+                              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                              getPixelPositionOffset={(width, height) => ({
+                                  x: 0,
+                                  y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
+                              })}
+                          >
+                              <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
+                          </OverlayView>
+                      )}
+                  </React.Fragment>
+                )
+              })
+            }
+          </MarkerClustererF>
+        ) : (
+          deviceMarkers
+        )}
         
         {devicesToRender.map((device) => (
             <React.Fragment key={`overlays-${device.id}`}>

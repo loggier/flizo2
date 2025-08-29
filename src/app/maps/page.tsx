@@ -49,6 +49,7 @@ export default function MapsPage() {
   const [showRoutes, setShowRoutes] = useState(true);
   const [showPOIs, setShowPOIs] = useState(true);
   const [autoCenter, setAutoCenter] = useState(true);
+  const [showCluster, setShowCluster] = useState(true);
   
   const [visibleDeviceIds, setVisibleDeviceIds] = useState<Set<number>>(new Set());
   const [visibleGeofenceIds, setVisibleGeofenceIds] = useState<Set<number>>(new Set());
@@ -86,6 +87,10 @@ export default function MapsPage() {
     const savedAutoCenter = localStorage.getItem("autoCenter");
     if (savedAutoCenter !== null) {
       setAutoCenter(JSON.parse(savedAutoCenter));
+    }
+    const savedShowCluster = localStorage.getItem("showCluster");
+    if (savedShowCluster !== null) {
+      setShowCluster(JSON.parse(savedShowCluster));
     }
     const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
     if (savedVisibleDeviceIds) {
@@ -491,6 +496,14 @@ export default function MapsPage() {
     });
   }
 
+  const handleToggleCluster = () => {
+    setShowCluster(prev => {
+      const newState = !prev;
+      localStorage.setItem("showCluster", JSON.stringify(newState));
+      return newState;
+    });
+  };
+
   const layerOptions: { id: MapType; label: string }[] = [
     { id: "OSM", label: t.bottomNav.map },
     { id: "SATELLITE", label: "Satélite" },
@@ -520,6 +533,7 @@ export default function MapsPage() {
         onSelectDevice={handleSelectDevice}
         onDeselectDevice={handleDeselectDevice}
         followedDevice={followedDevice}
+        showCluster={showCluster}
       />
       {isLoading && isInitialLoad && (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
@@ -550,6 +564,8 @@ export default function MapsPage() {
         autoCenter={autoCenter}
         onTogglePOIs={handleTogglePOIs}
         showPOIs={showPOIs}
+        onToggleCluster={handleToggleCluster}
+        showCluster={showCluster}
       />
       <DeviceListSheet 
         isOpen={isDeviceListOpen} 
@@ -599,5 +615,3 @@ export default function MapsPage() {
     </div>
   );
 }
-
-    
