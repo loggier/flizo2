@@ -64,11 +64,13 @@ export default function SettingsPage() {
         };
         checkStatus();
 
-        // Add listeners once when the component mounts
-        PushNotifications.removeAllListeners().then(() => {
-            PushNotifications.addListener('registration', handleTokenRegistration);
-            PushNotifications.addListener('registrationError', handleTokenError);
-        });
+        if (Capacitor.isNativePlatform()) {
+            // Add listeners once when the component mounts
+            PushNotifications.removeAllListeners().then(() => {
+                PushNotifications.addListener('registration', handleTokenRegistration);
+                PushNotifications.addListener('registrationError', handleTokenError);
+            });
+        }
         
         const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
         if (token) {
@@ -88,7 +90,9 @@ export default function SettingsPage() {
 
         // Cleanup listeners on component unmount
         return () => {
-            PushNotifications.removeAllListeners();
+            if (Capacitor.isNativePlatform()) {
+                PushNotifications.removeAllListeners();
+            }
         }
     }, [router]);
 
