@@ -65,7 +65,7 @@ interface MapComponentProps {
     userPosition: google.maps.LatLngLiteral | null;
     heading: number;
     devices: Device[];
-    visibleDeviceIds: Set<number>;
+    visibleDeviceIds?: Set<number>;
     geofences: Geofence[];
     routes: Route[];
     pois: POI[];
@@ -85,7 +85,7 @@ function MapComponent({
     userPosition, 
     heading, 
     devices, 
-    visibleDeviceIds,
+    visibleDeviceIds = new Set(),
     geofences, 
     routes,
     pois, 
@@ -115,7 +115,7 @@ function MapComponent({
       },
       tileSize: new google.maps.Size(256, 256),
       name: "Normal",
-      maxZoom: 18
+      maxZoom: 22
     });
 
     const satelliteMapType = new google.maps.ImageMapType({
@@ -129,7 +129,7 @@ function MapComponent({
         },
         tileSize: new google.maps.Size(256, 256),
         name: 'Satellite',
-        maxZoom: 20
+        maxZoom: 22
     });
 
     const trafficMapType = new google.maps.ImageMapType({
@@ -143,7 +143,7 @@ function MapComponent({
         },
         tileSize: new google.maps.Size(256, 256),
         name: 'Traffic',
-        maxZoom: 20
+        maxZoom: 22
     });
     
     mapInstance.mapTypes.set("OSM", osmMapType);
