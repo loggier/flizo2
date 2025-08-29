@@ -25,6 +25,67 @@ const center = {
   lng: -38.523
 };
 
+const clustererStyles: any = [
+    {
+      url: 'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(
+          '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="20" cy="20" r="18" stroke="#29ABE2" stroke-width="2" stroke-dasharray="4 4" fill="none"/>' +
+          '<circle cx="20" cy="20" r="12" fill="#29ABE2"/>' +
+          '</svg>'
+        ),
+      height: 40,
+      width: 40,
+      textColor: 'white',
+      textSize: 12,
+      fontWeight: 'bold',
+    },
+    {
+      url: 'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(
+          '<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="25" cy="25" r="23" stroke="#29ABE2" stroke-width="2" stroke-dasharray="5 5" fill="none"/>' +
+          '<circle cx="25" cy="25" r="16" fill="#29ABE2"/>' +
+          '</svg>'
+        ),
+      height: 50,
+      width: 50,
+      textColor: 'white',
+      textSize: 14,
+      fontWeight: 'bold',
+    },
+    {
+      url: 'data:image/svg+xml;charset=UTF-8,' +
+        encodeURIComponent(
+          '<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+          '<circle cx="30" cy="30" r="28" stroke="#29ABE2" stroke-width="2" stroke-dasharray="6 6" fill="none"/>' +
+          '<circle cx="30" cy="30" r="20" fill="#29ABE2"/>' +
+          '</svg>'
+        ),
+      height: 60,
+      width: 60,
+      textColor: 'white',
+      textSize: 16,
+      fontWeight: 'bold',
+    },
+  ];
+
+  const clusterCalculator = (markers: any[], numStyles: number) => {
+    let index = 0;
+    const count = markers.length;
+    let dv = count;
+    while (dv !== 0) {
+      dv = Math.floor(dv / 10);
+      index++;
+    }
+  
+    index = Math.min(index, numStyles);
+    return {
+      text: count.toString(),
+      index: index,
+    };
+  };
+
 interface MapComponentProps {
     mapType: MapType;
     onMapLoad: (map: google.maps.Map | null) => void;
@@ -127,6 +188,19 @@ function MapComponent({
     onMapLoad(null);
   }, [onMapLoad]);
 
+  const clusterClickHandler = useCallback((cluster: Cluster) => {
+    if (!map) return;
+    const bounds = new google.maps.LatLngBounds();
+    cluster.getMarkers().forEach(marker => {
+      if(marker.getPosition()){
+        bounds.extend(marker.getPosition()!);
+      }
+    });
+    map.fitBounds(bounds);
+    if(map.getZoom()! > 18) map.setZoom(18);
+  }, [map]);
+  
+
   useEffect(() => {
     if (map) {
       map.setMapTypeId(mapType);
@@ -207,7 +281,7 @@ function MapComponent({
             mapZoom={zoom}
           />
         )}
-        <MarkerClustererF>
+        <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator} onClick={clusterClickHandler}>
             {(clusterer) =>
               devices.map((device) => (
                 device && <DeviceMarker 

@@ -4,7 +4,6 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { LoginForm } from "@/components/auth/login-form";
-import { LoaderIcon } from "@/components/icons/loader-icon";
 
 export default function Home() {
   const router = useRouter();
@@ -18,11 +17,8 @@ export default function Home() {
     }
   }, [router]);
 
-  // We can show a loading state while the check is happening,
-  // but for a quick check, it might just flash briefly.
-  // Returning the form directly is also fine.
   return (
-    <main className="flex min-h-screen w-full items-center justify-center p-4">
+    <main className="flex min-h-screen w-full items-center justify-center p-4 bg-gray-100">
       <LoginForm />
     </main>
   );
