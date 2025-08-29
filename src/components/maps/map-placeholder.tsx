@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useEffect } from 'react';
@@ -196,17 +195,6 @@ function MapComponent({
     onMapLoad(null);
   }, [onMapLoad]);
 
-  const clusterClickHandler = useCallback((cluster: Cluster) => {
-    if (!map || !cluster) return;
-  
-    const center = cluster.getCenter();
-    if (center) {
-        map.panTo(center);
-        map.setZoom((map.getZoom() || 10) + 2);
-    }
-  }, [map]);
-  
-
   useEffect(() => {
     if (map) {
       map.setMapTypeId(mapType);
@@ -316,7 +304,7 @@ function MapComponent({
         )}
         
         {zoom <= MAX_ZOOM_FOR_CLUSTERING ? (
-            <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator} onClick={clusterClickHandler}>
+            <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator}>
                 {(clusterer) => (
                     <>
                         {devices.map((device) => (
@@ -370,5 +358,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
