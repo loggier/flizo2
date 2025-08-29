@@ -185,7 +185,7 @@ export default function MapsPage() {
       if (map.getZoom()! < 18) {
         map.setZoom(18);
       }
-      map.panBy(0, 180);
+      map.panBy(0, 150);
     } else if (autoCenter) {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -360,7 +360,7 @@ export default function MapsPage() {
     route.coordinates.forEach(coord => bounds.extend(coord));
 
     if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, 50); // 50px padding
+      map.fitBounds(bounds, 50);
       setIsDeviceListOpen(false);
     }
   };
