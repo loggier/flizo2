@@ -16,7 +16,7 @@ export default function FollowedVehicleInfo({ device }: FollowedVehicleInfoProps
   const lastUpdateTime = device.timestamp ? format(new Date(device.timestamp * 1000), 'dd/MM/yyyy HH:mm:ss') : 'N/A';
 
   return (
-    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 w-[70%] max-w-[200px]">
+    <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-10 w-[90%] max-w-xs">
       <Card className="bg-background/90 backdrop-blur-sm shadow-lg border border-border">
         <CardContent className="p-3">
           <div className="flex flex-col space-y-2 text-sm">
