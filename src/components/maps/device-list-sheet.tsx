@@ -128,35 +128,35 @@ export default function DeviceListSheet({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent
         side="left"
-        className="p-0 !w-[90vw] sm:!w-[400px] flex flex-col [&>button]:hidden"
+        className="p-0 !w-[90vw] sm:!w-[400px] flex flex-col [&>button]:hidden bg-card text-card-foreground"
       >
         <SheetHeader className="sr-only">
           <SheetTitle>Lista</SheetTitle>
         </SheetHeader>
         <Tabs defaultValue="dispositivos" className="w-full flex flex-col flex-1 min-h-0">
-          <div className="bg-primary p-2">
+          <div className="bg-card p-2 border-b">
               <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList className="inline-flex w-auto bg-primary-foreground/20">
-                    <TabsTrigger value="dispositivos" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Dispositivos</TabsTrigger>
-                    <TabsTrigger value="geozonas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Geozonas</TabsTrigger>
-                    <TabsTrigger value="rutas" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">Rutas</TabsTrigger>
-                    <TabsTrigger value="poi" className="text-white data-[state=active]:bg-white data-[state=active]:text-primary">POI</TabsTrigger>
+                <TabsList className="inline-flex w-auto">
+                    <TabsTrigger value="dispositivos">Dispositivos</TabsTrigger>
+                    <TabsTrigger value="geozonas">Geozonas</TabsTrigger>
+                    <TabsTrigger value="rutas">Rutas</TabsTrigger>
+                    <TabsTrigger value="poi">POI</TabsTrigger>
                 </TabsList>
                 <ScrollBar orientation="horizontal" />
               </ScrollArea>
               <div className="relative mt-2">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                     type="search"
                     placeholder="Buscar..."
-                    className="w-full rounded-md bg-white text-black pl-10"
+                    className="w-full rounded-md bg-background pl-10"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
           </div>
 
-          <ScrollArea className="flex-1 bg-white text-black">
+          <ScrollArea className="flex-1">
               <TabsContent value="dispositivos" className="m-0">
                 {isLoading ? (
                   <DeviceListSkeleton />
@@ -168,7 +168,7 @@ export default function DeviceListSheet({
                       
                       return (
                       <AccordionItem value={group.id.toString()} key={group.id} className="border-b">
-                        <div className="flex items-center justify-between px-4 py-2 hover:bg-gray-50">
+                        <div className="flex items-center justify-between px-4 py-2 hover:bg-accent">
                             <div className="flex items-center flex-1">
                                 <div onClick={(e) => e.stopPropagation()} className="pr-2">
                                     <Checkbox 
