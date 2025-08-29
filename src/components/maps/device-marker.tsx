@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MarkerF, Polyline, OverlayView } from '@react-google-maps/api';
 import type { Device } from '@/lib/types';
 import DeviceLabel from './device-label';
@@ -31,6 +31,18 @@ const DeviceMarker = ({
   mapZoom,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+  const [marker, setMarker] = useState<google.maps.Marker | null>(null);
+
+  useEffect(() => {
+    if (marker && clusterer) {
+      clusterer.addMarker(marker);
+    }
+    return () => {
+      if (marker && clusterer) {
+        clusterer.removeMarker(marker);
+      }
+    };
+  }, [marker, clusterer]);
 
   if (!device.lat || !device.lng) {
     return null;
@@ -87,7 +99,7 @@ const DeviceMarker = ({
         icon={deviceIcon}
         zIndex={101}
         onClick={() => onSelect(device)}
-        clusterer={clusterer}
+        onLoad={setMarker}
       />
       {shouldShowLabel && <DeviceLabel device={device} />}
       {isFollowed && (
@@ -118,5 +130,3 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
-
-    

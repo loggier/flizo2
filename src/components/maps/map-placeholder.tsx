@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow, MarkerClustererF } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
 import DeviceMarker from './device-marker';
@@ -9,7 +9,7 @@ import GeofenceMarker from './geofence-marker';
 import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
-import type { Cluster, Clusterer } from '@googlemaps/markerclusterer';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import ZoomControls from './zoom-controls';
 
 
@@ -21,48 +21,6 @@ const containerStyle = {
 const center = {
   lat: -3.745,
   lng: -38.523
-};
-
-const clustererStyles: any = [
-    {
-        url: 'data:image/svg+xml;charset=UTF-8,' +
-        encodeURIComponent(
-            '<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<circle cx="25" cy="25" r="25" fill="#F43F5E" fill-opacity="0.2"/>' +
-            '<circle cx="25" cy="25" r="20" fill="#F43F5E" fill-opacity="0.4"/>' +
-            '<circle cx="25" cy="25" r="15" fill="#F43F5E" fill-opacity="0.6"/>' +
-            '<circle cx="25" cy="25" r="10" fill="#F43F5E"/>' +
-            '<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="white">#</text>' +
-            '</svg>'.replace('#', '{{count}}')
-        ),
-        height: 50,
-        width: 50,
-        textColor: 'white',
-        textSize: 12,
-        fontWeight: 'bold',
-    },
-    // Add more styles for different cluster sizes if needed
-].map(style => ({
-    ...style,
-    url: style.url,
-    // The text content will be replaced by the calculator
-    // so we don't need to specify it here with textColor/textSize.
-}));
-
-
-const clusterCalculator = (markers: any[], numStyles: number) => {
-    let count = markers.length;
-    let index = 0;
-    while (count > 0) {
-        count = Math.floor(count / 10);
-        index++;
-    }
-    index = Math.min(index, numStyles);
-    return {
-        text: markers.length.toString(),
-        index: index,
-        title: `${markers.length} vehículos en esta área`
-    };
 };
 
 interface MapComponentProps {
@@ -101,10 +59,55 @@ function MapComponent({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
   const [zoom, setZoom] = useState(10);
+  const [clusterer, setClusterer] = useState<MarkerClusterer | null>(null);
+
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
+    libraries: ['marker'],
   });
+
+  useEffect(() => {
+    if (map) {
+      const clustererInstance = new MarkerClusterer({
+        map,
+        renderer: {
+            render: ({ count, position }) => {
+                const svg = window.btoa(`
+                <svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="25" cy="25" r="25" fill="#F43F5E" fill-opacity="0.2"/>
+                    <circle cx="25" cy="25" r="20" fill="#F43F5E" fill-opacity="0.4"/>
+                    <circle cx="25" cy="25" r="15" fill="#F43F5E" fill-opacity="0.6"/>
+                    <circle cx="25" cy="25" r="10" fill="#F43F5E"/>
+                    <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="white">${count}</text>
+                </svg>`);
+        
+                return new google.maps.Marker({
+                    position,
+                    icon: {
+                        url: `data:image/svg+xml;base64,${svg}`,
+                        scaledSize: new google.maps.Size(50, 50),
+                    },
+                    label: {
+                        text: String(count),
+                        color: "rgba(255,255,255,0.9)",
+                        fontSize: "11px",
+                    },
+                    // Adjust zIndex to be higher than other markers
+                    zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
+                });
+            }
+        }
+      });
+      setClusterer(clustererInstance);
+
+      return () => {
+        clustererInstance.clearMarkers();
+        setClusterer(null);
+      };
+    }
+  }, [map]);
+
 
   const handleZoomChanged = useCallback(() => {
     if (map) {
@@ -263,23 +266,18 @@ function MapComponent({
           />
         )}
         
-        <MarkerClustererF averageCenter enableRetinaIcons gridSize={60}>
-            {(clusterer) =>
-                devices.map((device) => (
-                    <DeviceMarker
-                        key={device.id}
-                        device={device}
-                        clusterer={clusterer}
-                        isUserLocation={false}
-                        showLabel={showLabels}
-                        onSelect={onSelectDevice}
-                        isFollowed={followedDevice?.id === device.id}
-                        mapZoom={zoom}
-                    />
-                ))
-            }
-        </MarkerClustererF>
-
+        {devices.map((device) => (
+            <DeviceMarker
+                key={device.id}
+                device={device}
+                clusterer={clusterer!}
+                isUserLocation={false}
+                showLabel={showLabels}
+                onSelect={onSelectDevice}
+                isFollowed={followedDevice?.id === device.id}
+                mapZoom={zoom}
+            />
+        ))}
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -313,5 +311,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
