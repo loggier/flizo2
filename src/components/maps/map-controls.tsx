@@ -40,13 +40,19 @@ export default function MapControls({
   onToggleCluster,
   showCluster,
 }: MapControlsProps) {
+
+  const handleActionClick = (e: React.MouseEvent<HTMLButtonElement>, action: () => void) => {
+    action();
+    e.currentTarget.blur();
+  }
+
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-2">
       <Button 
         variant="outline" 
         size="icon" 
         className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground"
-        onClick={onLocateUser}
+        onClick={(e) => handleActionClick(e, onLocateUser)}
       >
         <Crosshair className="h-6 w-6" />
       </Button>
@@ -54,7 +60,7 @@ export default function MapControls({
         variant="outline" 
         size="icon" 
         className="bg-background rounded-full shadow-md hover:bg-primary hover:text-primary-foreground"
-        onClick={onLayerChange}
+        onClick={(e) => handleActionClick(e, onLayerChange)}
       >
         <Layers className="h-6 w-6" />
       </Button>
