@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow, MarkerF } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
@@ -11,9 +11,9 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
-import { Polyline } from '@react-google-maps/api';
-import DeviceMarker from './device-marker';
-
+import DeviceLabel from './device-label';
+import { Pin } from 'lucide-react';
+import { OverlayView, Polyline } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
@@ -60,8 +60,10 @@ function MapComponent({
 }: MapComponentProps) {
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
-  
+  const [zoom, setZoom] = useState(10);
+
   const [markers, setMarkers] = useState<{ [key: string]: google.maps.Marker }>({});
+
   const clusterer = useMemo(() => {
     if (!map) return null;
     return new MarkerClusterer({ map });
@@ -80,6 +82,7 @@ function MapComponent({
       if (marker) {
         return { ...prevMarkers, [key]: marker };
       } else {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [key]: _, ...newMarkers } = prevMarkers;
         return newMarkers;
       }
@@ -140,6 +143,14 @@ function MapComponent({
     setMap(mapInstance);
     onMapLoad(mapInstance);
 
+    const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
+      setZoom(mapInstance.getZoom() || 10);
+    });
+
+    return () => {
+      google.maps.event.removeListener(zoomChangedListener);
+    }
+
   }, [onMapLoad]);
 
   
@@ -183,6 +194,9 @@ function MapComponent({
     }
   };
 
+  const shouldShowLabel = (device: Device) => showLabels && zoom >= 17;
+  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -199,17 +213,65 @@ function MapComponent({
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
-        {devices.map(device => (
-          <DeviceMarker
-            key={device.id}
-            map={map}
-            device={device}
-            setMarkerRef={setMarkerRef}
-            onSelectDevice={onSelectDevice}
-            showLabels={showLabels}
-            followedDevice={followedDevice}
-          />
-        ))}
+        {devices.map(device => {
+            if (!device.lat || !device.lng) return null;
+
+            const deviceIcon =
+                typeof window !== 'undefined' && window.google && device.icon
+                ? {
+                    url: `${serverUrl}${device.icon.path}`,
+                    scaledSize: new window.google.maps.Size(
+                        device.icon.width,
+                        device.icon.height
+                    ),
+                    anchor: new window.google.maps.Point(
+                        device.icon.width / 2,
+                        device.icon.height / 2
+                    ),
+                    rotation: device.course,
+                }
+                : undefined;
+            
+            const position = { lat: device.lat, lng: device.lng };
+
+            return (
+                <React.Fragment key={device.id}>
+                    <MarkerF
+                        position={position}
+                        title={device.name}
+                        icon={deviceIcon}
+                        zIndex={101}
+                        onClick={() => onSelectDevice(device)}
+                        onLoad={(marker) => setMarkerRef(marker, device.id.toString())}
+                        onUnmount={() => setMarkerRef(null, device.id.toString())}
+                    />
+                     {shouldShowLabel(device) && <DeviceLabel device={device} />}
+                    {followedDevice?.id === device.id && (
+                        <OverlayView
+                            position={position}
+                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                            getPixelPositionOffset={(width, height) => ({
+                                x: 0,
+                                y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
+                            })}
+                        >
+                            <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
+                        </OverlayView>
+                    )}
+                    {device.tail && device.tail.length > 0 && (
+                        <Polyline
+                            path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
+                            options={{
+                            strokeColor: device.device_data.tail_color,
+                            strokeWeight: 2,
+                            strokeOpacity: 0.8,
+                            zIndex: 100,
+                            }}
+                        />
+                    )}
+                </React.Fragment>
+            )
+        })}
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />

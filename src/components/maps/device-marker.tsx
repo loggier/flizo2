@@ -6,6 +6,7 @@ import { MarkerF, Polyline, OverlayView } from "@react-google-maps/api";
 import type { Device } from "@/lib/types";
 import DeviceLabel from "./device-label";
 import { Pin } from "lucide-react";
+import { MarkerClusterer } from "@googlemaps/markerclusterer";
 
 interface DeviceMarkerProps {
   map: google.maps.Map | null;
@@ -14,6 +15,7 @@ interface DeviceMarkerProps {
   setMarkerRef: (marker: google.maps.Marker | null, key: string) => void;
   showLabels: boolean;
   followedDevice: Device | null;
+  clusterer: MarkerClusterer | null;
 }
 
 const DeviceMarker = ({
@@ -23,6 +25,7 @@ const DeviceMarker = ({
   setMarkerRef,
   showLabels,
   followedDevice,
+  clusterer,
 }: DeviceMarkerProps) => {
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
   const [zoom, setZoom] = useState(map?.getZoom() || 10);
@@ -40,7 +43,9 @@ const DeviceMarker = ({
     const listener = map.addListener('zoom_changed', () => {
       setZoom(map.getZoom() || 10);
     });
-    return () => google.maps.event.removeListener(listener);
+    return () => { 
+      google.maps.event.removeListener(listener);
+    }
   }, [map]);
 
   if (!device.lat || !device.lng) return null;
@@ -74,6 +79,7 @@ const DeviceMarker = ({
         onClick={() => onSelectDevice(device)}
         onLoad={ref}
         onUnmount={() => setMarkerRef(null, device.id.toString())}
+        clusterer={clusterer!}
       />
       {shouldShowLabel && <DeviceLabel device={device} />}
       {followedDevice?.id === device.id && (
@@ -104,6 +110,5 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
-
 
     
