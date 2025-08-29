@@ -3,7 +3,6 @@
 import React from 'react';
 import { OverlayView } from '@react-google-maps/api';
 import type { Device } from '@/lib/types';
-import { format } from 'date-fns';
 
 interface DeviceLabelProps {
   device: Device;
@@ -34,7 +33,6 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
 
   const position = { lat: device.lat, lng: device.lng };
   const color = getStatusColor(device);
-  const time = device.timestamp ? format(new Date(device.timestamp * 1000), 'HH:mm:ss') : '';
   
   const labelContainerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -88,7 +86,7 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
         <div style={labelContainerStyle}>
           <div style={colorIndicatorStyle} />
           <div style={textStyle}>
-            {device.name} ({device.speed} {device.distance_unit_hour}) - {time}
+            {device.name} ({device.speed} {device.distance_unit_hour})
           </div>
         </div>
         <div style={anchorStyle} />
