@@ -2,7 +2,8 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow, MarkerClustererF, MarkerF, Polyline } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
+import { MarkerClusterer, Clusterer } from '@googlemaps/markerclusterer';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
 import GeofenceMarker from './geofence-marker';
@@ -10,11 +11,7 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
-import type { Clusterer } from '@googlemaps/markerclusterer';
-import DeviceLabel from './device-label';
-import { Pin } from 'lucide-react';
-import { OverlayView } from '@react-google-maps/api';
-
+import DeviceMarker from './device-marker';
 
 const containerStyle = {
   width: '100%',
@@ -27,51 +24,51 @@ const center = {
 };
 
 const clustererStyles: any = [
-  {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="30" cy="30" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
-              <circle cx="30" cy="30" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
-              <circle cx="30" cy="30" r="16" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
-              <circle cx="30" cy="30" r="10" fill="hsl(var(--primary))"/>
-          </svg>
-      `),
-      width: 60,
-      height: 60,
-      textColor: 'white',
-      textSize: 14,
-      fontWeight: 'bold',
-  },
-  {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="40" cy="40" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
-              <circle cx="40" cy="40" r="30" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
-              <circle cx="40" cy="40" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
-              <circle cx="40" cy="40" r="14" fill="hsl(var(--primary))"/>
-          </svg>
-      `),
-      width: 80,
-      height: 80,
-      textColor: 'white',
-      textSize: 16,
-      fontWeight: 'bold',
-  },
-  {
-      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
-          <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="50" cy="50" r="48" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
-              <circle cx="50" cy="50" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
-              <circle cx="50" cy="50" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
-              <circle cx="50" cy="50" r="18" fill="hsl(var(--primary))"/>
-          </svg>
-      `),
-      width: 100,
-      height: 100,
-      textColor: 'white',
-      textSize: 18,
-      fontWeight: 'bold',
-  }
+    {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="30" cy="30" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+                <circle cx="30" cy="30" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+                <circle cx="30" cy="30" r="16" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
+                <circle cx="30" cy="30" r="10" fill="hsl(var(--primary))"/>
+            </svg>
+        `),
+        width: 60,
+        height: 60,
+        textColor: 'white',
+        textSize: 14,
+        fontWeight: 'bold',
+    },
+    {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="40" cy="40" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+                <circle cx="40" cy="40" r="30" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+                <circle cx="40" cy="40" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
+                <circle cx="40" cy="40" r="14" fill="hsl(var(--primary))"/>
+            </svg>
+        `),
+        width: 80,
+        height: 80,
+        textColor: 'white',
+        textSize: 16,
+        fontWeight: 'bold',
+    },
+    {
+        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="48" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+                <circle cx="50" cy="50" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+                <circle cx="50" cy="50" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
+                <circle cx="50" cy="50" r="18" fill="hsl(var(--primary))"/>
+            </svg>
+        `),
+        width: 100,
+        height: 100,
+        textColor: 'white',
+        textSize: 18,
+        fontWeight: 'bold',
+    }
 ];
 
 
@@ -112,6 +109,8 @@ function MapComponent({
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
   const [zoom, setZoom] = useState(10);
   const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+  const [clusterer, setClusterer] = useState<Clusterer | null>(null);
+  const [markers, setMarkers] = useState<Record<string, google.maps.Marker>>({});
 
 
   const { isLoaded } = useLoadScript({
@@ -173,7 +172,59 @@ function MapComponent({
     
     setMap(mapInstance);
     onMapLoad(mapInstance);
+
+    const newClusterer = new MarkerClusterer({ 
+        map: mapInstance, 
+        markers: [],
+        renderer: {
+            render: ({ count, position }) => {
+                const style = clustererStyles.find(s => count < (s.maxCount || Infinity)) || clustererStyles[clustererStyles.length - 1];
+                const svg = window.btoa(`
+                    <svg fill="${style.color}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+                        <circle cx="120" cy="120" r="70" opacity=".6" />
+                        <circle cx="120" cy="120" r="90" opacity=".3" />
+                        <circle cx="120" cy="120" r="110" opacity=".2" />
+                        <text x="50%" y="50%" style="fill:#fff" text-anchor="middle" font-size="90" dy=".3em" font-weight="bold">${count}</text>
+                    </svg>`);
+                return new google.maps.Marker({
+                    position,
+                    icon: {
+                        url: `data:image/svg+xml;base64,${svg}`,
+                        scaledSize: new google.maps.Size(45, 45),
+                    },
+                    label: {
+                        text: String(count),
+                        color: "rgba(255,255,255,0.9)",
+                        fontSize: "12px",
+                    },
+                    // adjust zIndex to be above other markers
+                    zIndex: Number(google.maps.Marker.MAX_ZINDEX) + count,
+                });
+            }
+        }
+    });
+    setClusterer(newClusterer);
+
   }, [onMapLoad]);
+
+  useEffect(() => {
+    if (clusterer) {
+        clusterer.clearMarkers();
+        clusterer.addMarkers(Object.values(markers));
+    }
+  }, [clusterer, markers]);
+  
+  const setMarkerRef = useCallback((marker: google.maps.Marker | null, key: string) => {
+    setMarkers(prevMarkers => {
+        if (marker) {
+            return {...prevMarkers, [key]: marker};
+        } else {
+            const newMarkers = {...prevMarkers};
+            delete newMarkers[key];
+            return newMarkers;
+        }
+    });
+  }, []);
 
   const onUnmount = useCallback(function callback() {
     setMap(null);
@@ -200,26 +251,6 @@ function MapComponent({
   if (!apiKey) {
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
-
-  const userLocationIcon = (typeof window !== 'undefined' && window.google) ? {
-      path: window.google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-      scale: 7,
-      fillColor: '#4285F4',
-      fillOpacity: 1,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-      rotation: heading,
-      anchor: new google.maps.Point(0, 2.6)
-  } : undefined;
-
-  const userCircleIcon = (typeof window !== 'undefined' && window.google) ? {
-      path: window.google.maps.SymbolPath.CIRCLE,
-      scale: 14,
-      fillColor: '#4285F4',
-      fillOpacity: 0.3,
-      strokeColor: '#FFFFFF',
-      strokeWeight: 2,
-  } : undefined;
   
   const handleZoomIn = () => {
     if (map) {
@@ -251,83 +282,19 @@ function MapComponent({
         }}
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
-        {userPosition && userLocationIcon && userCircleIcon && (
-          <MarkerF
-            position={userPosition}
-            icon={userCircleIcon}
-            zIndex={99}
-          />
-        )}
-         {userPosition && userLocationIcon && (
-          <MarkerF
-            position={userPosition}
-            icon={userLocationIcon}
-            title={`Tu Ubicación (Rumbo: ${heading.toFixed(0)}°)`}
-            zIndex={100}
-          />
-        )}
         
-        <MarkerClustererF options={{ styles: clustererStyles }}>
-          {(clusterer) => (
-             <React.Fragment>
-              {devices.map((device) => {
-                if (!device.lat || !device.lng) return null;
-                
-                const deviceIcon = (typeof window !== 'undefined' && window.google && device.icon) ? {
-                  url: `${serverUrl}${device.icon.path}`,
-                  scaledSize: new window.google.maps.Size(device.icon.width, device.icon.height),
-                  anchor: new window.google.maps.Point(device.icon.width / 2, device.icon.height / 2),
-                  rotation: device.course,
-                } : undefined;
-                
-                const position = { lat: device.lat, lng: device.lng };
-                const shouldShowLabel = showLabels && zoom >= 17;
-
-                return (
-                  <React.Fragment key={device.id}>
-                    <MarkerF
-                      position={position}
-                      title={device.name}
-                      icon={deviceIcon}
-                      zIndex={101}
-                      onClick={() => onSelectDevice(device)}
-                      clusterer={clusterer}
-                    />
-                    {shouldShowLabel && <DeviceLabel device={device} />}
-                    {followedDevice?.id === device.id && (
-                      <OverlayView
-                        position={position}
-                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                        getPixelPositionOffset={(width, height) => ({
-                          x: 0,
-                          y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
-                        })}
-                      >
-                        <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
-                      </OverlayView>
-                    )}
-                  </React.Fragment>
-                )
-              })}
-            </React.Fragment>
-          )}
-        </MarkerClustererF>
-
-        {devices.map((device) => {
-          if (!device.tail || device.tail.length === 0) return null;
-          return (
-            <Polyline
-              key={`tail-${device.id}`}
-              path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
-              options={{
-                strokeColor: device.device_data.tail_color,
-                strokeWeight: 2,
-                strokeOpacity: 0.8,
-                zIndex: 100,
-              }}
+        {devices.map((device) => (
+            <DeviceMarker
+                key={device.id}
+                map={map}
+                device={device}
+                onLoad={(marker) => setMarkerRef(marker, device.id.toString())}
+                onUnload={() => setMarkerRef(null, device.id.toString())}
+                onSelectDevice={onSelectDevice}
+                showLabels={showLabels}
+                followedDevice={followedDevice}
             />
-          );
-        })}
+        ))}
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -361,5 +328,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
