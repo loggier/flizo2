@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import type { Device } from "@/lib/types";
 import { MarkerF, OverlayView } from '@react-google-maps/api';
 import DeviceLabel from './device-label';
@@ -39,23 +39,17 @@ const DeviceMarker = ({ device, onLoad, onClick, zoom, showLabels, isFollowed }:
             }
             : undefined;
     
-    const ref = React.useRef<google.maps.Marker>(null);
-    useEffect(() => {
-        onLoad(ref.current);
-        return () => {
-          onLoad(null);
-        };
-      }, [onLoad]);
-
     return (
         <>
             <MarkerF
                 position={position}
-                onLoad={(marker) => onLoad(marker)}
+                onLoad={onLoad}
                 onClick={onClick}
                 icon={deviceIcon}
                 title={device.name}
                 zIndex={isFollowed ? 1001 : 100}
+                // Do not render marker if it's part of a cluster
+                visible={false}
             />
             {showLabels && zoom >= 17 && <DeviceLabel device={device} />}
             {isFollowed && (
@@ -75,3 +69,5 @@ const DeviceMarker = ({ device, onLoad, onClick, zoom, showLabels, isFollowed }:
 };
 
 export default React.memo(DeviceMarker);
+
+    
