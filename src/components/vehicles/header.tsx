@@ -22,7 +22,7 @@ export function VehicleHeader() {
     const isActive = statusFilter === value;
 
     if (isActive) {
-      return "bg-background text-primary font-bold shadow-lg hover:bg-primary hover:text-primary-foreground";
+      return "bg-background text-primary font-bold shadow-lg hover:bg-background/90";
     }
 
     switch (value) {
