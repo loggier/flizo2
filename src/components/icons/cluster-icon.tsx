@@ -14,11 +14,10 @@ export function ClusterIcon({ className, ...props }: React.SVGProps<SVGSVGElemen
       className={cn(className)}
       {...props}
     >
-      <path d="M8 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-      <path d="M17 18a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-      <path d="M5 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-      <path d="M10.14 6.33 14 15" />
-      <path d="M7.77 15.24 5.86 18" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 19.4a3 3 0 1 0-4.8-3.2" />
+        <path d="M4.6 19.4a3 3 0 1 0 4.8-3.2" />
+        <path d="M12 4.04A3 3 0 0 0 9.17 8.8" />
     </svg>
   );
 }
