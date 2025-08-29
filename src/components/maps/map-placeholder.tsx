@@ -223,7 +223,7 @@ function MapComponent({
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
-        <MarkerClustererF options={{ styles: clustererStyles }}>
+        <MarkerClustererF options={{ styles: clustererStyles, maxZoom: 16 }}>
           {(clusterer) =>
             devicesToRender.map((device) => {
               if (!device.lat || !device.lng) return null;
