@@ -9,6 +9,7 @@ import { RouteIcon } from "../icons/route-icon";
 import { AutocenterIcon } from "../icons/autocenter-icon";
 
 interface MapControlsProps {
+  isFollowing?: boolean;
   onLayerChange: () => void;
   onLocateUser: () => void;
   onToggleGeofences: () => void;
@@ -22,6 +23,7 @@ interface MapControlsProps {
 }
 
 export default function MapControls({ 
+  isFollowing = false,
   onLayerChange, 
   onLocateUser,
   onToggleGeofences,
@@ -51,50 +53,56 @@ export default function MapControls({
       >
         <Layers className="h-6 w-6" />
       </Button>
-       <Button 
-        variant={autoCenter ? "default" : "outline"}
-        size="icon" 
-        className={cn(
-          "bg-background rounded-full shadow-md",
-          autoCenter ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
-        )}
-        onClick={onToggleAutoCenter}
-      >
-        <AutocenterIcon className="h-6 w-6" />
-      </Button>
-      <Button 
-        variant={showGeofences ? "default" : "outline"}
-        size="icon" 
-        className={cn(
-          "bg-background rounded-full shadow-md",
-          showGeofences ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
-        )}
-        onClick={onToggleGeofences}
-      >
-        <GeofenceIcon className="h-6 w-6" />
-      </Button>
-      <Button 
-        variant={showRoutes ? "default" : "outline"}
-        size="icon" 
-        className={cn(
-          "bg-background rounded-full shadow-md",
-          showRoutes ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
-        )}
-        onClick={onToggleRoutes}
-      >
-        <RouteIcon className="h-6 w-6" />
-      </Button>
-      <Button 
-        variant={showPOIs ? "default" : "outline"}
-        size="icon" 
-        className={cn(
-          "bg-background rounded-full shadow-md",
-          showPOIs ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
-        )}
-        onClick={onTogglePOIs}
-      >
-        <MapPin className="h-6 w-6" />
-      </Button>
+      {!isFollowing && (
+        <>
+          <Button 
+            variant={autoCenter ? "default" : "outline"}
+            size="icon" 
+            className={cn(
+              "bg-background rounded-full shadow-md",
+              autoCenter ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+            )}
+            onClick={onToggleAutoCenter}
+          >
+            <AutocenterIcon className="h-6 w-6" />
+          </Button>
+          <Button 
+            variant={showGeofences ? "default" : "outline"}
+            size="icon" 
+            className={cn(
+              "bg-background rounded-full shadow-md",
+              showGeofences ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+            )}
+            onClick={onToggleGeofences}
+          >
+            <GeofenceIcon className="h-6 w-6" />
+          </Button>
+          <Button 
+            variant={showRoutes ? "default" : "outline"}
+            size="icon" 
+            className={cn(
+              "bg-background rounded-full shadow-md",
+              showRoutes ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+            )}
+            onClick={onToggleRoutes}
+          >
+            <RouteIcon className="h-6 w-6" />
+          </Button>
+          <Button 
+            variant={showPOIs ? "default" : "outline"}
+            size="icon" 
+            className={cn(
+              "bg-background rounded-full shadow-md",
+              showPOIs ? "bg-primary text-primary-foreground hover:bg-primary/90" : "hover:bg-primary hover:text-primary-foreground"
+            )}
+            onClick={onTogglePOIs}
+          >
+            <MapPin className="h-6 w-6" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }
+
+    

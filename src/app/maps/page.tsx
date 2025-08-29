@@ -539,6 +539,7 @@ export default function MapsPage() {
       </div>
       <DeviceStatusSummary devices={allDevices} />
       <MapControls 
+        isFollowing={!!followedDeviceId}
         onLayerChange={handleLayerChange}
         onLocateUser={handleLocateUser}
         onToggleGeofences={handleToggleGeofences}
@@ -598,3 +599,5 @@ export default function MapsPage() {
     </div>
   );
 }
+
+    
