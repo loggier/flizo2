@@ -6,7 +6,7 @@ import { MarkerF, Polyline, OverlayView } from '@react-google-maps/api';
 import type { Device } from '@/lib/types';
 import DeviceLabel from './device-label';
 import { Pin } from 'lucide-react';
-import type { MarkerClusterer } from '@googlemaps/markerclusterer';
+import type { Clusterer } from '@googlemaps/markerclusterer';
 
 interface DeviceMarkerProps {
   device: Device;
@@ -16,7 +16,7 @@ interface DeviceMarkerProps {
   showLabel: boolean;
   onSelect: (device: Device) => void;
   isFollowed?: boolean;
-  clusterer: MarkerClusterer | undefined;
+  clusterer: Clusterer | undefined;
   mapZoom: number;
 }
 

@@ -11,6 +11,7 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
+import type { Cluster, Clusterer } from '@googlemaps/markerclusterer';
 
 const containerStyle = {
   width: '100%',
@@ -22,9 +23,54 @@ const center = {
   lng: -38.523
 };
 
-const clustererOptions = {
-    imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m',
-};
+const clustererStyles: any = [
+  {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="30" cy="30" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+              <circle cx="30" cy="30" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+              <circle cx="30" cy="30" r="16" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
+              <circle cx="30" cy="30" r="10" fill="hsl(var(--primary))"/>
+          </svg>
+      `),
+      width: 60,
+      height: 60,
+      textColor: 'white',
+      textSize: 14,
+      fontWeight: 'bold',
+  },
+  {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+              <circle cx="40" cy="40" r="30" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+              <circle cx="40" cy="40" r="22" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
+              <circle cx="40" cy="40" r="14" fill="hsl(var(--primary))"/>
+          </svg>
+      `),
+      width: 80,
+      height: 80,
+      textColor: 'white',
+      textSize: 16,
+      fontWeight: 'bold',
+  },
+  {
+      url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+          <svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="48" stroke="hsl(var(--primary))" stroke-opacity="0.2" stroke-width="2" fill="none"/>
+              <circle cx="50" cy="50" r="38" stroke="hsl(var(--primary))" stroke-opacity="0.4" stroke-width="2" fill="none"/>
+              <circle cx="50" cy="50" r="28" stroke="hsl(var(--primary))" stroke-opacity="0.6" stroke-width="2" fill="none"/>
+              <circle cx="50" cy="50" r="18" fill="hsl(var(--primary))"/>
+          </svg>
+      `),
+      width: 100,
+      height: 100,
+      textColor: 'white',
+      textSize: 18,
+      fontWeight: 'bold',
+  }
+];
+
 
 interface MapComponentProps {
     mapType: MapType;
@@ -135,6 +181,15 @@ function MapComponent({
     }
   }, [map, mapType]);
   
+  const clusterClickHandler = (cluster: Cluster) => {
+    if (!map) return;
+    const center = cluster.getCenter();
+    if (center) {
+        map.panTo(center);
+        const currentZoom = map.getZoom() || 0;
+        map.setZoom(currentZoom + 2);
+    }
+  }
 
   if (!isLoaded) {
     return (
@@ -222,24 +277,25 @@ function MapComponent({
             showLabel={false}
             onSelect={() => {}}
             mapZoom={zoom}
+            clusterer={undefined}
           />
         )}
         
-        <MarkerClustererF options={clustererOptions}>
-            {(clusterer) =>
-              devices.map((device) => (
-                <DeviceMarker
-                  key={device.id}
-                  device={device}
-                  isUserLocation={false}
-                  showLabel={showLabels}
-                  onSelect={onSelectDevice}
-                  isFollowed={followedDevice?.id === device.id}
-                  mapZoom={zoom}
-                  clusterer={clusterer}
-                />
-              ))
-            }
+        <MarkerClustererF options={{ styles: clustererStyles }} onClick={clusterClickHandler}>
+          {(clusterer) =>
+            devices.map((device) => (
+              <DeviceMarker
+                key={device.id}
+                device={device}
+                isUserLocation={false}
+                showLabel={showLabels}
+                onSelect={onSelectDevice}
+                isFollowed={followedDevice?.id === device.id}
+                mapZoom={zoom}
+                clusterer={clusterer}
+              />
+            ))
+          }
         </MarkerClustererF>
 
         {geofences.map(geofence => (
