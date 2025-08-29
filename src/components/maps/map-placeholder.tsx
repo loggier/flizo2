@@ -30,8 +30,8 @@ const clustererStyles: any = [
       url: 'data:image/svg+xml;charset=UTF-8,' +
         encodeURIComponent(
           '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<circle cx="20" cy="20" r="18" stroke="#29ABE2" stroke-width="2" stroke-dasharray="4 4" fill="none"/>' +
-          '<circle cx="20" cy="20" r="12" fill="#29ABE2"/>' +
+          '<circle cx="20" cy="20" r="18" stroke="#F43F5E" stroke-width="2" stroke-dasharray="4 4" fill="none"/>' +
+          '<circle cx="20" cy="20" r="12" fill="#F43F5E"/>' +
           '</svg>'
         ),
       height: 40,
@@ -44,8 +44,8 @@ const clustererStyles: any = [
       url: 'data:image/svg+xml;charset=UTF-8,' +
         encodeURIComponent(
           '<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<circle cx="25" cy="25" r="23" stroke="#29ABE2" stroke-width="2" stroke-dasharray="5 5" fill="none"/>' +
-          '<circle cx="25" cy="25" r="16" fill="#29ABE2"/>' +
+          '<circle cx="25" cy="25" r="23" stroke="#F43F5E" stroke-width="2" stroke-dasharray="5 5" fill="none"/>' +
+          '<circle cx="25" cy="25" r="16" fill="#F43F5E"/>' +
           '</svg>'
         ),
       height: 50,
@@ -58,8 +58,8 @@ const clustererStyles: any = [
       url: 'data:image/svg+xml;charset=UTF-8,' +
         encodeURIComponent(
           '<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<circle cx="30" cy="30" r="28" stroke="#29ABE2" stroke-width="2" stroke-dasharray="6 6" fill="none"/>' +
-          '<circle cx="30" cy="30" r="20" fill="#29ABE2"/>' +
+          '<circle cx="30" cy="30" r="28" stroke="#F43F5E" stroke-width="2" stroke-dasharray="6 6" fill="none"/>' +
+          '<circle cx="30" cy="30" r="20" fill="#F43F5E"/>' +
           '</svg>'
         ),
       height: 60,

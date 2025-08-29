@@ -14,7 +14,7 @@ body {
     --card-foreground: 210 40% 98%;
     --popover: 222.2 47.4% 11.2%;
     --popover-foreground: 210 40% 98%;
-    --primary: 194.3 89.4% 53.9%; /* Saturated Blue #29ABE2 */
+    --primary: 346.8 90.4% 60.2%; /* Pinkish Red #F43F5E */
     --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -26,7 +26,7 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 194.3 89.4% 53.9%;
+    --ring: 346.8 90.4% 60.2%;
     --radius: 0.5rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
@@ -42,7 +42,7 @@ body {
     --card-foreground: 210 40% 98%;
     --popover: 222.2 47.4% 11.2%;
     --popover-foreground: 210 40% 98%;
-    --primary: 194.3 89.4% 53.9%;
+    --primary: 346.8 90.4% 60.2%;
     --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -54,7 +54,7 @@ body {
     --destructive-foreground: 210 40% 98%;
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 194.3 89.4% 53.9%;
+    --ring: 346.8 90.4% 60.2%;
     --radius: 0.5rem;
   }
 }
