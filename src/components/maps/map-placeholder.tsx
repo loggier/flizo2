@@ -27,7 +27,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="20" fill="hsl(346.8 90.4% 60.2%)" /><circle cx="40" cy="40" r="28" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="4" stroke-opacity="0.5" /><circle cx="40" cy="40" r="36" fill="none" stroke="hsl(120 100% 35%)" stroke-width="4" stroke-opacity="0.7" /></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="28" fill="none" stroke="hsl(346.8 90.4% 80.2%)" stroke-width="6" stroke-opacity="0.5" /><circle cx="40" cy="40" r="20" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="6" stroke-opacity="0.7" /><circle cx="40" cy="40" r="14" fill="hsl(346.8 90.4% 60.2%)" /></svg>'
     )}`,
     height: 60,
     width: 60,
@@ -38,7 +38,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="25" fill="hsl(346.8 90.4% 60.2%)" /><circle cx="50" cy="50" r="35" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="5" stroke-opacity="0.5" /><circle cx="50" cy="50" r="45" fill="none" stroke="hsl(120 100% 35%)" stroke-width="5" stroke-opacity="0.7" /></svg>'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="35" fill="none" stroke="hsl(346.8 90.4% 80.2%)" stroke-width="7" stroke-opacity="0.5" /><circle cx="50" cy="50" r="25" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="7" stroke-opacity="0.7" /><circle cx="50" cy="50" r="18" fill="hsl(346.8 90.4% 60.2%)" /></svg>'
     )}`,
     height: 70,
     width: 70,
@@ -49,7 +49,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="30" fill="hsl(346.8 90.4% 60.2%)" /><circle cx="60" cy="60" r="42" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="6" stroke-opacity="0.5" /><circle cx="60" cy="60" r="54" fill="none" stroke="hsl(120 100% 35%)" stroke-width="6" stroke-opacity="0.7" /></svg>'
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="42" fill="none" stroke="hsl(346.8 90.4% 80.2%)" stroke-width="8" stroke-opacity="0.5" /><circle cx="60" cy="60" r="30" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="8" stroke-opacity="0.7" /><circle cx="60" cy="60" r="22" fill="hsl(346.8 90.4% 60.2%)" /></svg>'
     )}`,
     height: 80,
     width: 80,
@@ -189,6 +189,10 @@ function MapComponent({
     }
   };
   
+  const devicesToRender = useMemo(() => {
+    return devices.filter(d => visibleDeviceIds.has(d.id));
+  }, [devices, visibleDeviceIds]);
+  
   if (!isLoaded) {
     return (
         <div className="flex h-full w-full items-center justify-center bg-gray-200">
@@ -204,8 +208,6 @@ function MapComponent({
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
   
-  const devicesToRender = devices.filter(d => visibleDeviceIds.has(d.id));
-
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -325,3 +327,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
