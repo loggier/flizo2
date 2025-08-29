@@ -24,40 +24,40 @@ const center = {
 };
 
 const clustererStyles: any = [
-  {
-    textColor: 'white',
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.2"/><circle cx="20" cy="20" r="12" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="20" cy="20" r="7" fill="hsl(346.8 90.4% 60.2%)"/></svg>'
-    )}`,
-    height: 40,
-    width: 40,
-    textSize: 14,
-    anchorText: [0, 0],
-    fontWeight: 'bold',
-  },
-  {
-    textColor: 'white',
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="23" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.2"/><circle cx="25" cy="25" r="16" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="25" cy="25" r="9" fill="hsl(346.8 90.4% 60.2%)"/></svg>'
-    )}`,
-    height: 50,
-    width: 50,
-    textSize: 16,
-    anchorText: [0, 0],
-    fontWeight: 'bold',
-  },
-  {
-    textColor: 'white',
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.2"/><circle cx="30" cy="30" r="20" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="30" cy="30" r="11" fill="hsl(346.8 90.4% 60.2%)"/></svg>'
-    )}`,
-    height: 60,
-    width: 60,
-    textSize: 18,
-    anchorText: [0, 0],
-    fontWeight: 'bold',
-  },
-];
+    {
+      textColor: 'white',
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.2"/><circle cx="20" cy="20" r="12" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="20" cy="20" r="9" fill="hsl(346.8 90.4% 60.2%)"/></svg>'
+      )}`,
+      height: 40,
+      width: 40,
+      textSize: 14,
+      anchorText: [0, 0],
+      fontWeight: 'bold',
+    },
+    {
+      textColor: 'white',
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="23" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.2"/><circle cx="25" cy="25" r="16" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="25" cy="25" r="12" fill="hsl(346.8 90.4% 60.2%)"/></svg>'
+      )}`,
+      height: 50,
+      width: 50,
+      textSize: 16,
+      anchorText: [0, 0],
+      fontWeight: 'bold',
+    },
+    {
+      textColor: 'white',
+      url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.2"/><circle cx="30" cy="30" r="20" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="30" cy="30" r="15" fill="hsl(346.8 90.4% 60.2%)"/></svg>'
+      )}`,
+      height: 60,
+      width: 60,
+      textSize: 18,
+      anchorText: [0, 0],
+      fontWeight: 'bold',
+    },
+  ];
 
 interface MapComponentProps {
     mapType: MapType;
