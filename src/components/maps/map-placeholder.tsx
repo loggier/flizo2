@@ -11,7 +11,8 @@ import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import { Pin } from 'lucide-react';
-import type { Cluster, ClustererOptions } from '@googlemaps/markerclusterer';
+import type { Cluster, Clusterer } from '@googlemaps/markerclusterer';
+import ZoomControls from './zoom-controls';
 
 
 const containerStyle = {
@@ -70,16 +71,6 @@ function MapComponent({
         setZoom(map.getZoom() || 10);
     }
   }, [map]);
-
-  const clusterClickHandler = useCallback((cluster: Cluster, map: google.maps.Map) => {
-    const bounds = new google.maps.LatLngBounds();
-    cluster.markers?.forEach(marker => {
-      if (marker.getPosition()) {
-        bounds.extend(marker.getPosition()!);
-      }
-    });
-    map.fitBounds(bounds);
-  }, []);
 
   const onLoad = useCallback(function callback(mapInstance: google.maps.Map) {
     const osmMapType = new google.maps.ImageMapType({
@@ -216,7 +207,7 @@ function MapComponent({
             mapZoom={zoom}
           />
         )}
-        <MarkerClustererF onClick={(c) => map && clusterClickHandler(c, map)}>
+        <MarkerClustererF>
             {(clusterer) =>
               devices.map((device) => (
                 device && <DeviceMarker 
