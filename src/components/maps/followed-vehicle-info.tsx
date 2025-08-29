@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { Device } from '@/lib/types';
@@ -20,8 +21,8 @@ export default function FollowedVehicleInfo({ device }: FollowedVehicleInfoProps
         <CardContent className="p-3">
           <div className="flex flex-col space-y-2 text-sm">
             <div className="flex items-center gap-2 font-bold text-base text-foreground">
-                <Car className="h-5 w-5 text-primary" />
-                <span>{device.name}</span>
+                <Car className="h-5 w-5 text-primary flex-shrink-0" />
+                <span className="truncate">{device.name}</span>
             </div>
             <div className="flex justify-between items-center text-muted-foreground">
                 <div className="flex items-center gap-1.5">
