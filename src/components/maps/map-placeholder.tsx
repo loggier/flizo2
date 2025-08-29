@@ -27,7 +27,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="hsl(var(--primary))" stroke="white" stroke-width="2"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" style="filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));"><circle cx="20" cy="20" r="18" fill="hsl(346.8 90.4% 60.2%)" /></svg>'
     )}`,
     height: 40,
     width: 40,
@@ -38,7 +38,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50"><circle cx="25" cy="25" r="23" fill="hsl(var(--primary))" stroke="white" stroke-width="2"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" style="filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));"><circle cx="25" cy="25" r="23" fill="hsl(346.8 90.4% 60.2%)" /></svg>'
     )}`,
     height: 50,
     width: 50,
@@ -49,7 +49,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><circle cx="30" cy="30" r="28" fill="hsl(var(--primary))" stroke="white" stroke-width="2"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" style="filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.3));"><circle cx="30" cy="30" r="28" fill="hsl(346.8 90.4% 60.2%)" /></svg>'
     )}`,
     height: 60,
     width: 60,
@@ -58,7 +58,6 @@ const clustererStyles: any = [
     fontWeight: 'bold',
   },
 ];
-
 
 interface MapComponentProps {
     mapType: MapType;
@@ -327,5 +326,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
