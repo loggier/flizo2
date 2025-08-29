@@ -61,33 +61,7 @@ function MapComponent({
   const [map, setMap] = useState<google.maps.Map | null>(null);
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!;
   const [zoom, setZoom] = useState(10);
-
-  const [markers, setMarkers] = useState<{ [key: string]: google.maps.Marker }>({});
-
-  const clusterer = useMemo(() => {
-    if (!map) return null;
-    return new MarkerClusterer({ map });
-  }, [map]);
-
-
-  useEffect(() => {
-    if (!clusterer) return;
-    clusterer.clearMarkers();
-    clusterer.addMarkers(Object.values(markers));
-  }, [clusterer, markers]);
-
-
-  const setMarkerRef = useCallback((marker: google.maps.Marker | null, key: string) => {
-    setMarkers(prevMarkers => {
-      if (marker) {
-        return { ...prevMarkers, [key]: marker };
-      } else {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { [key]: _, ...newMarkers } = prevMarkers;
-        return newMarkers;
-      }
-    });
-  }, []);
+  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -143,6 +117,34 @@ function MapComponent({
     setMap(mapInstance);
     onMapLoad(mapInstance);
 
+    const gmarkers = devices.map(device => {
+        if (!device.lat || !device.lng) return null;
+
+        const deviceIcon = (typeof window !== 'undefined' && window.google && device.icon) ? {
+            url: `${serverUrl}${device.icon.path}`,
+            scaledSize: new window.google.maps.Size(device.icon.width, device.icon.height),
+            anchor: new window.google.maps.Point(device.icon.width / 2, device.icon.height / 2),
+        } : undefined;
+
+        const marker = new google.maps.Marker({
+            position: { lat: device.lat, lng: device.lng },
+            title: device.name,
+            icon: deviceIcon,
+            // @ts-ignore // rotation is not in the type definition but it works
+            rotation: device.course 
+        });
+
+        marker.addListener('click', () => {
+            onSelectDevice(device);
+        });
+
+        return marker;
+    }).filter((m): m is google.maps.Marker => m !== null);
+
+
+    new MarkerClusterer({ markers: gmarkers, map: mapInstance });
+
+
     const zoomChangedListener = mapInstance.addListener('zoom_changed', () => {
       setZoom(mapInstance.getZoom() || 10);
     });
@@ -151,7 +153,7 @@ function MapComponent({
       google.maps.event.removeListener(zoomChangedListener);
     }
 
-  }, [onMapLoad]);
+  }, [onMapLoad, devices, onSelectDevice, serverUrl]);
 
   
   const onUnmount = useCallback(function callback() {
@@ -195,7 +197,6 @@ function MapComponent({
   };
 
   const shouldShowLabel = (device: Device) => showLabels && zoom >= 17;
-  const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
 
   return (
       <GoogleMap
@@ -213,65 +214,34 @@ function MapComponent({
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
-        {devices.map(device => {
-            if (!device.lat || !device.lng) return null;
-
-            const deviceIcon =
-                typeof window !== 'undefined' && window.google && device.icon
-                ? {
-                    url: `${serverUrl}${device.icon.path}`,
-                    scaledSize: new window.google.maps.Size(
-                        device.icon.width,
-                        device.icon.height
-                    ),
-                    anchor: new window.google.maps.Point(
-                        device.icon.width / 2,
-                        device.icon.height / 2
-                    ),
-                    rotation: device.course,
-                }
-                : undefined;
-            
-            const position = { lat: device.lat, lng: device.lng };
-
-            return (
-                <React.Fragment key={device.id}>
-                    <MarkerF
-                        position={position}
-                        title={device.name}
-                        icon={deviceIcon}
-                        zIndex={101}
-                        onClick={() => onSelectDevice(device)}
-                        onLoad={(marker) => setMarkerRef(marker, device.id.toString())}
-                        onUnmount={() => setMarkerRef(null, device.id.toString())}
+        {devices.map(device => (
+            <React.Fragment key={device.id}>
+                 {shouldShowLabel(device) && <DeviceLabel device={device} />}
+                 {followedDevice?.id === device.id && device.lat && device.lng && (
+                    <OverlayView
+                        position={{ lat: device.lat, lng: device.lng }}
+                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                        getPixelPositionOffset={(width, height) => ({
+                            x: 0,
+                            y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
+                        })}
+                    >
+                        <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
+                    </OverlayView>
+                )}
+                {device.tail && device.tail.length > 0 && (
+                    <Polyline
+                        path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
+                        options={{
+                        strokeColor: device.device_data.tail_color,
+                        strokeWeight: 2,
+                        strokeOpacity: 0.8,
+                        zIndex: 100,
+                        }}
                     />
-                     {shouldShowLabel(device) && <DeviceLabel device={device} />}
-                    {followedDevice?.id === device.id && (
-                        <OverlayView
-                            position={position}
-                            mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                            getPixelPositionOffset={(width, height) => ({
-                                x: 0,
-                                y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
-                            })}
-                        >
-                            <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
-                        </OverlayView>
-                    )}
-                    {device.tail && device.tail.length > 0 && (
-                        <Polyline
-                            path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
-                            options={{
-                            strokeColor: device.device_data.tail_color,
-                            strokeWeight: 2,
-                            strokeOpacity: 0.8,
-                            zIndex: 100,
-                            }}
-                        />
-                    )}
-                </React.Fragment>
-            )
-        })}
+                )}
+            </React.Fragment>
+        ))}
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -306,5 +276,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
