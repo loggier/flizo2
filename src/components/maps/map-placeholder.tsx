@@ -251,7 +251,7 @@ function MapComponent({
     }
   };
 
-  const renderMarkers = () => devices.map((device) => (
+  const markers = devices.map((device) => (
     device && <DeviceMarker 
       key={device.id} 
       device={device} 
@@ -323,7 +323,7 @@ function MapComponent({
               )}
             </MarkerClustererF>
         ) : (
-            renderMarkers()
+            markers
         )}
 
         {geofences.map(geofence => (

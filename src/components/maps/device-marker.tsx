@@ -88,7 +88,6 @@ const DeviceMarker = ({
         zIndex={101}
         onClick={() => onSelect(device)}
         clusterer={clusterer}
-        noClustererRedraw={true}
       />
       {shouldShowLabel && <DeviceLabel device={device} />}
       {isFollowed && (
