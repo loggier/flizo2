@@ -196,12 +196,18 @@ function MapComponent({
 
   const clusterClickHandler = useCallback((cluster: Cluster) => {
     if (!map) return;
+  
+    const markers = cluster.getMarkers();
+    if (!markers || markers.length === 0) return;
+  
     const bounds = new google.maps.LatLngBounds();
-    cluster.markers?.forEach(marker => {
-      if(marker.getPosition()){
-        bounds.extend(marker.getPosition()!);
+    markers.forEach(marker => {
+      const position = marker.getPosition();
+      if (position) {
+        bounds.extend(position);
       }
     });
+  
     map.fitBounds(bounds);
     if(map.getZoom()! > 18) map.setZoom(18);
   }, [map]);
@@ -350,3 +356,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
