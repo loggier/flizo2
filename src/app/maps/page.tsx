@@ -495,7 +495,6 @@ export default function MapsPage() {
     { id: "TRAFFIC", label: "Tráfico" },
   ];
 
-  const visibleDevices = allDevices.filter(device => visibleDeviceIds.has(device.id));
   const geofencesToRender = showGeofences ? geofences.filter(g => visibleGeofenceIds.has(g.id)) : [];
   const routesToRender = showRoutes ? routes.filter(r => visibleRouteIds.has(r.id)) : [];
   const poisToRender = showPOIs ? pois.filter(p => visiblePoiIds.has(p.id)) : [];
@@ -510,7 +509,8 @@ export default function MapsPage() {
         onMapLoad={setMap} 
         userPosition={userPosition} 
         heading={heading}
-        devices={visibleDevices}
+        devices={allDevices}
+        visibleDeviceIds={visibleDeviceIds}
         geofences={geofencesToRender}
         routes={routesToRender}
         pois={poisToRender}
@@ -562,7 +562,7 @@ export default function MapsPage() {
         routes={routes}
         visibleRouteIds={visibleRouteIds}
         toggleRouteVisibility={toggleRouteVisibility}
-        onSelectRoute={handleSelectRoute}
+        onSelectRoute={onSelectRoute}
         pois={pois}
         visiblePoiIds={visiblePoiIds}
         togglePoiVisibility={togglePoiVisibility}

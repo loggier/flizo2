@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, MarkerF, Polyline, OverlayView, MarkerClustererF } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
@@ -23,24 +23,27 @@ const center = {
   lng: -38.523
 };
 
-const clustererStyles = [
+const clustererStyles: any = [
   {
-    textColor: "white",
-    url: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png",
+    textColor: 'white',
+    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
     height: 53,
     width: 53,
+    textSize: 12,
   },
   {
-    textColor: "white",
-    url: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png",
+    textColor: 'white',
+    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png',
     height: 56,
     width: 56,
+    textSize: 12,
   },
   {
-    textColor: "white",
-    url: "https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png",
+    textColor: 'white',
+    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png',
     height: 66,
     width: 66,
+    textSize: 14,
   },
 ];
 
@@ -51,6 +54,7 @@ interface MapComponentProps {
     userPosition: google.maps.LatLngLiteral | null;
     heading: number;
     devices: Device[];
+    visibleDeviceIds: Set<number>;
     geofences: Geofence[];
     routes: Route[];
     pois: POI[];
@@ -70,6 +74,7 @@ function MapComponent({
     userPosition, 
     heading, 
     devices, 
+    visibleDeviceIds,
     geofences, 
     routes,
     pois, 
@@ -187,6 +192,8 @@ function MapComponent({
     return <div>API Key for Google Maps is missing. Please check your environment variables.</div>;
   }
   
+  const devicesToRender = devices.filter(d => visibleDeviceIds.has(d.id));
+
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -204,32 +211,32 @@ function MapComponent({
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
         <MarkerClustererF options={{ styles: clustererStyles }}>
-          {(clusterer) => (
-            <>
-              {devices.map((device) => {
-                 if (!device.lat || !device.lng) return null;
+          {(clusterer) =>
+            devicesToRender.map((device) => {
+              if (!device.lat || !device.lng) return null;
 
-                 const position = { lat: device.lat, lng: device.lng };
-                 const isFollowed = followedDevice?.id === device.id;
-                 const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
-                 
-                 const deviceIcon =
-                   typeof window !== 'undefined' && window.google && device.icon
-                     ? {
-                         url: deviceIconUrl,
-                         scaledSize: new window.google.maps.Size(
-                           device.icon.width,
-                           device.icon.height
-                         ),
-                         anchor: new window.google.maps.Point(
-                           device.icon.width / 2,
-                           device.icon.height / 2
-                         ),
-                       }
-                     : undefined;
+              const position = { lat: device.lat, lng: device.lng };
+              const isFollowed = followedDevice?.id === device.id;
+              const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
 
-                return (
-                  <React.Fragment key={device.id}>
+              const deviceIcon =
+                typeof window !== 'undefined' && window.google && device.icon
+                  ? {
+                      url: deviceIconUrl,
+                      scaledSize: new window.google.maps.Size(
+                        device.icon.width,
+                        device.icon.height
+                      ),
+                      anchor: new window.google.maps.Point(
+                        device.icon.width / 2,
+                        device.icon.height / 2
+                      ),
+                      rotation: device.course,
+                    }
+                  : undefined;
+              
+              return (
+                <React.Fragment key={device.id}>
                     <MarkerF
                       position={position}
                       clusterer={clusterer}
@@ -238,7 +245,6 @@ function MapComponent({
                       title={device.name}
                       zIndex={isFollowed ? 1001 : 100}
                     />
-                    {showLabels && zoom >= 17 && <DeviceLabel device={device} />}
                      {isFollowed && (
                         <OverlayView
                             position={position}
@@ -251,15 +257,15 @@ function MapComponent({
                             <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
                         </OverlayView>
                     )}
-                  </React.Fragment>
-                )
-              })}
-            </>
-          )}
+                </React.Fragment>
+              )
+            })
+          }
         </MarkerClustererF>
-
-        {devices.map(device => (
-             <React.Fragment key={`tail-${device.id}`}>
+        
+        {devicesToRender.map((device) => (
+            <React.Fragment key={`overlays-${device.id}`}>
+                {showLabels && zoom >= 17 && <DeviceLabel device={device} />}
                 {device.tail && device.tail.length > 0 && (
                     <Polyline
                       path={device.tail.map(p => ({ lat: parseFloat(p.lat), lng: parseFloat(p.lng) }))}
@@ -271,9 +277,8 @@ function MapComponent({
                       }}
                     />
                 )}
-             </React.Fragment>
+            </React.Fragment>
         ))}
-
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -308,5 +313,3 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
-
-    
