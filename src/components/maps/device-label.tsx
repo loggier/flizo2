@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from 'react';
@@ -34,7 +33,6 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
 
   const position = { lat: device.lat, lng: device.lng };
   const color = getStatusColor(device);
-  const time = device.time ? device.time.split(' ')[1] : '';
   
   const labelContainerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -88,7 +86,7 @@ const DeviceLabel = ({ device }: DeviceLabelProps) => {
         <div style={labelContainerStyle}>
           <div style={colorIndicatorStyle} />
           <div style={textStyle}>
-            {device.name} ({device.speed} {device.distance_unit_hour}) - {time}
+            {device.name} ({device.speed} {device.distance_unit_hour})
           </div>
         </div>
         <div style={anchorStyle} />

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -12,6 +11,7 @@ import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
 import DeviceLabel from './device-label';
 import { Pin } from 'lucide-react';
+import FollowedVehicleInfo from './followed-vehicle-info';
 
 const containerStyle = {
   width: '100%',
@@ -222,6 +222,7 @@ function MapComponent({
         }}
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
+        {followedDevice && <FollowedVehicleInfo device={followedDevice} />}
         
         <MarkerClustererF options={{ styles: clustererStyles, maxZoom: 16 }}>
           {(clusterer) =>
