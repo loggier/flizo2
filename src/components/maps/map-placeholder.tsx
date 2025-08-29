@@ -27,32 +27,35 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="110" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.3"/><circle cx="120" cy="120" r="80" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5" stroke="#ffffff" stroke-width="4"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="20" fill="hsl(346.8 90.4% 60.2%)" /><circle cx="40" cy="40" r="28" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="4" stroke-opacity="0.5" /><circle cx="40" cy="40" r="36" fill="none" stroke="hsl(120 100% 35%)" stroke-width="4" stroke-opacity="0.7" /></svg>'
     )}`,
     height: 60,
     width: 60,
     textSize: 14,
     anchorText: [0, 0],
+    fontWeight: 'bold',
   },
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="115" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.4"/><circle cx="120" cy="120" r="90" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.6" stroke="#ffffff" stroke-width="4"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="25" fill="hsl(346.8 90.4% 60.2%)" /><circle cx="50" cy="50" r="35" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="5" stroke-opacity="0.5" /><circle cx="50" cy="50" r="45" fill="none" stroke="hsl(120 100% 35%)" stroke-width="5" stroke-opacity="0.7" /></svg>'
     )}`,
     height: 70,
     width: 70,
     textSize: 16,
     anchorText: [0, 0],
+    fontWeight: 'bold',
   },
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="120" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="#ffffff" stroke-width="4"/></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="30" fill="hsl(346.8 90.4% 60.2%)" /><circle cx="60" cy="60" r="42" fill="none" stroke="hsl(346.8 90.4% 70.2%)" stroke-width="6" stroke-opacity="0.5" /><circle cx="60" cy="60" r="54" fill="none" stroke="hsl(120 100% 35%)" stroke-width="6" stroke-opacity="0.7" /></svg>'
     )}`,
     height: 80,
     width: 80,
     textSize: 18,
     anchorText: [0, 0],
+    fontWeight: 'bold',
   },
 ];
 
