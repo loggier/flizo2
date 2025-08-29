@@ -118,3 +118,5 @@ const DeviceMarker = ({
 };
 
 export default React.memo(DeviceMarker);
+
+    

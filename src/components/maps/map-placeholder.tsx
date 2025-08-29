@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, MarkerClustererF } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
@@ -9,7 +9,6 @@ import GeofenceMarker from './geofence-marker';
 import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
 import { LoaderIcon } from '../icons/loader-icon';
-import { Pin } from 'lucide-react';
 import type { Cluster, Clusterer } from '@googlemaps/markerclusterer';
 import ZoomControls from './zoom-controls';
 
@@ -27,69 +26,44 @@ const center = {
 const clustererStyles: any = [
     {
         url: 'data:image/svg+xml;charset=UTF-8,' +
-          encodeURIComponent(
+        encodeURIComponent(
             '<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">' +
             '<circle cx="25" cy="25" r="25" fill="#F43F5E" fill-opacity="0.2"/>' +
             '<circle cx="25" cy="25" r="20" fill="#F43F5E" fill-opacity="0.4"/>' +
             '<circle cx="25" cy="25" r="15" fill="#F43F5E" fill-opacity="0.6"/>' +
             '<circle cx="25" cy="25" r="10" fill="#F43F5E"/>' +
-            '</svg>'
-          ),
+            '<text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="bold" fill="white">#</text>' +
+            '</svg>'.replace('#', '{{count}}')
+        ),
         height: 50,
         width: 50,
         textColor: 'white',
         textSize: 12,
         fontWeight: 'bold',
-      },
-      {
-        url: 'data:image/svg+xml;charset=UTF-8,' +
-          encodeURIComponent(
-            '<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<circle cx="30" cy="30" r="30" fill="#F43F5E" fill-opacity="0.2"/>' +
-            '<circle cx="30" cy="30" r="25" fill="#F43F5E" fill-opacity="0.4"/>' +
-            '<circle cx="30" cy="30" r="20" fill="#F43F5E" fill-opacity="0.6"/>' +
-            '<circle cx="30" cy="30" r="15" fill="#F43F5E"/>' +
-            '</svg>'
-          ),
-        height: 60,
-        width: 60,
-        textColor: 'white',
-        textSize: 14,
-        fontWeight: 'bold',
-      },
-      {
-        url: 'data:image/svg+xml;charset=UTF-8,' +
-          encodeURIComponent(
-            '<svg width="70" height="70" viewBox="0 0 70 70" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<circle cx="35" cy="35" r="35" fill="#F43F5E" fill-opacity="0.2"/>' +
-            '<circle cx="35" cy="35" r="30" fill="#F43F5E" fill-opacity="0.4"/>' +
-            '<circle cx="35" cy="35" r="25" fill="#F43F5E" fill-opacity="0.6"/>' +
-            '<circle cx="35" cy="35" r="20" fill="#F43F5E"/>' +
-            '</svg>'
-          ),
-        height: 70,
-        width: 70,
-        textColor: 'white',
-        textSize: 16,
-        fontWeight: 'bold',
-      },
-  ];
+    },
+    // Add more styles for different cluster sizes if needed
+].map(style => ({
+    ...style,
+    url: style.url,
+    // The text content will be replaced by the calculator
+    // so we don't need to specify it here with textColor/textSize.
+}));
 
-  const clusterCalculator = (markers: any[], numStyles: number) => {
+
+const clusterCalculator = (markers: any[], numStyles: number) => {
+    let count = markers.length;
     let index = 0;
-    const count = markers.length;
-    let dv = count;
-    while (dv !== 0) {
-      dv = Math.floor(dv / 10);
-      index++;
+    while (count > 0) {
+        count = Math.floor(count / 10);
+        index++;
     }
-  
     index = Math.min(index, numStyles);
     return {
-      text: count.toString(),
-      index: index,
+        text: markers.length.toString(),
+        index: index,
+        title: `${markers.length} vehículos en esta área`
     };
-  };
+};
 
 interface MapComponentProps {
     mapType: MapType;
@@ -107,8 +81,6 @@ interface MapComponentProps {
     selectedDeviceForAlert?: Device | null;
     followedDevice?: Device | null;
 }
-
-const MAX_ZOOM_FOR_CLUSTERING = 16;
 
 function MapComponent({ 
     mapType, 
@@ -251,18 +223,6 @@ function MapComponent({
     }
   };
 
-  const markers = devices.map((device) => (
-    device && <DeviceMarker 
-      key={device.id} 
-      device={device} 
-      isUserLocation={false} 
-      showLabel={showLabels}
-      onSelect={onSelectDevice}
-      isFollowed={followedDevice?.id === device.id}
-      mapZoom={zoom}
-    />
-  ));
-
   return (
       <GoogleMap
         mapContainerStyle={containerStyle}
@@ -303,28 +263,23 @@ function MapComponent({
           />
         )}
         
-        {zoom <= MAX_ZOOM_FOR_CLUSTERING ? (
-            <MarkerClustererF styles={clustererStyles} calculator={clusterCalculator}>
-              {(clusterer) => (
-                <>
-                  {devices.map((device) => (
-                    device && <DeviceMarker
-                      key={device.id}
-                      device={device}
-                      isUserLocation={false}
-                      showLabel={showLabels}
-                      onSelect={onSelectDevice}
-                      isFollowed={followedDevice?.id === device.id}
-                      clusterer={clusterer}
-                      mapZoom={zoom}
+        <MarkerClustererF averageCenter enableRetinaIcons gridSize={60}>
+            {(clusterer) =>
+                devices.map((device) => (
+                    <DeviceMarker
+                        key={device.id}
+                        device={device}
+                        clusterer={clusterer}
+                        isUserLocation={false}
+                        showLabel={showLabels}
+                        onSelect={onSelectDevice}
+                        isFollowed={followedDevice?.id === device.id}
+                        mapZoom={zoom}
                     />
-                  ))}
-                </>
-              )}
-            </MarkerClustererF>
-        ) : (
-            markers
-        )}
+                ))
+            }
+        </MarkerClustererF>
+
 
         {geofences.map(geofence => (
           <GeofenceMarker key={`geofence-${geofence.id}`} geofence={geofence} />
@@ -358,3 +313,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
