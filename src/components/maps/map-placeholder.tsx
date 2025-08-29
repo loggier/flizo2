@@ -27,7 +27,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="20" fill="none" stroke="hsl(var(--primary) / 0.4)" stroke-width="6" stroke-dasharray="100 26" stroke-linecap="round"/><circle cx="40" cy="40" r="14" fill="none" stroke="hsl(var(--primary) / 0.7)" stroke-width="6" stroke-dasharray="70 18" stroke-linecap="round" /><circle cx="40" cy="40" r="8" fill="hsl(var(--primary))" /></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><circle cx="40" cy="40" r="20" fill="none" stroke="hsl(var(--primary) / 0.4)" stroke-width="6" /><circle cx="40" cy="40" r="14" fill="none" stroke="hsl(var(--primary) / 0.7)" stroke-width="6" /><circle cx="40" cy="40" r="8" fill="hsl(var(--primary))" /></svg>'
     )}`,
     height: 60,
     width: 60,
@@ -38,7 +38,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="25" fill="none" stroke="hsl(var(--primary) / 0.3)" stroke-width="7" stroke-dasharray="120 37" stroke-linecap="round" /><circle cx="50" cy="50" r="18" fill="none" stroke="hsl(var(--primary) / 0.6)" stroke-width="7" stroke-dasharray="85 28" stroke-linecap="round" /><circle cx="50" cy="50" r="11" fill="hsl(var(--primary))" /></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="25" fill="none" stroke="hsl(var(--primary) / 0.3)" stroke-width="7" /><circle cx="50" cy="50" r="18" fill="none" stroke="hsl(var(--primary) / 0.6)" stroke-width="7" /><circle cx="50" cy="50" r="11" fill="hsl(var(--primary))" /></svg>'
     )}`,
     height: 70,
     width: 70,
@@ -49,7 +49,7 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="30" fill="none" stroke="hsl(var(--primary) / 0.2)" stroke-width="8" stroke-dasharray="145 43" stroke-linecap="round" /><circle cx="60" cy="60" r="22" fill="none" stroke="hsl(var(--primary) / 0.5)" stroke-width="8" stroke-dasharray="105 32" stroke-linecap="round" /><circle cx="60" cy="60" r="14" fill="hsl(var(--primary))" /></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><circle cx="60" cy="60" r="30" fill="none" stroke="hsl(var(--primary) / 0.2)" stroke-width="8" /><circle cx="60" cy="60" r="22" fill="none" stroke="hsl(var(--primary) / 0.5)" stroke-width="8" /><circle cx="60" cy="60" r="14" fill="hsl(var(--primary))" /></svg>'
     )}`,
     height: 80,
     width: 80,
