@@ -185,7 +185,7 @@ export default function MapsPage() {
       if (map.getZoom()! < 18) {
         map.setZoom(18);
       }
-      map.panBy(0, -200);
+      map.panBy(0, 200);
     } else if (autoCenter) {
       const visibleDevices = allDevices.filter(d => visibleDeviceIds.has(d.id));
       if (visibleDevices.length > 0) {
@@ -598,5 +598,3 @@ export default function MapsPage() {
     </div>
   );
 }
-
-    
