@@ -2,17 +2,18 @@
 "use client";
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { GoogleMap, useLoadScript, InfoWindow } from '@react-google-maps/api';
+import { GoogleMap, useLoadScript, InfoWindow, MarkerF, Polyline } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
 import GeofenceMarker from './geofence-marker';
 import RouteMarker from './route-marker';
 import PoiMarker from './poi-marker';
-import DeviceMarker from './device-marker';
 import { LoaderIcon } from '../icons/loader-icon';
 import ZoomControls from './zoom-controls';
-import { Polyline } from '@react-google-maps/api';
+import DeviceLabel from './device-label';
+import { Pin } from 'lucide-react';
+import { OverlayView } from '@react-google-maps/api';
 
 const containerStyle = {
   width: '100%',
@@ -63,6 +64,8 @@ interface MapComponentProps {
     followedDevice?: Device | null;
 }
 
+const serverUrl = process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/';
+
 function MapComponent({ 
     mapType, 
     onMapLoad, 
@@ -84,7 +87,7 @@ function MapComponent({
   const [zoom, setZoom] = useState(10);
   
   const [markers, setMarkers] = useState<{ [key: string]: google.maps.Marker }>({});
-  const clusterer = useRef<MarkerClusterer | null>(null);
+  const clustererRef = useRef<MarkerClusterer | null>(null);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -93,45 +96,48 @@ function MapComponent({
 
   useEffect(() => {
     if (!map) return;
-    if (!clusterer.current) {
-        clusterer.current = new MarkerClusterer({ map, renderer: {
-            render: ({ count, position }) => {
-                const styleIndex = Math.min(String(count).length, clustererStyles.length) - 1;
-                const style = clustererStyles[styleIndex];
-                return new google.maps.Marker({
-                    position,
-                    icon: {
-                        url: style.url,
-                        scaledSize: new google.maps.Size(style.width, style.height),
-                    },
-                    label: {
-                        text: String(count),
-                        color: style.textColor,
-                        fontSize: "12px",
-                        fontWeight: 'bold',
-                    },
-                    zIndex: 1000 + count,
-                });
+    if (!clustererRef.current) {
+        clustererRef.current = new MarkerClusterer({ 
+            map, 
+            renderer: {
+                render: ({ count, position }) => {
+                    const styleIndex = Math.min(String(count).length, clustererStyles.length) - 1;
+                    const style = clustererStyles[styleIndex];
+                    return new google.maps.Marker({
+                        position,
+                        icon: {
+                            url: style.url,
+                            scaledSize: new google.maps.Size(style.width, style.height),
+                        },
+                        label: {
+                            text: String(count),
+                            color: style.textColor,
+                            fontSize: "12px",
+                            fontWeight: 'bold',
+                        },
+                        zIndex: 1000 + count,
+                    });
+                }
             }
-        }});
+        });
     }
   }, [map]);
 
   useEffect(() => {
-    clusterer.current?.clearMarkers();
-    clusterer.current?.addMarkers(Object.values(markers));
+    clustererRef.current?.clearMarkers();
+    clustererRef.current?.addMarkers(Object.values(markers));
   }, [markers]);
 
 
   const setMarkerRef = useCallback((marker: google.maps.Marker | null, key: string) => {
     setMarkers(prev => {
-      if (marker) {
-        return { ...prev, [key]: marker };
-      } else {
-        const newMarkers = { ...prev };
-        delete newMarkers[key];
-        return newMarkers;
-      }
+        if (marker) {
+            return { ...prev, [key]: marker };
+        } else {
+            const newMarkers = { ...prev };
+            delete newMarkers[key];
+            return newMarkers;
+        }
     });
   }, []);
 
@@ -199,7 +205,7 @@ function MapComponent({
     onMapLoad(null);
   }, [onMapLoad]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (map) {
       map.setMapTypeId(mapType);
     }
@@ -250,17 +256,53 @@ function MapComponent({
       >
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
-        {devices.map((device) => (
-            <DeviceMarker
-                key={device.id}
-                device={device}
-                onLoad={(marker) => setMarkerRef(marker, device.id.toString())}
-                onClick={() => onSelectDevice(device)}
-                zoom={zoom}
-                showLabels={showLabels}
-                isFollowed={followedDevice?.id === device.id}
-            />
-        ))}
+        {devices.map((device) => {
+            if (!device.lat || !device.lng) return null;
+            
+            const position = { lat: device.lat, lng: device.lng };
+            const deviceIconUrl = device.icon ? `${serverUrl}${device.icon.path}` : `https://placehold.co/80x80.png`;
+            const isFollowed = followedDevice?.id === device.id;
+            const deviceIcon =
+                typeof window !== 'undefined' && window.google && device.icon
+                    ? {
+                        url: deviceIconUrl,
+                        scaledSize: new window.google.maps.Size(
+                            device.icon.width,
+                            device.icon.height
+                        ),
+                        anchor: new window.google.maps.Point(
+                            device.icon.width / 2,
+                            device.icon.height / 2
+                        ),
+                    }
+                    : undefined;
+                    
+            return (
+              <React.Fragment key={device.id}>
+                <MarkerF
+                    position={position}
+                    onLoad={(marker) => setMarkerRef(marker, device.id.toString())}
+                    onClick={() => onSelectDevice(device)}
+                    icon={deviceIcon}
+                    title={device.name}
+                    zIndex={isFollowed ? 1001 : 100}
+                />
+                {showLabels && zoom >= 17 && <DeviceLabel device={device} />}
+                {isFollowed && (
+                    <OverlayView
+                        position={position}
+                        mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                        getPixelPositionOffset={(width, height) => ({
+                            x: 0,
+                            y: -(height + (device.icon?.height ? device.icon.height / 2 : 20) + 30),
+                        })}
+                    >
+                        <Pin className="h-6 w-6 text-primary animate-bounce" fill="currentColor" />
+                    </OverlayView>
+                )}
+              </React.Fragment>
+            )
+        })}
 
         {devices.map(device => (
              <React.Fragment key={`tail-${device.id}`}>

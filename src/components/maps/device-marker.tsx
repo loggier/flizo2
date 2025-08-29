@@ -1,7 +1,7 @@
 
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import type { Device } from "@/lib/types";
 import { MarkerF, OverlayView } from '@react-google-maps/api';
 import DeviceLabel from './device-label';
@@ -38,6 +38,14 @@ const DeviceMarker = ({ device, onLoad, onClick, zoom, showLabels, isFollowed }:
                 ),
             }
             : undefined;
+    
+    const ref = React.useRef<google.maps.Marker>(null);
+    useEffect(() => {
+        onLoad(ref.current);
+        return () => {
+          onLoad(null);
+        };
+      }, [onLoad]);
 
     return (
         <>
