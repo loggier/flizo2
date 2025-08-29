@@ -27,29 +27,32 @@ const clustererStyles: any = [
   {
     textColor: 'white',
     url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="white" stroke-width="8" /></svg>'
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="110" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.3"/><circle cx="120" cy="120" r="80" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5" stroke="#ffffff" stroke-width="4"/></svg>'
     )}`,
-    height: 53,
-    width: 53,
-    textSize: 12,
-  },
-  {
-    textColor: 'white',
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="white" stroke-width="8" /></svg>'
-    )}`,
-    height: 56,
-    width: 56,
-    textSize: 12,
-  },
-  {
-    textColor: 'white',
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="white" stroke-width="8" /></svg>'
-    )}`,
-    height: 66,
-    width: 66,
+    height: 60,
+    width: 60,
     textSize: 14,
+    anchorText: [0, 0],
+  },
+  {
+    textColor: 'white',
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="115" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.4"/><circle cx="120" cy="120" r="90" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.6" stroke="#ffffff" stroke-width="4"/></svg>'
+    )}`,
+    height: 70,
+    width: 70,
+    textSize: 16,
+    anchorText: [0, 0],
+  },
+  {
+    textColor: 'white',
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="120" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.5"/><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="#ffffff" stroke-width="4"/></svg>'
+    )}`,
+    height: 80,
+    width: 80,
+    textSize: 18,
+    anchorText: [0, 0],
   },
 ];
 
