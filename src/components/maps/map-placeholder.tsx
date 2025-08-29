@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, useLoadScript, InfoWindow, MarkerF, MarkerClustererF } from '@react-google-maps/api';
 import type { MapType } from '@/app/maps/page';
 import type { Device, Geofence, Route, POI, AlertEvent } from '@/lib/types';
@@ -205,35 +205,43 @@ function MapComponent({
         <ZoomControls onZoomIn={handleZoomIn} onZoomOut={handleZoomOut} />
         
         <MarkerClustererF options={{ styles: clustererStyles }}>
-          {(clusterer) => (
-            <>
-              {devices.map(device => {
-                 if (!device.lat || !device.lng) return null;
-                const position = { lat: device.lat, lng: device.lng };
-                const deviceIcon = (typeof window !== 'undefined' && window.google && device.icon) ? {
-                    url: `${serverUrl}${device.icon.path}`,
-                    scaledSize: new window.google.maps.Size(device.icon.width, device.icon.height),
-                    anchor: new window.google.maps.Point(device.icon.width / 2, device.icon.height / 2),
-                } : undefined;
+            {(clusterer) => 
+                <>
+                    {devices.map((device) => {
+                        if (!device.lat || !device.lng) return null;
+                        const position = { lat: device.lat, lng: device.lng };
+                        
+                        const deviceIcon =
+                          typeof window !== 'undefined' && window.google && device.icon
+                            ? {
+                                url: `${serverUrl}${device.icon.path}`,
+                                scaledSize: new window.google.maps.Size(
+                                  device.icon.width,
+                                  device.icon.height
+                                ),
+                                anchor: new window.google.maps.Point(
+                                  device.icon.width / 2,
+                                  device.icon.height / 2
+                                ),
+                              }
+                            : undefined;
 
-                return (
-                    <MarkerF
-                        key={device.id}
-                        position={position}
-                        title={device.name}
-                        icon={deviceIcon}
-                        // @ts-ignore
-                        rotation={device.course}
-                        clusterer={clusterer}
-                        onClick={() => onSelectDevice(device)}
-                    />
-                )
-              })}
-            </>
-          )}
+                        return (
+                            <MarkerF
+                                key={device.id}
+                                position={position}
+                                icon={deviceIcon}
+                                title={device.name}
+                                onClick={() => onSelectDevice(device)}
+                                clusterer={clusterer}
+                            />
+                        )
+                    })}
+                </>
+            }
         </MarkerClustererF>
-        
-        {/* Render labels and tails outside of the clusterer */}
+
+
         {devices.map(device => (
              <React.Fragment key={`info-${device.id}`}>
                 {showLabels && zoom >= 17 && device.lat && device.lng && <DeviceLabel device={device} />}
@@ -297,3 +305,5 @@ function MapComponent({
 }
 
 export default React.memo(MapComponent);
+
+    
