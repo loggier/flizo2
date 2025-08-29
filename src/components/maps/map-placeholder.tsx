@@ -26,21 +26,27 @@ const center = {
 const clustererStyles: any = [
   {
     textColor: 'white',
-    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m1.png',
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="white" stroke-width="8" /></svg>'
+    )}`,
     height: 53,
     width: 53,
     textSize: 12,
   },
   {
     textColor: 'white',
-    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m2.png',
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="white" stroke-width="8" /></svg>'
+    )}`,
     height: 56,
     width: 56,
     textSize: 12,
   },
   {
     textColor: 'white',
-    url: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m3.png',
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240"><circle cx="120" cy="120" r="100" fill="hsl(346.8 90.4% 60.2%)" fill-opacity="0.8" stroke="white" stroke-width="8" /></svg>'
+    )}`,
     height: 66,
     width: 66,
     textSize: 14,
