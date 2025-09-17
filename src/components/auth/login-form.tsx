@@ -40,7 +40,7 @@ import { FlizoLogo } from "../icons/flizo-logo";
 import { useLanguage } from "@/hooks/use-language";
 import { sendFCMToken } from "@/services/flizo.service";
 import { Capacitor } from "@capacitor/core";
-import { PushNotifications, Token, PushNotificationSchema } from "@capacitor/push-notifications";
+import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } from "@capacitor/push-notifications";
 
 
 const formSchema = (t: any) => z.object({
@@ -93,6 +93,11 @@ export function LoginForm() {
             });
           }
         });
+        
+        PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
+          console.log('Push notification action performed', notification);
+          router.push('/alerts');
+        });
 
       });
       
@@ -106,7 +111,7 @@ export function LoginForm() {
         }
       });
     }
-  }, []);
+  }, [router, toast]);
   
   async function onSubmit(values: z.infer<typeof currentFormSchema>) {
     setIsSubmitting(true);
