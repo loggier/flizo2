@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
 import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
+import AppInitializer from '@/components/layout/app-initializer';
 
 export const metadata: Metadata = {
   title: 'Flizo Copilot',
@@ -25,7 +26,9 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <LanguageProvider>
           <VehicleFilterProvider>
-            {children}
+            <AppInitializer>
+              {children}
+            </AppInitializer>
           </VehicleFilterProvider>
         </LanguageProvider>
         <Toaster />
