@@ -586,7 +586,7 @@ export default function MapsPage() {
         pois={pois}
         visiblePoiIds={visiblePoiIds}
         togglePoiVisibility={togglePoiVisibility}
-        onSelectPOI={onSelectPOI}
+        onSelectPOI={handleSelectPOI}
         isLoading={isLoading}
       />
        <VehicleDetailsSheet
@@ -616,5 +616,7 @@ export default function MapsPage() {
     </div>
   );
 }
+
+    
 
     
