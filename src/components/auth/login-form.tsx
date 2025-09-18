@@ -41,6 +41,8 @@ import { useLanguage } from "@/hooks/use-language";
 import { sendFCMToken } from "@/services/flizo.service";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } from "@capacitor/push-notifications";
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { LoaderIcon } from "../icons/loader-icon";
 
 
 const formSchema = (t: any) => z.object({
@@ -55,6 +57,7 @@ export function LoginForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { language, setLanguage, t } = useLanguage();
+  const { isChecking } = useAuthRedirect();
   const loginTranslations = t.loginForm;
 
   const currentFormSchema = formSchema(loginTranslations);
@@ -69,14 +72,6 @@ export function LoginForm() {
   });
 
   useEffect(() => {
-    // This effect handles auto-login redirection.
-    // It runs once when the component mounts.
-    const sessionToken = sessionStorage.getItem("user_api_hash");
-    const localToken = localStorage.getItem("user_api_hash");
-    if (sessionToken || localToken) {
-      router.replace('/maps');
-    }
-
     if (Capacitor.isNativePlatform()) {
       // Clear old listeners
       PushNotifications.removeAllListeners().then(() => {
@@ -188,6 +183,14 @@ export function LoginForm() {
   }
 
   const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/'}page/privacy_policy_new`;
+
+  if (isChecking) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <LoaderIcon className="h-12 w-12 text-primary" />
+      </div>
+    );
+  }
 
   return (
     <Card className="w-full max-w-md shadow-2xl">
