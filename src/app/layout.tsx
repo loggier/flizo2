@@ -5,7 +5,6 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
 import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
-import { useAuth } from '@/hooks/use-auth';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 
 export default function RootLayout({
@@ -13,7 +12,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isInitializing } = useAuth();
   
   return (
     <html lang="en">
@@ -27,13 +25,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <LanguageProvider>
           <VehicleFilterProvider>
-            {isInitializing ? (
-                <div className="flex h-screen w-full items-center justify-center bg-background">
-                  <LoaderIcon className="h-10 w-10 text-primary" />
-                </div>
-            ) : (
-              children
-            )}
+            {children}
           </VehicleFilterProvider>
         </LanguageProvider>
         <Toaster />
