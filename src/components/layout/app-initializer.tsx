@@ -11,25 +11,31 @@ export default function AppInitializer({ children }: { children: React.ReactNode
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const sessionToken = sessionStorage.getItem("user_api_hash");
-    const localToken = localStorage.getItem("user_api_hash");
-    const isAuthenticated = !!sessionToken || !!localToken;
+    let active = true;
 
-    // If on the login page and already authenticated, redirect to maps
-    if (pathname === '/' && isAuthenticated) {
-      router.replace('/maps');
-      // We don't stop initializing here, let it finish to show the maps page
-      // setIsInitializing(false) will happen on the next render on the new page
-    } 
-    // If on any other page and not authenticated, redirect to login
-    else if (pathname !== '/' && !isAuthenticated) {
-      router.replace('/');
-      // Same as above, let it finish on the new page
+    function checkAuth() {
+      if (!active) return;
+      
+      const sessionToken = sessionStorage.getItem("user_api_hash");
+      const localToken = localStorage.getItem("user_api_hash");
+      const isAuthenticated = !!sessionToken || !!localToken;
+
+      if (pathname === '/' && isAuthenticated) {
+        router.replace('/maps');
+        // Let initialization finish on the new page
+      } else if (pathname !== '/' && !isAuthenticated) {
+        router.replace('/');
+        // Let initialization finish on the new page
+      } else {
+        setIsInitializing(false);
+      }
     }
-    // Otherwise, we are on the correct page
-    else {
-      setIsInitializing(false);
-    }
+
+    checkAuth();
+    
+    return () => {
+      active = false;
+    };
   }, [pathname, router]);
 
   if (isInitializing) {
