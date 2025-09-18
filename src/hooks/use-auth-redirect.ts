@@ -1,15 +1,14 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Capacitor } from '@capacitor/core';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Capacitor } from "@capacitor/core";
 
 async function isReady() {
   if (!Capacitor.isNativePlatform()) {
     return Promise.resolve();
   }
-  // On native, we need to wait for the platform to be ready.
   return new Promise<void>((resolve) => {
     if (window.hasOwnProperty('Capacitor')) {
         resolve();
@@ -19,28 +18,25 @@ async function isReady() {
   });
 }
 
-export const useAuthRedirect = () => {
+export function useAuthRedirect() {
   const router = useRouter();
-  const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthStatus = async () => {
       await isReady();
       
-      const sessionToken = sessionStorage.getItem("user_api_hash");
-      const localToken = localStorage.getItem("user_api_hash");
-      const token = sessionToken || localToken;
-      
-      if (token && pathname === '/') {
-        router.replace('/maps');
+      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+
+      if (token) {
+        router.replace("/maps");
       } else {
         setIsChecking(false);
       }
     };
 
-    checkAuth();
-  }, [router, pathname]);
+    checkAuthStatus();
+  }, [router]);
 
   return { isChecking };
-};
+}

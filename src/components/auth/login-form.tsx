@@ -41,9 +41,8 @@ import { useLanguage } from "@/hooks/use-language";
 import { sendFCMToken } from "@/services/flizo.service";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } from "@capacitor/push-notifications";
-import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 import { LoaderIcon } from "../icons/loader-icon";
-
+import { useAuthRedirect } from "@/hooks/use-auth-redirect";
 
 const formSchema = (t: any) => z.object({
   email: z.string().email({ message: t.emailInvalid }),
@@ -73,11 +72,8 @@ export function LoginForm() {
 
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
-      // Clear old listeners
       PushNotifications.removeAllListeners().then(() => {
-        // Add new listeners
         PushNotifications.addListener('registration', (token: Token) => {
-          // Just save the token. We will send it after login.
           localStorage.setItem("fcm_token_pending", token.value);
         });
 
@@ -100,10 +96,8 @@ export function LoginForm() {
           console.log('Push notification action performed', notification);
           router.push('/alerts');
         });
-
       });
       
-      // Request permissions and register
       PushNotifications.checkPermissions().then(permStatus => {
         if (permStatus.receive === 'prompt') {
           PushNotifications.requestPermissions();
@@ -152,7 +146,6 @@ export function LoginForm() {
             storage.setItem("profile", JSON.stringify(profile));
         }
         
-        // After successful login, check for a pending FCM token and send it
         const pendingToken = localStorage.getItem("fcm_token_pending");
         if (pendingToken) {
             try {
@@ -186,7 +179,7 @@ export function LoginForm() {
 
   if (isChecking) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
+      <div className="flex h-screen w-full items-center justify-center bg-gray-100">
         <LoaderIcon className="h-12 w-12 text-primary" />
       </div>
     );
