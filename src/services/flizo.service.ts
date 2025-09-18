@@ -1,5 +1,6 @@
 
 import type { Device, DeviceGroup, Geofence, Route, POI, AlertEvent, AlertSetting, HistoryData, Command } from "@/lib/types";
+import { storage } from "./../lib/storage";
 
 const serverApi = process.env.NEXT_PUBLIC_serverApi || 'https://s1.flizo.app/api/';
 
@@ -24,7 +25,7 @@ export async function getDevices(user_api_hash: string): Promise<DeviceGroup[]> 
 }
 
 export async function getAddress(lat: number, lon: number): Promise<string | null> {
-    const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const user_api_hash = await storage.get("user_api_hash");
     if (!user_api_hash) {
         throw new Error('Unauthorized');
     }

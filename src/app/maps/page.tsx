@@ -23,6 +23,7 @@ import { Capacitor } from "@capacitor/core";
 import { Geolocation } from "@capacitor/geolocation";
 import { useToast } from "@/hooks/use-toast";
 import { Car, Pin, PinOff } from "lucide-react";
+import { storage } from "@/lib/storage";
 
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
@@ -64,61 +65,60 @@ export default function MapsPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    // Load preferences from localStorage
-    const savedMapType = localStorage.getItem("mapType") as MapType;
-    if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
-      setMapType(savedMapType);
-    }
-    const savedShowLabels = localStorage.getItem("showLabels");
-    if (savedShowLabels) {
-      setShowLabels(JSON.parse(savedShowLabels));
-    }
-    const savedShowGeofences = localStorage.getItem("showGeofences");
-    if (savedShowGeofences !== null) {
-        setShowGeofences(JSON.parse(savedShowGeofences));
-    }
-    const savedShowRoutes = localStorage.getItem("showRoutes");
-    if (savedShowRoutes !== null) {
-        setShowRoutes(JSON.parse(savedShowRoutes));
-    }
-     const savedShowPOIs = localStorage.getItem("showPOIs");
-    if (savedShowPOIs !== null) {
-        setShowPOIs(JSON.parse(savedShowPOIs));
-    }
-    const savedAutoCenter = localStorage.getItem("autoCenter");
-    if (savedAutoCenter !== null) {
-      setAutoCenter(JSON.parse(savedAutoCenter));
-    }
-    const savedShowCluster = localStorage.getItem("showCluster");
-    if (savedShowCluster !== null) {
-      setShowCluster(JSON.parse(savedShowCluster));
-    }
-    const savedVisibleDeviceIds = localStorage.getItem('visibleDeviceIds');
-    if (savedVisibleDeviceIds) {
-        setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
-    }
-     const savedVisibleGeofenceIds = localStorage.getItem('visibleGeofenceIds');
-    if (savedVisibleGeofenceIds) {
-      setVisibleGeofenceIds(new Set(JSON.parse(savedVisibleGeofenceIds)));
-    }
-    const savedVisibleRouteIds = localStorage.getItem('visibleRouteIds');
-    if (savedVisibleRouteIds) {
-      setVisibleRouteIds(new Set(JSON.parse(savedVisibleRouteIds)));
-    }
-    const savedVisiblePoiIds = localStorage.getItem('visiblePoiIds');
-    if (savedVisiblePoiIds) {
-        setVisiblePoiIds(new Set(JSON.parse(savedVisiblePoiIds)));
-    }
+    const loadPreferences = async () => {
+      const [
+        savedMapType,
+        savedShowLabels,
+        savedShowGeofences,
+        savedShowRoutes,
+        savedShowPOIs,
+        savedAutoCenter,
+        savedShowCluster,
+        savedVisibleDeviceIds,
+        savedVisibleGeofenceIds,
+        savedVisibleRouteIds,
+        savedVisiblePoiIds,
+        clickedDeviceId
+      ] = await Promise.all([
+        storage.get("mapType"),
+        storage.get("showLabels"),
+        storage.get("showGeofences"),
+        storage.get("showRoutes"),
+        storage.get("showPOIs"),
+        storage.get("autoCenter"),
+        storage.get("showCluster"),
+        storage.get('visibleDeviceIds'),
+        storage.get('visibleGeofenceIds'),
+        storage.get('visibleRouteIds'),
+        storage.get('visiblePoiIds'),
+        storage.get("selectedDeviceId")
+      ]);
 
-    const clickedDeviceId = sessionStorage.getItem("selectedDeviceId");
-    if (clickedDeviceId) {
+      if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
+        setMapType(savedMapType as MapType);
+      }
+      if (savedShowLabels) setShowLabels(JSON.parse(savedShowLabels));
+      if (savedShowGeofences !== null) setShowGeofences(JSON.parse(savedShowGeofences));
+      if (savedShowRoutes !== null) setShowRoutes(JSON.parse(savedShowRoutes));
+      if (savedShowPOIs !== null) setShowPOIs(JSON.parse(savedShowPOIs));
+      if (savedAutoCenter !== null) setAutoCenter(JSON.parse(savedAutoCenter));
+      if (savedShowCluster !== null) setShowCluster(JSON.parse(savedShowCluster));
+      if (savedVisibleDeviceIds) setVisibleDeviceIds(new Set(JSON.parse(savedVisibleDeviceIds)));
+      if (savedVisibleGeofenceIds) setVisibleGeofenceIds(new Set(JSON.parse(savedVisibleGeofenceIds)));
+      if (savedVisibleRouteIds) setVisibleRouteIds(new Set(JSON.parse(savedVisibleRouteIds)));
+      if (savedVisiblePoiIds) setVisiblePoiIds(new Set(JSON.parse(savedVisiblePoiIds)));
+
+      if (clickedDeviceId) {
         setSelectedDeviceId(parseInt(clickedDeviceId, 10));
-        sessionStorage.removeItem("selectedDeviceId");
-    }
+        await storage.remove("selectedDeviceId");
+      }
+    };
+    
+    loadPreferences();
 
     const fetchData = async () => {
       setIsLoading(true);
-      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+      const token = await storage.get("user_api_hash");
       if (!token) {
         router.push("/");
         return;
@@ -140,27 +140,25 @@ export default function MapsPage() {
         setPois(fetchedPois);
 
         if (isInitialLoad) {
-            if (!savedVisibleDeviceIds) {
-                setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
-            }
-            if (!savedVisibleGeofenceIds) {
-                setVisibleGeofenceIds(new Set(fetchedGeofences.map(g => g.id)));
-            }
-            if (!savedVisibleRouteIds) {
-                setVisibleRouteIds(new Set(fetchedRoutes.map(r => r.id)));
-            }
-            if (!savedVisiblePoiIds) {
-                setVisiblePoiIds(new Set(fetchedPois.map(p => p.id)));
-            }
+            const visibleDeviceIdsStr = await storage.get('visibleDeviceIds');
+            if (!visibleDeviceIdsStr) setVisibleDeviceIds(new Set(flattenedDevices.map(d => d.id)));
+
+            const visibleGeofenceIdsStr = await storage.get('visibleGeofenceIds');
+            if (!visibleGeofenceIdsStr) setVisibleGeofenceIds(new Set(fetchedGeofences.map(g => g.id)));
+
+            const visibleRouteIdsStr = await storage.get('visibleRouteIds');
+            if (!visibleRouteIdsStr) setVisibleRouteIds(new Set(fetchedRoutes.map(r => r.id)));
+            
+            const visiblePoiIdsStr = await storage.get('visiblePoiIds');
+            if (!visiblePoiIdsStr) setVisiblePoiIds(new Set(fetchedPois.map(p => p.id)));
         }
         
-        localStorage.setItem('devices', JSON.stringify(flattenedDevices));
+        await storage.set('devices', JSON.stringify(flattenedDevices));
         
       } catch (error) {
         console.error("Failed to fetch data:", error);
         if ((error as Error).message === 'Unauthorized') {
-          localStorage.clear();
-          sessionStorage.clear();
+          await storage.remove("user_api_hash");
           router.push("/");
         }
       } finally {
@@ -211,25 +209,25 @@ export default function MapsPage() {
 
   useEffect(() => {
     if (!isInitialLoad) {
-        localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
+        storage.set('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
     }
   }, [visibleDeviceIds, isInitialLoad]);
 
   useEffect(() => {
     if (!isInitialLoad) {
-        localStorage.setItem('visibleGeofenceIds', JSON.stringify(Array.from(visibleGeofenceIds)));
+        storage.set('visibleGeofenceIds', JSON.stringify(Array.from(visibleGeofenceIds)));
     }
   }, [visibleGeofenceIds, isInitialLoad]);
 
     useEffect(() => {
     if (!isInitialLoad) {
-        localStorage.setItem('visibleRouteIds', JSON.stringify(Array.from(visibleRouteIds)));
+        storage.set('visibleRouteIds', JSON.stringify(Array.from(visibleRouteIds)));
     }
     }, [visibleRouteIds, isInitialLoad]);
     
     useEffect(() => {
     if (!isInitialLoad) {
-        localStorage.setItem('visiblePoiIds', JSON.stringify(Array.from(visiblePoiIds)));
+        storage.set('visiblePoiIds', JSON.stringify(Array.from(visiblePoiIds)));
     }
     }, [visiblePoiIds, isInitialLoad]);
 
@@ -453,14 +451,14 @@ export default function MapsPage() {
   
   const handleSelectLayer = (type: MapType) => {
     setMapType(type);
-    localStorage.setItem("mapType", type);
+    storage.set("mapType", type);
     setIsLayerSheetOpen(false);
   };
 
   const handleToggleLabels = () => {
     setShowLabels(prev => {
         const newState = !prev;
-        localStorage.setItem("showLabels", JSON.stringify(newState));
+        storage.set("showLabels", JSON.stringify(newState));
         return newState;
     });
   }
@@ -468,7 +466,7 @@ export default function MapsPage() {
   const handleToggleGeofences = () => {
     setShowGeofences(prev => {
         const newState = !prev;
-        localStorage.setItem("showGeofences", JSON.stringify(newState));
+        storage.set("showGeofences", JSON.stringify(newState));
         return newState;
     });
   }
@@ -476,7 +474,7 @@ export default function MapsPage() {
   const handleToggleRoutes = () => {
     setShowRoutes(prev => {
         const newState = !prev;
-        localStorage.setItem("showRoutes", JSON.stringify(newState));
+        storage.set("showRoutes", JSON.stringify(newState));
         return newState;
     });
   }
@@ -484,7 +482,7 @@ export default function MapsPage() {
    const handleTogglePOIs = () => {
     setShowPOIs(prev => {
         const newState = !prev;
-        localStorage.setItem("showPOIs", JSON.stringify(newState));
+        storage.set("showPOIs", JSON.stringify(newState));
         return newState;
     });
   }
@@ -492,7 +490,7 @@ export default function MapsPage() {
   const handleToggleAutoCenter = () => {
     setAutoCenter(prev => {
         const newState = !prev;
-        localStorage.setItem("autoCenter", JSON.stringify(newState));
+        storage.set("autoCenter", JSON.stringify(newState));
         return newState;
     });
   }
@@ -500,7 +498,7 @@ export default function MapsPage() {
   const handleToggleCluster = () => {
     setShowCluster(prev => {
       const newState = !prev;
-      localStorage.setItem("showCluster", JSON.stringify(newState));
+      storage.set("showCluster", JSON.stringify(newState));
       return newState;
     });
   };
@@ -517,6 +515,17 @@ export default function MapsPage() {
 
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
   const followedDevice = allDevices.find(d => d.id === followedDeviceId) || null;
+
+  if (isLoading && isInitialLoad) {
+    return (
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
+        <LoaderIcon className="h-12 w-12 text-primary" />
+        <p className="mt-4 text-lg font-semibold text-foreground">
+          Inicializando...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-full w-full">
@@ -536,12 +545,6 @@ export default function MapsPage() {
         followedDevice={followedDevice}
         showCluster={showCluster}
       />
-      {isLoading && isInitialLoad && (
-        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm">
-          <LoaderIcon className="h-10 w-10 text-primary" />
-          <p className="mt-4 text-lg font-semibold text-primary-foreground">Cargando vehículos...</p>
-        </div>
-      )}
       <div className="absolute top-4 left-4">
         <Button 
             variant="default" 

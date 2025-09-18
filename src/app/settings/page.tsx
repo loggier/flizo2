@@ -31,6 +31,7 @@ import Link from "next/link";
 import { getFCMToken } from "@/lib/firebase";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications, Token, PermissionState } from "@capacitor/push-notifications";
+import { storage } from "@/lib/storage";
 
 
 export default function SettingsPage() {
@@ -54,39 +55,41 @@ export default function SettingsPage() {
     useEffect(() => {
         setIsClient(true);
         
-        const checkStatus = async () => {
-            if (Capacitor.isNativePlatform()) {
-                const status = await PushNotifications.checkPermissions();
-                setNotificationStatus(status.receive);
-            } else if (typeof window !== 'undefined' && "Notification" in window) {
-                setNotificationStatus(Notification.permission);
-            }
-        };
-        checkStatus();
+        const init = async () => {
+            const checkStatus = async () => {
+                if (Capacitor.isNativePlatform()) {
+                    const status = await PushNotifications.checkPermissions();
+                    setNotificationStatus(status.receive);
+                } else if (typeof window !== 'undefined' && "Notification" in window) {
+                    setNotificationStatus(Notification.permission);
+                }
+            };
+            await checkStatus();
 
-        if (Capacitor.isNativePlatform()) {
-            // Add listeners once when the component mounts
-            PushNotifications.removeAllListeners().then(() => {
+            if (Capacitor.isNativePlatform()) {
+                await PushNotifications.removeAllListeners();
                 PushNotifications.addListener('registration', handleTokenRegistration);
                 PushNotifications.addListener('registrationError', handleTokenError);
-            });
-        }
-        
-        const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-        if (token) {
-            getUserData(token)
-                .then(profile => {
-                    if (profile?.email) {
-                        setUserEmail(profile.email);
-                    }
-                })
-                .catch(err => {
-                    console.error("Failed to fetch user data", err);
-                    handleLogout(); // Logout if token is invalid
-                });
-        } else {
-            router.push('/');
-        }
+            }
+            
+            const token = await storage.get("user_api_hash");
+            if (token) {
+                getUserData(token)
+                    .then(profile => {
+                        if (profile?.email) {
+                            setUserEmail(profile.email);
+                        }
+                    })
+                    .catch(err => {
+                        console.error("Failed to fetch user data", err);
+                        handleLogout(); // Logout if token is invalid
+                    });
+            } else {
+                router.push('/');
+            }
+        };
+
+        init();
 
         // Cleanup listeners on component unmount
         return () => {
@@ -96,17 +99,17 @@ export default function SettingsPage() {
         }
     }, [router]);
 
-    const handleTokenRegistration = async (token: Token) => {
-        const user_api_hash = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const handleTokenRegistration = async (token: Token | { value: string }) => {
+        const user_api_hash = await storage.get("user_api_hash");
         if (!user_api_hash) {
             console.warn("User not logged in, skipping FCM token send.");
-            localStorage.setItem("fcm_token_pending", token.value);
+            await storage.set("fcm_token_pending", token.value);
             return;
         }
         try {
             await sendFCMToken(user_api_hash, token.value);
-            localStorage.setItem("fcm_token", token.value);
-            localStorage.removeItem("fcm_token_pending");
+            await storage.set("fcm_token", token.value);
+            await storage.remove("fcm_token_pending");
             toast({ title: 'Suscripción exitosa', description: 'Ahora recibirás notificaciones.' });
         } catch (error) {
             handleTokenError(error);
@@ -119,11 +122,12 @@ export default function SettingsPage() {
         toast({ variant: 'destructive', title: 'Error de suscripción', description: 'No se pudo registrar para notificaciones.' });
     }
 
-    const handleLogout = () => {
-        const lng = localStorage.getItem('lng') || 'es';
-        localStorage.clear();
-        sessionStorage.clear();
-        localStorage.setItem('lng', lng);
+    const handleLogout = async () => {
+        const lng = (await storage.get('lng')) || 'es';
+        await storage.clearPreserving(['language']);
+        if (lng) {
+            await storage.set('language', lng);
+        }
         router.push('/');
     };
 
@@ -141,7 +145,7 @@ export default function SettingsPage() {
             return;
         }
 
-        const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+        const token = await storage.get("user_api_hash");
         if (!token) {
             handleLogout();
             return;

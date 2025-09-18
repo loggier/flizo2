@@ -14,6 +14,7 @@ import {
 import { VehicleCard } from '@/components/vehicles/vehicle-card';
 import { VehicleListSkeleton } from '@/components/vehicles/vehicle-list-skeleton';
 import { useVehicleFilter } from '@/hooks/use-vehicle-filter';
+import { storage } from '@/lib/storage';
 
 export type VehicleStatus = 'all' | 'moving' | 'stopped' | 'offline';
 
@@ -25,7 +26,7 @@ export default function VehiclesPage() {
 
   const fetchAndSetDevices = async () => {
     if (!isLoading) setIsLoading(true);
-    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const token = await storage.get("user_api_hash");
     if (!token) {
       router.push("/");
       return;
@@ -36,8 +37,7 @@ export default function VehiclesPage() {
     } catch (error) {
       console.error("Failed to fetch devices:", error);
       if ((error as Error).message === 'Unauthorized') {
-        localStorage.clear();
-        sessionStorage.clear();
+        storage.remove("user_api_hash");
         router.push("/");
       }
     } finally {
@@ -81,7 +81,7 @@ export default function VehiclesPage() {
   }, [deviceGroups, searchTerm, statusFilter]);
   
   const handleVehicleClick = (device: Device) => {
-    sessionStorage.setItem('selectedDeviceId', device.id.toString());
+    storage.set('selectedDeviceId', device.id.toString());
     router.push('/maps');
   };
 

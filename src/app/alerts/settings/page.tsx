@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { storage } from '@/lib/storage';
 
 
 function AlertSettingItem({ alert, onStatusChange }: { alert: AlertSetting, onStatusChange: (id: number, active: boolean) => Promise<void> }) {
@@ -67,7 +68,7 @@ export default function AlertsSettingsPage() {
   useEffect(() => {
     const fetchAlerts = async () => {
       setIsLoading(true);
-      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+      const token = await storage.get("user_api_hash");
       if (!token) {
         router.push("/");
         return;
@@ -78,8 +79,7 @@ export default function AlertsSettingsPage() {
       } catch (error) {
         console.error("Failed to fetch alerts:", error);
         if ((error as Error).message === 'Unauthorized') {
-          localStorage.clear();
-          sessionStorage.clear();
+          storage.remove("user_api_hash");
           router.push("/");
         } else {
             toast({
@@ -97,7 +97,7 @@ export default function AlertsSettingsPage() {
   }, [router, toast]);
 
   const handleStatusChange = async (id: number, active: boolean) => {
-    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const token = await storage.get("user_api_hash");
     if (!token) {
         router.push("/");
         return;

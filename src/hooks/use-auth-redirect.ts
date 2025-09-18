@@ -1,42 +1,39 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Capacitor } from "@capacitor/core";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { storage } from "@/lib/storage";
 
-async function isReady() {
-  if (!Capacitor.isNativePlatform()) {
-    return Promise.resolve();
-  }
-  return new Promise<void>((resolve) => {
-    if (window.hasOwnProperty('Capacitor')) {
-        resolve();
-    } else {
-        window.addEventListener('capacitorPlatformReady', () => resolve());
-    }
-  });
-}
+const SESSION_KEY = "user_api_hash";
+const PUBLIC_PATHS = ["/"];
 
 export function useAuthRedirect() {
   const router = useRouter();
+  const pathname = usePathname();
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      await isReady();
-      
-      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    let mounted = true;
+    (async () => {
+      const token = await storage.get(SESSION_KEY);
+      if (!mounted) return;
 
-      if (token) {
+      const isPublicPath = PUBLIC_PATHS.includes(pathname);
+
+      if (token && isPublicPath) {
         router.replace("/maps");
+      } else if (!token && !isPublicPath) {
+        router.replace("/");
       } else {
         setIsChecking(false);
       }
-    };
+    })();
 
-    checkAuthStatus();
-  }, [router]);
+    return () => {
+      mounted = false;
+    };
+  }, [router, pathname]);
 
   return { isChecking };
 }

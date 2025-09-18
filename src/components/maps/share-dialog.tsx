@@ -31,6 +31,7 @@ import { LoaderIcon } from "../icons/loader-icon";
 import { Input } from "../ui/input";
 import { Copy, Share2 } from "lucide-react";
 import { Share } from "@capacitor/share";
+import { storage } from "@/lib/storage";
 
 interface ShareDialogProps {
   isOpen: boolean;
@@ -56,7 +57,7 @@ export default function ShareDialog({
   const [generatedUrl, setGeneratedUrl] = useState<string | null>(null);
 
   const handleGenerateLink = async () => {
-    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const token = await storage.get("user_api_hash");
     if (!token) {
         toast({ variant: 'destructive', title: 'Error de autenticación' });
         return;

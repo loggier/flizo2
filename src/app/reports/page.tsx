@@ -17,6 +17,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { storage } from '@/lib/storage';
 
 const reportTypes = [
     { title: 'Información', icon: Info, type: 1 },
@@ -44,17 +45,20 @@ function ReportsPageContent() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        setIsLoading(true);
-        const storedDevices = localStorage.getItem('devices');
-        if (storedDevices) {
-            setDevices(JSON.parse(storedDevices));
-        }
-        
-        const deviceId = searchParams.get('deviceId');
-        if (deviceId) {
-            setSelectedVehicle(deviceId);
-        }
-        setIsLoading(false);
+        const loadDevices = async () => {
+            setIsLoading(true);
+            const storedDevices = await storage.get('devices');
+            if (storedDevices) {
+                setDevices(JSON.parse(storedDevices));
+            }
+            
+            const deviceId = searchParams.get('deviceId');
+            if (deviceId) {
+                setSelectedVehicle(deviceId);
+            }
+            setIsLoading(false);
+        };
+        loadDevices();
     }, [searchParams]);
     
     const formatDateForApi = (date: Date): string => {
@@ -114,7 +118,7 @@ function ReportsPageContent() {
     }, [selectedDay, customDateFrom, customDateTo]);
 
     const handleGenerateReport = async (type: number) => {
-        const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+        const token = await storage.get("user_api_hash");
         if (!token || !selectedVehicle) {
             toast({
                 variant: 'destructive',

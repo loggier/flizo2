@@ -3,6 +3,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { getTranslations, locales, Locale } from '@/lib/locales';
+import { storage } from '@/lib/storage';
 
 interface LanguageContextType {
   language: Locale;
@@ -16,16 +17,17 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [language, setLanguageState] = useState<Locale>('es');
 
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Locale;
-    if (savedLanguage && locales.includes(savedLanguage)) {
-      setLanguageState(savedLanguage);
-    }
+    storage.get('language').then(savedLanguage => {
+      if (savedLanguage && locales.includes(savedLanguage as Locale)) {
+        setLanguageState(savedLanguage as Locale);
+      }
+    });
   }, []);
 
   const setLanguage = (lang: Locale) => {
     if (locales.includes(lang)) {
       setLanguageState(lang);
-      localStorage.setItem('language', lang);
+      storage.set('language', lang);
     }
   };
 

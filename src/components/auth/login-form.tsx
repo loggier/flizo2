@@ -42,7 +42,7 @@ import { sendFCMToken } from "@/services/flizo.service";
 import { Capacitor } from "@capacitor/core";
 import { PushNotifications, Token, PushNotificationSchema, ActionPerformed } from "@capacitor/push-notifications";
 import { LoaderIcon } from "../icons/loader-icon";
-import { useAuthRedirect } from "@/hooks/use-auth-redirect";
+import { storage } from "@/lib/storage";
 
 const formSchema = (t: any) => z.object({
   email: z.string().email({ message: t.emailInvalid }),
@@ -56,7 +56,6 @@ export function LoginForm() {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { language, setLanguage, t } = useLanguage();
-  const { isChecking } = useAuthRedirect();
   const loginTranslations = t.loginForm;
 
   const currentFormSchema = formSchema(loginTranslations);
@@ -74,7 +73,7 @@ export function LoginForm() {
     if (Capacitor.isNativePlatform()) {
       PushNotifications.removeAllListeners().then(() => {
         PushNotifications.addListener('registration', (token: Token) => {
-          localStorage.setItem("fcm_token_pending", token.value);
+          storage.set("fcm_token_pending", token.value);
         });
 
         PushNotifications.addListener('registrationError', (error: any) => {
@@ -136,22 +135,20 @@ export function LoginForm() {
       const profile = { email: data.email, id: data.id, full_name: data.full_name };
 
       if (token) {
-        const storage = values.rememberMe ? localStorage : sessionStorage;
-        
-        storage.setItem("user_api_hash", token);
+        await storage.set("user_api_hash", token);
         if (permissions) {
-          storage.setItem("permissions", JSON.stringify(permissions));
+          await storage.set("permissions", JSON.stringify(permissions));
         }
         if (profile) {
-            storage.setItem("profile", JSON.stringify(profile));
+          await storage.set("profile", JSON.stringify(profile));
         }
         
-        const pendingToken = localStorage.getItem("fcm_token_pending");
+        const pendingToken = await storage.get("fcm_token_pending");
         if (pendingToken) {
             try {
                 await sendFCMToken(token, pendingToken);
-                localStorage.setItem("fcm_token", pendingToken);
-                localStorage.removeItem("fcm_token_pending");
+                await storage.set("fcm_token", pendingToken);
+                await storage.remove("fcm_token_pending");
             } catch (e) {
                 console.error("Failed to send pending FCM token:", e);
             }
@@ -176,14 +173,6 @@ export function LoginForm() {
   }
 
   const privacyPolicyUrl = `${process.env.NEXT_PUBLIC_serverUrl || 'https://s1.flizo.app/'}page/privacy_policy_new`;
-
-  if (isChecking) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-100">
-        <LoaderIcon className="h-12 w-12 text-primary" />
-      </div>
-    );
-  }
 
   return (
     <Card className="w-full max-w-md shadow-2xl">
@@ -257,7 +246,7 @@ export function LoginForm() {
       </CardContent>
       <CardFooter className="flex flex-col items-center justify-center text-center text-xs text-muted-foreground space-y-4">
          <div className="w-full">
-            <Select onValueChange={setLanguage} defaultValue={language}>
+            <Select onValueChange={(lang) => { setLanguage(lang as 'es' | 'en'); storage.set('language', lang);}} defaultValue={language}>
               <SelectTrigger>
                 <SelectValue placeholder="Language" />
               </SelectTrigger>

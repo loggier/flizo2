@@ -10,6 +10,7 @@ import { AlertCard } from '@/components/alerts/alert-card';
 import { AlertsListSkeleton } from '@/components/alerts/alerts-list-skeleton';
 import MapComponent from '@/components/maps/map-placeholder';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { storage } from '@/lib/storage';
 
 export default function AlertsPage() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export default function AlertsPage() {
   useEffect(() => {
     const fetchEvents = async () => {
       setIsLoading(true);
-      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+      const token = await storage.get("user_api_hash");
       if (!token) {
         router.push("/");
         return;
@@ -31,7 +32,7 @@ export default function AlertsPage() {
       try {
         const [fetchedEvents, devicesFromStorage] = await Promise.all([
           getEvents(token),
-          localStorage.getItem('devices') ? JSON.parse(localStorage.getItem('devices')!) : []
+          storage.get('devices').then(d => d ? JSON.parse(d) : [])
         ]);
         
         setEvents(fetchedEvents);
@@ -40,8 +41,7 @@ export default function AlertsPage() {
       } catch (error) {
         console.error("Failed to fetch events:", error);
         if ((error as Error).message === 'Unauthorized') {
-          localStorage.clear();
-          sessionStorage.clear();
+          storage.remove("user_api_hash");
           router.push("/");
         }
       } finally {

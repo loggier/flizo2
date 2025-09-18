@@ -5,6 +5,13 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
 import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
+import { useAuthRedirect } from '@/hooks/use-auth-redirect';
+
+function AppContent({ children }: { children: React.ReactNode }) {
+  useAuthRedirect();
+  return <>{children}</>;
+}
+
 
 export default function RootLayout({
   children,
@@ -24,7 +31,9 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <LanguageProvider>
           <VehicleFilterProvider>
-            {children}
+            <AppContent>
+              {children}
+            </AppContent>
           </VehicleFilterProvider>
         </LanguageProvider>
         <Toaster />

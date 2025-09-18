@@ -38,6 +38,7 @@ import { LoaderIcon } from "../icons/loader-icon";
 import ShareDialog from "./share-dialog";
 import { StreetViewIcon } from "../icons/street-view-icon";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { storage } from "@/lib/storage";
 
 
 interface VehicleDetailsSheetProps {
@@ -147,7 +148,7 @@ export default function VehicleDetailsSheet({ device, onClose, onFollow }: Vehic
   };
 
   const handleCommandClick = async () => {
-    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const token = await storage.get("user_api_hash");
     if (!token) {
         toast({ variant: 'destructive', title: 'Error', description: 'No se encontró el token de autenticación.' });
         return;
@@ -167,7 +168,7 @@ export default function VehicleDetailsSheet({ device, onClose, onFollow }: Vehic
   };
 
   const handleSendCommand = async (command: Command, index: number) => {
-    const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+    const token = await storage.get("user_api_hash");
     if (!token) {
       toast({ variant: 'destructive', title: 'Error', description: 'No se encontró el token de autenticación.' });
       return;

@@ -15,6 +15,7 @@ import { DateTimePicker } from '@/components/ui/datetime-picker';
 import HistoryMap from '@/components/history/history-map';
 import HistoryDetails from '@/components/history/history-details';
 import HistoryPlaybackControls from '@/components/history/history-playback-controls';
+import { storage } from '@/lib/storage';
 
 function HistoryPageContent() {
     const router = useRouter();
@@ -43,19 +44,22 @@ function HistoryPageContent() {
     const [routePath, setRoutePath] = useState<HistoryPoint[]>([]);
      
     useEffect(() => {
-        setIsLoading(true);
-        const storedDevices = localStorage.getItem('devices');
-        if (storedDevices) {
-            const allDevices: Device[] = JSON.parse(storedDevices);
-            setDevices(allDevices);
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const deviceId = urlParams.get('deviceId');
-            if (deviceId) {
-                setSelectedVehicle(deviceId);
+        const loadDevices = async () => {
+            setIsLoading(true);
+            const storedDevices = await storage.get('devices');
+            if (storedDevices) {
+                const allDevices: Device[] = JSON.parse(storedDevices);
+                setDevices(allDevices);
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const deviceId = urlParams.get('deviceId');
+                if (deviceId) {
+                    setSelectedVehicle(deviceId);
+                }
             }
-        }
-        setIsLoading(false);
+            setIsLoading(false);
+        };
+        loadDevices();
     }, []);
 
     useEffect(() => {
@@ -173,7 +177,7 @@ function HistoryPageContent() {
     }, []);
 
     const handleShowHistory = async () => {
-        const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
+        const token = await storage.get("user_api_hash");
         if (!token || !selectedVehicle) {
             toast({
                 variant: 'destructive',
