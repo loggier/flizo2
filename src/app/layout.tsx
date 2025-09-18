@@ -1,6 +1,6 @@
+
 "use client";
 
-import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
@@ -8,26 +8,13 @@ import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
 import { useAuth } from '@/hooks/use-auth';
 import { LoaderIcon } from '@/components/icons/loader-icon';
 
-function AppContent({ children }: { children: React.ReactNode }) {
-  const { isInitializing } = useAuth();
-
-  if (isInitializing) {
-    return (
-      <div className="flex h-screen w-full items-center justify-center bg-background">
-        <LoaderIcon className="h-10 w-10 text-primary" />
-      </div>
-    );
-  }
-
-  return <>{children}</>;
-}
-
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { isInitializing } = useAuth();
+  
   return (
     <html lang="en">
       <head>
@@ -40,9 +27,13 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <LanguageProvider>
           <VehicleFilterProvider>
-            <AppContent>
-              {children}
-            </AppContent>
+            {isInitializing ? (
+                <div className="flex h-screen w-full items-center justify-center bg-background">
+                  <LoaderIcon className="h-10 w-10 text-primary" />
+                </div>
+            ) : (
+              children
+            )}
           </VehicleFilterProvider>
         </LanguageProvider>
         <Toaster />
