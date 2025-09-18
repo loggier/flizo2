@@ -68,8 +68,15 @@ export function LoginForm() {
     },
   });
 
-  // This useEffect will run once when the component mounts
   useEffect(() => {
+    // This effect handles auto-login redirection.
+    // It runs once when the component mounts.
+    const sessionToken = sessionStorage.getItem("user_api_hash");
+    const localToken = localStorage.getItem("user_api_hash");
+    if (sessionToken || localToken) {
+      router.replace('/maps');
+    }
+
     if (Capacitor.isNativePlatform()) {
       // Clear old listeners
       PushNotifications.removeAllListeners().then(() => {
@@ -162,11 +169,7 @@ export function LoginForm() {
             }
         }
         
-        // Use a timeout to ensure storage event propagates before navigation
-        setTimeout(() => {
-            window.dispatchEvent(new Event("storage"));
-            router.push("/maps");
-        }, 100);
+        router.push("/maps");
 
       } else {
          throw new Error(data.message || loginTranslations.genericError);
