@@ -27,23 +27,9 @@ import { Car, Pin, PinOff } from "lucide-react";
 
 export type MapType = "OSM" | "SATELLITE" | "TRAFFIC";
 
-async function isReady() {
-  if (!Capacitor.isNativePlatform()) {
-    return Promise.resolve();
-  }
-  return new Promise<void>((resolve) => {
-    if (window.hasOwnProperty('Capacitor')) {
-        resolve();
-    } else {
-        window.addEventListener('capacitorPlatformReady', () => resolve());
-    }
-  });
-}
-
 export default function MapsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   
   const [mapType, setMapType] = useState<MapType>("OSM");
   const [map, setMap] = useState<google.maps.Map | null>(null);
@@ -78,21 +64,6 @@ export default function MapsPage() {
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      await isReady();
-      const token = localStorage.getItem("user_api_hash") || sessionStorage.getItem("user_api_hash");
-      if (!token) {
-        router.replace("/");
-      } else {
-        setIsCheckingAuth(false);
-      }
-    };
-    checkAuth();
-  }, [router]);
-
-
-  useEffect(() => {
-    if (isCheckingAuth) return;
     // Load preferences from localStorage
     const savedMapType = localStorage.getItem("mapType") as MapType;
     if (savedMapType && ["OSM", "SATELLITE", "TRAFFIC"].includes(savedMapType)) {
@@ -204,10 +175,10 @@ export default function MapsPage() {
     const intervalId = setInterval(fetchData, 30000); 
 
     return () => clearInterval(intervalId);
-  }, [router, isInitialLoad, isCheckingAuth]);
+  }, [router, isInitialLoad]);
 
   useEffect(() => {
-    if (!map || isInitialLoad || isCheckingAuth) return;
+    if (!map || isInitialLoad) return;
   
     const followedDevice = allDevices.find(d => d.id === followedDeviceId);
     const selectedDevice = allDevices.find(d => d.id === selectedDeviceId);
@@ -236,31 +207,31 @@ export default function MapsPage() {
         }
       }
     }
-  }, [map, allDevices, selectedDeviceId, followedDeviceId, visibleDeviceIds, isInitialLoad, autoCenter, isCheckingAuth]);
+  }, [map, allDevices, selectedDeviceId, followedDeviceId, visibleDeviceIds, isInitialLoad, autoCenter]);
 
   useEffect(() => {
-    if (!isInitialLoad && !isCheckingAuth) {
+    if (!isInitialLoad) {
         localStorage.setItem('visibleDeviceIds', JSON.stringify(Array.from(visibleDeviceIds)));
     }
-  }, [visibleDeviceIds, isInitialLoad, isCheckingAuth]);
+  }, [visibleDeviceIds, isInitialLoad]);
 
   useEffect(() => {
-    if (!isInitialLoad && !isCheckingAuth) {
+    if (!isInitialLoad) {
         localStorage.setItem('visibleGeofenceIds', JSON.stringify(Array.from(visibleGeofenceIds)));
     }
-  }, [visibleGeofenceIds, isInitialLoad, isCheckingAuth]);
+  }, [visibleGeofenceIds, isInitialLoad]);
 
     useEffect(() => {
-    if (!isInitialLoad && !isCheckingAuth) {
+    if (!isInitialLoad) {
         localStorage.setItem('visibleRouteIds', JSON.stringify(Array.from(visibleRouteIds)));
     }
-    }, [visibleRouteIds, isInitialLoad, isCheckingAuth]);
+    }, [visibleRouteIds, isInitialLoad]);
     
     useEffect(() => {
-    if (!isInitialLoad && !isCheckingAuth) {
+    if (!isInitialLoad) {
         localStorage.setItem('visiblePoiIds', JSON.stringify(Array.from(visiblePoiIds)));
     }
-    }, [visiblePoiIds, isInitialLoad, isCheckingAuth]);
+    }, [visiblePoiIds, isInitialLoad]);
 
   useEffect(() => {
     const handleDeviceOrientation = (event: DeviceOrientationEvent) => {
@@ -546,15 +517,6 @@ export default function MapsPage() {
 
   const selectedDevice = allDevices.find(d => d.id === selectedDeviceId) || null;
   const followedDevice = allDevices.find(d => d.id === followedDeviceId) || null;
-
-  if (isCheckingAuth) {
-    return (
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-background">
-        <LoaderIcon className="h-12 w-12 text-primary" />
-        <p className="mt-4 text-lg font-semibold text-foreground">Inicializando...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="relative h-full w-full">
