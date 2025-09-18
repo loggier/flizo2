@@ -68,19 +68,6 @@ export function LoginForm() {
     },
   });
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const sessionToken = sessionStorage.getItem("user_api_hash");
-      const localToken = localStorage.getItem("user_api_hash");
-      if (sessionToken || localToken) {
-        router.push('/maps');
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [router]);
-
-
   // This useEffect will run once when the component mounts
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
@@ -175,8 +162,11 @@ export function LoginForm() {
             }
         }
         
-        window.dispatchEvent(new Event("storage"));
-        router.push("/maps");
+        // Use a timeout to ensure storage event propagates before navigation
+        setTimeout(() => {
+            window.dispatchEvent(new Event("storage"));
+            router.push("/maps");
+        }, 100);
 
       } else {
          throw new Error(data.message || loginTranslations.genericError);

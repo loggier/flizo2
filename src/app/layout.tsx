@@ -5,7 +5,26 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { LanguageProvider } from '@/hooks/use-language';
 import { VehicleFilterProvider } from '@/hooks/use-vehicle-filter';
+import { useAuth } from '@/hooks/use-auth';
 import { LoaderIcon } from '@/components/icons/loader-icon';
+
+function AppContent({ children }: { children: React.ReactNode }) {
+  const { isInitializing, isAuthenticated } = useAuth();
+
+  if (isInitializing) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <LoaderIcon className="h-10 w-10 text-primary" />
+      </div>
+    );
+  }
+
+  // If we are on the login page, render it.
+  // The useAuth hook will handle redirection if the user is already authenticated.
+  // If not authenticated and not on login, useAuth will redirect to login.
+  return <>{children}</>;
+}
+
 
 export default function RootLayout({
   children,
@@ -25,7 +44,9 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <LanguageProvider>
           <VehicleFilterProvider>
-            {children}
+            <AppContent>
+              {children}
+            </AppContent>
           </VehicleFilterProvider>
         </LanguageProvider>
         <Toaster />
